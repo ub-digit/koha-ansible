@@ -1,0 +1,486 @@
+---
+- hosts: all
+  vars:
+    koha_home: /home/vagrant/kohadev/current
+    koha_instance_name: kohadev
+    koha_db_password: kohadevpass
+  become: true
+  become_user: root
+  tasks:
+    - name: Add official Koha repository (key)
+      ansible.builtin.apt_key:
+        url: http://debian.koha-community.org/koha/gpg.asc
+        state: present
+
+    - name: Add official Koha repository (repo)
+      ansible.builtin.apt_repository:
+        repo: deb [trusted=yes] http://debian.koha-community.org/koha unstable main
+        update_cache: yes
+        state: present
+
+    - name: Install required packages
+      apt:
+        name: ['curl',
+               'ntp',
+               'vim',
+               'byobu',
+               'htop',
+               'libstring-similarity-perl', #??
+               'mariadb-server',
+               'apt-transport-https',
+               'cpanminus',
+               'dh-make-perl',
+               'git',
+               'git-email',
+               'libdata-printer-perl',
+               'mlocate',
+               'perltidy',
+               'libstrictures-perl',
+               # Koha-common dependencies as listed by `apt-cache depends koha-common`
+               'debconf',
+               'libalgorithm-checkdigits-perl',
+               'libanyevent-http-perl',
+               'libanyevent-perl',
+               'libarchive-extract-perl',
+               'libarchive-zip-perl',
+               'libarray-utils-perl',
+               'libauthen-cas-client-perl',
+               'libbiblio-endnotestyle-perl',
+               'libbusiness-isbn-perl',
+               'libbusiness-issn-perl',
+               'libbytes-random-secure-perl',
+               'python-mysqldb', # required for ansible mysql collection
+               #'libcache-memcached-fast-safe-perl',
+#               'libcache-memcached-perl',
+#               'libcgi-compile-perl',
+#               'libcgi-emulate-psgi-perl',
+#               'libcgi-pm-perl',
+#               'libcgi-session-driver-memcached-perl',
+#               'libcgi-session-perl',
+#               'libcgi-session-serialize-yaml-perl',
+#               'libclass-accessor-perl',
+#               'libclass-factory-util-perl',
+#               'libclass-inspector-perl',
+#               'libclone-perl',
+#               'libcrypt-eksblowfish-perl',
+#               'libdata-ical-perl',
+#               'libdate-calc-perl',
+#               'libdate-manip-perl',
+#               'libdatetime-event-ical-perl',
+#               'libdatetime-format-ical-perl',
+#               'libdatetime-format-mysql-perl',
+#               'libdatetime-perl',
+#               'libdatetime-timezone-perl',
+#               'libdbd-mock-perl',
+#               'libdbd-mysql-perl',
+#               'libdbd-sqlite2-perl',
+#               'libdbi-perl',
+#               'libdbix-class-schema-loader-perl',
+#               'libdbix-runsql-perl',
+#               'libdevel-cover-perl',
+#               'libdigest-sha-perl',
+#               'libemail-date-perl',
+#               'libemail-messageid-perl',
+#               'libemail-sender-perl',
+#               'libemail-stuffer-perl',
+#               'libemail-valid-perl',
+#               'libexception-class-perl',
+#               'libfile-slurp-perl',
+#               'libfont-ttf-perl',
+#               'libgd-barcode-perl',
+#               'libgd-perl',
+#               'libgraphics-magick-perl',
+#               'libgravatar-url-perl',
+#               'libhtml-format-perl',
+#               'libhtml-parser-perl',
+#               'libhtml-scrubber-perl',
+#               'libhttp-cookies-perl',
+#               'libhttp-message-perl',
+#               'libhttp-oai-perl',
+#               'libintl-perl',
+#               'libjson-perl',
+#               'libjson-validator-perl',
+#               'liblibrary-callnumber-lc-perl',
+#               'liblingua-ispell-perl',
+#               'liblingua-stem-perl',
+#               'liblingua-stem-snowball-perl',
+#               'liblist-moreutils-perl',
+#               'liblocale-codes-perl',
+#               'liblocale-currency-format-perl',
+#               'liblocale-po-perl',
+#               'liblog-log4perl-perl',
+#               'libwww-perl',
+#               'libio-socket-ssl-perl',
+#               'libmarc-charset-perl',
+#               'libmarc-file-mij-perl',
+#               'libmarc-record-perl',
+#               'libmarc-xml-perl',
+#               'libmime-lite-perl',
+#               'libmodern-perl-perl',
+#               'libmodule-bundled-files-perl',
+#               'libmodule-cpanfile-perl',
+#               'libmodule-load-conditional-perl',
+#               'libmodule-pluggable-perl',
+#               'libmojolicious-perl',
+#               'libmojolicious-plugin-openapi-perl',
+#               'libmoo-perl',
+#               'libnet-cidr-perl',
+#               'libnet-ldap-perl',
+#               'libnet-netmask-perl',
+#               'libnet-oauth2-authorizationserver-perl',
+#               'libnet-server-perl',
+#               'libnet-sftp-foreign-perl',
+#               'libnet-stomp-perl',
+#               'libnet-z3950-simpleserver-perl',
+#               'libnet-z3950-zoom-perl',
+#               'libnumber-format-perl',
+#               'libopenoffice-oodoc-perl',
+#               'libparallel-forkmanager-perl',
+#               'libpdf-api2-perl',
+#               'libpdf-fromhtml-perl',
+#               'libpdf-reuse-barcode-perl',
+#               'libpdf-reuse-perl',
+#               'libpdf-table-perl',
+#               'libplack-middleware-logwarn-perl',
+#               'libplack-middleware-reverseproxy-perl',
+#               'libreadonly-perl',
+#               'libscalar-list-utils-perl',
+#               'libschedule-at-perl',
+#               'libsearch-elasticsearch-perl',
+#               'libsereal-decoder-perl',
+#               'libsereal-encoder-perl',
+#               'libsms-send-perl',
+#               'libstring-random-perl',
+#               'libsys-cpu-perl',
+#               'libtemplate-perl',
+#               'libtemplate-plugin-gettext-perl',
+#               'libtemplate-plugin-htmltotext-perl',
+#               'libtemplate-plugin-json-escape-perl',
+#               'libtemplate-plugin-stash-perl',
+#               'libtest-deep-perl',
+#               'libtest-exception-perl',
+#               'libtest-mockmodule-perl',
+#               'libtest-mockobject-perl',
+#               'libtest-mocktime-perl',
+#               'libtest-simple-perl',
+#               'libtest-strict-perl',
+#               'libtest-warn-perl',
+#               'libtest-www-mechanize-perl',
+#               'libtest-yaml-valid-perl',
+#               'libtext-bidi-perl',
+#               'libtext-csv-encoded-perl',
+#               'libtext-csv-perl',
+#               'libtext-csv-xs-perl',
+#               'libtext-iconv-perl',
+#               'libtext-pdf-perl',
+#               'libtext-unidecode-perl',
+#               'libtime-fake-perl',
+#               'libtry-tiny-perl',
+#               'libuniversal-can-perl',
+#               'libuniversal-require-perl',
+#               'liburi-perl',
+#               'libuuid-perl',
+#               'libwebservice-ils-perl',
+#               'libwww-csrf-perl',
+#               'libwww-perl',
+#               'libxml-dumper-perl',
+#               'libxml-libxml-perl',
+#               'libxml-libxslt-perl',
+#               'libxml-rss-perl',
+#               'libxml-sax-perl',
+#               'libxml-sax-writer-perl',
+#               'libxml-simple-perl',
+#               'libxml-writer-perl',
+#               'libyaml-perl',
+#               'libyaml-syck-perl',
+               'gettext',
+               'xsltproc',
+               'docbook-xsl',
+               'ttf-dejavu',
+               'libxml2-utils',
+               'bash-completion',
+               'libtest-simple-perl',
+               'apache2',
+               'libapache2-mpm-itk',
+               'at',
+               'daemon',
+               'debconf',
+               'memcached',
+               'perl-doc',
+               'pwgen',
+               'rabbitmq-server',
+               'starman',
+               'sudo',
+               'unzip',
+               'xmlstarlet',
+               'yaz',
+               'libyaz-dev',
+               'pkg-config',
+               'uuid-dev',
+               'libgdome2-dev', #For XML::LibXSLT, might be dependecy of libgdome2 that makes it compile?
+               'libfribidi-dev',
+               'libgd-dev'
+               ]
+        state: latest
+        force: yes
+        update_cache: yes
+
+    # TODO: replace shell with command?
+    - name: Install troublesome Perl modules (with failing tests)
+      ansible.builtin.shell: "cpanm -n {{ item }}"
+      loop:
+        - Mojolicious::Plugin::OpenAPI
+        - JSON::Validator
+        - JSON::Validator::OpenAPI::Mojolicious
+        - Cache::Memcached::Fast::Safe
+
+    - name: Install dependecies not included in cpanfile
+      ansible.builtin.shell: "cpanm Alien::Tidyp"
+
+    - name: Install Koha perl dependencies
+      ansible.builtin.shell: "cd {{ koha_home }} && cpanm --installdeps ."
+
+    - name: Add Java key
+      ansible.builtin.apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: 73C3DB2A
+
+    - name: Add Java repository
+      ansible.builtin.apt_repository:
+       #repo: ppa:linuxuprising/java
+       repo: deb http://ppa.launchpad.net/linuxuprising/java/ubuntu bionic main
+       update_cache: yes
+       state: present
+
+    - name: Set Java licence as accepted
+      debconf:
+        name: oracle-java15-installer
+        question: shared/accepted-oracle-license-v1-2
+        value: 'true'
+        vtype: select
+
+    - name: Install Java
+      apt:
+        name: oracle-java15-installer
+        state: latest
+        update_cache: yes
+
+    - name: Set Java version as default
+      apt:
+        name: oracle-java15-set-default
+        state: latest
+
+    - name: Add Elasticsearch key
+      ansible.builtin.apt_key:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        state: present
+
+    - name: Add Elasticsearch repository
+      ansible.builtin.apt_repository:
+        repo: deb https://artifacts.elastic.co/packages/5.x/apt stable main
+        state: present
+        filename: elastic-5.x.list
+
+    - name: Install Elasticsearch
+      apt:
+        name: elasticsearch
+        state: latest
+        update_cache: yes
+
+    - name: Install Elaasticsearch plugins
+      community.general.elasticsearch_plugin:
+        name: analysis-icu
+        state: present
+
+    # This needs to be done before trying to enable the cgi module
+    - name: Apache | MPM fix
+      apache2_module:
+        name: mpm_event
+        state: absent
+
+    - name: Apache | Disable default vhost
+      ansible.builtin.shell: a2dissite 000-default
+      notify: restart apache
+
+    - name: Apache | Set ports
+      template:
+        src: ports.conf.j2
+        dest: /etc/apache2/ports.conf
+        mode: 0644
+      notify: restart apache
+
+    - name: Apache | Enable needed modules
+      apache2_module:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - rewrite
+        - headers
+        - proxy_http
+        - cgi
+      notify: restart apache
+
+    - name: Copy Koha scripts
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/scripts/"
+        dest: "/usr/sbin/"
+        mode: 0755
+
+        #    - name: Find all Koha scripts
+        #      find:
+        #        paths: "/usr/sbin/"
+        #        patterns: "koha-*"
+        #      register: scripts
+
+        #    - name: Replace koha-functions.sh path in scripts
+        #      replace:
+        #        path: "{{ item.path }}"
+        #        regexp: '/usr/share/koha/bin/koha-functions.sh'
+        #        replace: '{{ koha_home }}/debian/scripts/koha-functions.sh'
+        #      with_items: "{{ scripts.files }}"
+    - name: Fix koha-functions.sh path in scripts
+      ansible.builtin.shell: ls /usr/sbin | grep '^koha-' | xargs -I{ sed -i 's#/usr/share/koha/bin/koha-functions.sh#{{ koha_home }}/debian/scripts/koha-functions.sh#g' '/usr/sbin/{'
+
+    - name: Comment out check_apache_config (to avoid warning causing crash)
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-create'
+        regexp: 'check_apache_config\s*$'
+        replace: '#check_apache_config'
+
+    - name: Comment out create Zebra config files
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-create'
+        regexp: '((?:generate_config_file zebra)|(?:"/etc/koha/sites/\$name/zebra))'
+        replace: '#\1'
+
+    - name: Comment out start-zebra
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-create'
+        regexp: 'koha-zebra --start'
+        replace: '#koha-zebra --start'
+
+    - name: Copy Koha config files
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/etc/"
+        dest: "/etc/koha/"
+
+    - name: Write /etc/koha/passwd
+      template:
+        src: koha_passwd.j2
+        dest: /etc/koha/passwd
+        mode: 0644
+
+    - name: Write /etc/default/koha-common
+      template:
+        src: koha-common.j2
+        dest: /etc/default/koha-common
+        mode: 0644
+
+    # Can't figure out where these are created, at least not in koha-common package, koha-create (or koha-create-dirs)
+    - name: Create /etc/koha/sites directory
+      ansible.builtin.file:
+        path: /etc/koha/sites
+        mode: 0755
+        state: directory
+
+    - name: Create /var/log/koha directory
+      ansible.builtin.file:
+        path: /var/log/koha
+        mode: 0755
+        state: directory
+
+    - name: Ensure koha_home directory
+      ansible.builtin.file:
+        path: "{{ koha_home }}"
+        mode: 0755
+        state: directory
+
+    - name: Create symlink debian.cnf -> koha-common.cnf
+      ansible.builtin.file:
+        src: /etc/mysql/debian.cnf
+        dest: /etc/mysql/koha-common.cnf
+        state: link
+
+        #- name: Write koha-sites.conf file
+        #template:
+        #src: koha-sites.conf.j2
+        #dest: /etc/koha/koha-sites.conf
+        #mode: 0644
+
+        #- name: Write koha-conf-site.xml file
+        #template:
+        #src: koha-conf-site.xml.in.j2
+        #dest: /etc/koha/koha-conf-site.xml.in
+        #mode: 0644
+
+    - name: Check for instance existence
+      ansible.builtin.shell: koha-list | grep {{ koha_instance_name }}
+      register: result
+      ignore_errors: yes
+
+    - name: Create Koha instance
+      ansible.builtin.command:  koha-create --create-db {{ koha_instance_name }}
+      when: result.stdout == ""
+      notify: restart apache
+
+    - name: Enable dev_install in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<dev_install>0</dev_install>'
+        replace: '<dev_install>1</dev_install>'
+      when: result.stdout == ""
+
+    - name: Set intranetdir in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<intranetdir>[^<]+</intranetdir>'
+        replace: "<intranetdir>{{ koha_home }}</intranetdir>"
+      when: result.stdout == ""
+
+    - name: Set intrahtdocs in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<intrahtdocs>[^<]+</intrahtdocs>'
+        replace: "<intrahtdocs>{{ koha_home }}/koha-tmpl/intranet-tmpl</intrahtdocs>"
+      when: result.stdout == ""
+
+    - name: Set opacdir in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<opacdir>[^<]+</opacdir>'
+        replace: "<opacdir>{{ koha_home }}/opac</opacdir>"
+      when: result.stdout == ""
+
+    - name: Set opachtdocs in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<opachtdocs>[^<]+</opachtdocs>'
+        replace: "<opachtdocs>{{ koha_home }}/koha-tmpl/opac-tmpl</opachtdocs>"
+      when: result.stdout == ""
+
+    - name: Set included in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<includes>[^<]+</includes>'
+        replace: "<includes>{{ koha_home }}/koha-tmpl/intranet-tmpl/prog/en/includes</includes>"
+      when: result.stdout == ""
+
+    - name: Copy database dump file
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/initial-db.sql"
+        dest: /tmp/initial-db.sql
+      when: result.stdout == ""
+
+    - name: Import Koha database
+      community.mysql.mysql_db:
+        name: "koha_{{ koha_instance_name }}"
+        state: import
+        target: /tmp/initial-db.sql
+      when: result.stdout == ""
+
+  handlers:
+    - name: restart apache
+      service:
+        name: apache2
+        state: restarted
+      become: yes
