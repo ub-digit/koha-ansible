@@ -1,0 +1,7 @@
+---
+#koha_home: /home/vagrant/kohadev/current
+#koha_instance_name: kohadev
+#koha_db_password: kohadevpass
+koha_home: /home/apps/koha/current
+koha_instance_name: koha
+koha_db_password: kohapass

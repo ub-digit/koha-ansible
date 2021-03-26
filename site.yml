@@ -1,9 +1,7 @@
 ---
 - hosts: all
-  vars:
-    koha_home: /home/vagrant/kohadev/current
-    koha_instance_name: kohadev
-    koha_db_password: kohadevpass
+  vars_files:
+    - vars/defaults.yml
   become: true
   become_user: root
   tasks:
@@ -277,9 +275,9 @@
 
     - name: Add Elasticsearch repository
       ansible.builtin.apt_repository:
-        repo: deb https://artifacts.elastic.co/packages/5.x/apt stable main
+        repo: deb https://artifacts.elastic.co/packages/6.x/apt stable main
         state: present
-        filename: elastic-5.x.list
+        filename: elastic-6.x.list
 
     - name: Install Elasticsearch
       apt:
