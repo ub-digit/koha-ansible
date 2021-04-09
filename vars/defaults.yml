@@ -1,7 +1,6 @@
 ---
-#koha_home: /home/vagrant/kohadev/current
-#koha_instance_name: kohadev
-#koha_db_password: kohadevpass
-koha_home: /home/apps/koha/current
-koha_instance_name: koha
-koha_db_password: kohapass
+smtp_host: 127.0.0.1
+smtp_port: 1025
+#smtp_username: admin
+#smtp_password: {{ vault_smtp_password }}
+smtp_ssl_mode: disabled

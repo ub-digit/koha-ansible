@@ -1,0 +1,10 @@
+ftp_marc_file_pattern='^2[012]\w+\.mrc$'
+ftp_user="goteborgsu"
+ftp_password="{{ gobi_ftp_password }}"
+ftp_host="ftp.ybp.com"
+ftp_remote_directory="ecat"
+
+koha_user="{{ gobi_koha_user }}"
+koha_path="{{ gobi_koha_path }}"
+koha_instance="{{ gobi_koha_instance }}"
+bulkmarcimport_options="-insert -c=MARC21 -tomarcplugin \"Koha::Plugin::Se::Ub::Gu::MarcImport\""

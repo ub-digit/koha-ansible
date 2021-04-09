@@ -1,0 +1,36 @@
+---
+- hosts: all
+  vars_files:
+    - vars/vault.yml
+    - vars/defaults.yml
+    - vars/gobi_defaults.yml
+  tasks:
+    - name: Ensure required directories
+      ansible.builtin.file:
+        path: "{{ gobi_data_dir }}/{{ item }}"
+        mode: 0755
+        state: directory
+      loop:
+        - adjustgobi_err
+        - adjustgobi_in
+        - bulkmarcimport_err
+        - bulkmarcimport_in
+        - done
+        - fetchgobi_done
+        - log
+
+    - name: Checkout repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/koha-gobi-import.git
+        dest: "{{ gobi_home }}"
+        version: "{{ gobi_version }}"
+
+    - name: Write gobi.sh.conf
+      template:
+        src: gobi.sh.conf.j2
+        dest: "{{ gobi_home }}/gobi.sh.conf"
+
+    - name: Write log4perl.conf
+      template:
+        src: log4perl.conf.j2
+        dest: "{{ gobi_home }}/log4perl.conf"

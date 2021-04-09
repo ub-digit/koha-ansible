@@ -1,0 +1,13 @@
+gobi_version: master
+gobi_home: /home/apps/koha-gobi-import
+
+gobi_ftp_password: "{{ vault_gobi_ftp_password }}"
+gobi_koha_user: "{{ koha_instance_name }}"
+gobi_koha_path: "{{ koha_home }}"
+gobi_koha_instance: "{{ koha_instance_name }}"
+
+gobi_smtp_host: "{{ smtp_host }}"
+gobi_smtp_port: "{{ smtp_port }}"
+
+gobi_data_dir: /opt/gobi
+gobi_log_dir: /opt/gobi/log
