@@ -2,6 +2,7 @@
 - hosts: all
   vars_files:
     - vars/defaults.yml
+    - vars/vault.yml
   become: true
   become_user: root
   tasks:
@@ -375,6 +376,7 @@
         mode: 0644
 
     # Can't figure out where these are created, at least not in koha-common package, koha-create (or koha-create-dirs)
+    # koha-common.dirs
     - name: Create /etc/koha/sites directory
       ansible.builtin.file:
         path: /etc/koha/sites
@@ -393,11 +395,17 @@
         mode: 0755
         state: directory
 
+
+    # TODO: Only when instance not exists
+
     - name: Create symlink debian.cnf -> koha-common.cnf
       ansible.builtin.file:
         src: /etc/mysql/debian.cnf
         dest: /etc/mysql/koha-common.cnf
         state: link
+
+
+      # TODO: Replace dir
 
         #- name: Write koha-sites.conf file
         #template:
@@ -461,6 +469,57 @@
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<includes>[^<]+</includes>'
         replace: "<includes>{{ koha_home }}/koha-tmpl/intranet-tmpl/prog/en/includes</includes>"
+      when: result.stdout == ""
+
+    - name: Set smtp_server block setting in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<smtp_server>.+?</smtp_server>'
+        replace: |-
+          <smtp_server>
+            <host>{{ smtp_host }}</host>
+            <port>{{ smtp_port }}<port>
+            <timeout>120</timeout>
+            <ssl_mode>{{ smtp_ssl_mode }}</ssl_mode>
+            <user_name>{{ smtp_username }}</user_name>
+            <password>{{ smtp_password }}</password>
+            <debug>0</debug>
+          </smtp_server>
+      #when: result.stdout == ""
+    - name: Copy cronjobs (cron.d)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/cron/koha-common.cron.d"
+        dest: /etc/cron.d/koha
+      when: result.stdout == ""
+
+    - name: Copy cronjobs (cron.daily)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/cron/koha-common.cron.daily"
+        dest: /etc/cron.daily/koha
+      when: result.stdout == ""
+
+    - name: Copy cronjobs (cron.hourly)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/cron/koha-common.cron.hourly"
+        dest: /etc/cron.hourly/koha
+      when: result.stdout == ""
+
+    - name: Comment out zebraqueue job
+      ansible.builtin.replace:
+        path: /etc/cron.daily/koha
+        regexp: '(koha-foreach.+?--zebraqueue)'
+        replace: '#\1'
+      when: result.stdout == ""
+
+    - name: Ajust Koha paths for cron-scripts
+      ansible.builtin.replace:
+        path: "{{ item }}"
+        regexp: '/usr/share/koha/bin'
+        replace: '{{ koha_home }}/misc'
+      loop:
+        - /etc/cron.d/koha
+        - /etc/cron.daily/koha
+        - /etc/cron.hourly/koha
       when: result.stdout == ""
 
     - name: Copy database dump file
