@@ -1,0 +1,36 @@
+---
+- hosts: all
+  vars_files:
+    - vars/fetchlibris_defaults.yml
+  tasks:
+    - name: Ensure required directories
+      ansible.builtin.file:
+        path: "{{ fetchlibris_data_dir }}/{{ item }}"
+        mode: 0755
+        state: directory
+      become: yes
+      loop:
+        - begun
+        - done
+        - log
+
+    - name: Checkout repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/fetchlibris.git
+        dest: "{{ fetchlibris_home }}"
+        version: "{{ fetchlibris_version }}"
+
+    - name: Write fetchlibris.sh.conf
+      template:
+        src: fetchlibris.sh.conf.j2
+        dest: "{{ fetchlibris_home }}/fetchlibris.sh.conf"
+
+    - name: Schedule cron job
+      ansible.builtin.cron:
+        name: "koha-fetchlibris-import"
+        minute: "30"
+        hour: "23"
+        job: "{{ fetchlibris_home }}/fetchlibris.sh"
+        state: present
+        user: root
+      become: yes

@@ -10,9 +10,8 @@
         path: "{{ gobi_data_dir }}/{{ item }}"
         mode: 0755
         state: directory
+      become: yes
       loop:
-        - adjustgobi_err
-        - adjustgobi_in
         - bulkmarcimport_err
         - bulkmarcimport_in
         - done
@@ -34,3 +33,13 @@
       template:
         src: log4perl.conf.j2
         dest: "{{ gobi_home }}/log4perl.conf"
+
+    - name: Schedule cron job
+      ansible.builtin.cron:
+        name: "koha-gobi-import"
+        minute: "30"
+        hour: "23"
+        job: "{{ gobi_home }}/loadgobi.sh > /dev/null 2>&1"
+        state: present
+        user: root
+      become: yes

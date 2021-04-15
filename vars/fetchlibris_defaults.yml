@@ -1,0 +1,5 @@
+---
+fetchlibris_version: master
+fetchlibris_home: /home/apps/fetchlibris
+fetchlibris_data_dir: /opt/fetchlibris
+mail_user: gunda@ub.gu.se,isabel.folkesson@ub.gu.se,martin.oxelqvist@ub.gu.se

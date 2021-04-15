@@ -1,0 +1,38 @@
+---
+- hosts: all
+  vars_files:
+    - vars/fetchlibris_defaults.yml # Implicit dependecy. Perhaps not ideal, but makes "in" directory editable in one place
+    - vars/loadlibris_defaults.yml
+  tasks:
+    - name: Ensure required directories
+      ansible.builtin.file:
+        path: "{{ loadlibris_data_dir }}/{{ item }}"
+        mode: 0755
+        state: directory
+      become: yes
+      loop:
+        - done
+        - in_archive
+        - bulkmarcimport_err
+        - log
+
+    - name: Checkout repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/loadlibris.git
+        dest: "{{ loadlibris_home }}"
+        version: "{{ loadlibris_version }}"
+
+    - name: Write loadlibris.sh.conf
+      template:
+        src: loadlibris.sh.conf.j2
+        dest: "{{ loadlibris_home }}/loadlibris.sh.conf"
+
+    - name: Schedule cron job
+      ansible.builtin.cron:
+        name: "koha-loadlibris-import"
+        minute: "30"
+        hour: "23"
+        job: "{{ loadlibris_home }}/loadlibris.sh"
+        state: present
+        user: root
+      become: yes
