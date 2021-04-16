@@ -27,9 +27,9 @@
 
     - name: Schedule cron job
       ansible.builtin.cron:
-        name: "koha-fetchlibris-import"
+        name: "koha-fetchlibris"
         minute: "30"
-        hour: "23"
+        hour: "04"
         job: "{{ fetchlibris_home }}/fetchlibris.sh"
         state: present
         user: root

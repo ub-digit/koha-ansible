@@ -1,0 +1,20 @@
+UPDATESDIR="/var/lib/koha/primo/koha/updates"
+
+TAREXT=".tar.gz"
+TAROPTS="czf"
+
+FILEPREFIX="46GUB-delta-"
+FILEEXT=".marc"
+
+PRIMOUSER="primo"
+PRIMOGROUP="primo"
+
+EXPTMP="$$"
+EXPROOT="/var/tmp"
+EXPDIR="$EXPROOT/$EXPTMP"
+
+KOHAPATH="{{ koha_home }}"
+KOHASHELL="/usr/sbin/koha-shell"
+EXPORTRECORDSOPTS="--dont_export_items --deleted_marc_conditions=942n=1"
+
+DATA_DIR="{{ koha_primo_export_data_dir }}"

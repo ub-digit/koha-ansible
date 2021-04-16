@@ -1,0 +1,32 @@
+---
+- hosts: all
+  vars_files:
+    - vars/koha_primo_export_defaults.yml
+  tasks:
+    - name: Ensure required directories
+      ansible.builtin.file:
+        path: "{{ koha_primo_export_data_dir }}"
+        mode: 0755
+        state: directory
+      become: yes
+
+    - name: Checkout repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/koha-primo-export.git
+        dest: "{{ koha_primo_export_home }}"
+        version: "{{ koha_primo_export_version }}"
+
+    - name: Write config
+      template:
+        src: koha-primo-export.config.j2
+        dest: "{{ koha_primo_export_home }}/config"
+
+    - name: Schedule cron job
+      ansible.builtin.cron:
+        name: "koha-primo-export"
+        minute: "30"
+        hour: "04,16"
+        job: "{{ koha_primo_export_home }}/sync_records.sh > /dev/null 2>&1"
+        state: present
+        user: root
+      become: yes

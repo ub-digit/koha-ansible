@@ -1,0 +1,19 @@
+---
+- hosts: all
+  vars_files:
+    - vars/auto_enable_printer_defaults.yml
+
+  tasks:
+    - name: Checkout repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/auto-enable-printer.git
+        dest: "{{ auto_enable_printer_home }}"
+        version: "{{ auto_enable_printer_version }}"
+
+    - name: Schedule cron job
+      ansible.builtin.cron:
+        name: "auto-enable-printer"
+        job: "{{ auto_enable_printer_home }}/auto-enable-printer.sh >> {{ auto_enable_printer_log_dir }}/auto-enable-printer.log 2>&1"
+        state: present
+        user: root
+      become: yes

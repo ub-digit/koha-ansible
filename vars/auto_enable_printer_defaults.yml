@@ -1,0 +1,4 @@
+---
+auto_enable_printer_home: /home/apps/auto-enable-printer
+auto_enable_printer_version: master
+auto_enable_printer_log_dir: /opt/auto-enable-printer/log

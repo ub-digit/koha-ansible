@@ -1,0 +1,32 @@
+---
+- hosts: all
+  vars_files:
+    - vars/loadlibris_defaults.yml # for loadlibris_home (koha-shell path)
+    - vars/libris_oai_import_defaults.yml
+  tasks:
+    - name: Ensure required directories
+      ansible.builtin.file:
+        path: "{{ libris_oai_import_log_dir }}"
+        state: directory
+      become: yes
+
+    - name: Checkout repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/libris-oai-import.git
+        dest: "{{ libris_oai_import_home }}"
+        version: "{{ libris_oai_import_version }}"
+
+    - name: Write export_nix.sh.conf
+      template:
+        src: export_nix.sh.conf.j2
+        dest: "{{ libris_oai_import_home }}/export_nix.sh.conf"
+
+    - name: Schedule cron job
+      ansible.builtin.cron:
+        name: "koha-export-nix"
+        minute: "00"
+        hour: "05"
+        job: "{{ libris_oai_import_home }}/export_nix.sh"
+        state: present
+        user: root
+      become: yes

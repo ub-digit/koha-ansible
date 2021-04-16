@@ -1,0 +1,34 @@
+---
+- hosts: all
+  vars_files:
+    - vars/print_notice_defaults.yml
+  tasks:
+    - name: Ensure required directories
+      ansible.builtin.file:
+        path: "{{ print_notice_data_dir }}/{{ item }}"
+        mode: 0755
+        state: directory
+      become: yes
+      loop:
+        - log
+
+    - name: Checkout repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/koha-print-notice.git
+        dest: "{{ print_notice_home }}"
+        version: "{{ print_notice_version }}"
+
+    - name: Write print-notice.conf
+      template:
+        src: print-notice.conf.j2
+        dest: "{{ print_notice_home }}/print-notice.conf"
+
+    - name: Schedule cron job
+      ansible.builtin.cron:
+        name: "koha-print-notice"
+        minute: "00"
+        hour: "08"
+        job: "{{ print_notice_home }}/send_all.sh >> {{ print_notice_data_dir }}/log/sendall.log 2>&1"
+        state: present
+        user: root
+      become: yes

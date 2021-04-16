@@ -1,0 +1,4 @@
+---
+print_notice_home: /home/apps/koha-print-notice
+print_notice_version: master
+print_notice_data_dir: /opt/koha-print-notice
