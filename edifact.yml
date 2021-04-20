@@ -1,0 +1,42 @@
+---
+- hosts: all
+  vars_files:
+    - vars/vault.yml
+    - vars/edifact_defaults.yml
+  tasks:
+    - name: Ensure data directory
+      ansible.builtin.file:
+        path: "{{ edifact_data_dir }}"
+        mode: 0755
+        state: directory
+      become: yes
+
+    - name: Ensure vendor directories
+      ansible.builtin.file:
+        path: "{{ edifact_data_dir }}/vendors/{{ item.0 }}/{{item.1}}"
+        mode: 0755
+        state: directory
+      loop: "{{ ['Dawson', 'Delbanco', 'Adlibris']|product(['archive', 'messages'])|list }}"
+      become: yes
+
+    - name: Checkout repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/koha-edifact.git
+        dest: "{{ edifact_home }}"
+        version: "{{ edifact_version }}"
+
+    - name: Write upload_edi.conf.yml
+      template:
+        src: upload_edi.conf.yml.j2
+        dest: "{{ edifact_home }}/upload_edi.conf.yml"
+
+    - name: Schedule cron jobs
+      ansible.builtin.cron:
+        name: "koha-edifact-{{ item.0 }}"
+        minute: "{{ item.1 }}"
+        hour: "22"
+        job: "{{ edifact_home }}/upload_edi.sh {{ item.0 }} >> {{ edifact_data_dir }}/upload_edi.log 2>&1"
+        state: present
+        user: root
+      loop: "{{ ['Dawson', 'Delbanco', 'Adlibris']|zip(['30', '32', 34])|list }}"
+      become: yes

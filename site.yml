@@ -24,6 +24,7 @@
                'vim',
                'byobu',
                'htop',
+               'tree',
                'libstring-similarity-perl', #??
                'mariadb-server',
                'apt-transport-https',
@@ -535,6 +536,35 @@
         target: /tmp/initial-db.sql
       when: result.stdout == ""
 
+    # GUB-scripts
+    - name: Write /usr/local/sbin/koha-database-backup.sh
+      template:
+        src: koha-database-backup.sh.j2
+        dest: /usr/local/sbin/koha-database-backup.sh
+        mode: 0544
+
+    - name: Ensure log directory for koha-database-backup.sh
+      ansible.builtin.file:
+        path: "{{ koha_database_backup_log_dir }}"
+        mode: 0755
+        state: directory
+
+    - name: Ensure data directory for koha-database-backup.sh
+      ansible.builtin.file:
+        path: "{{ koha_database_backup_data_dir }}"
+        mode: 0755
+        state: directory
+
+    - name: Schedule cron job for koha-database-backup.sh
+      ansible.builtin.cron:
+        name: "koha-database-backup"
+        minute: "00"
+        hour: "23"
+        job: "/usr/local/sbin/koha-database-backup.sh >> {{ koha_database_backup_log_dir }}/backup.log 2>&1"
+        state: present
+
+
+  # TODO: Handler for restaring memcached??
   handlers:
     - name: restart apache
       service:

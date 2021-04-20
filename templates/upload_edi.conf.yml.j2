@@ -1,0 +1,23 @@
+base_dir: {{ edifact_base_dir }}
+email: {{ edifact_email }}
+
+vendors:
+  Dawson:
+    host: ftp.dawsonbooks.co.uk
+    port: '21'
+    server_dir: '.'
+    user: '{{ edifact_dawson_user }}'
+    pass: '{{ edifact_dawson_password }}'
+  Delbanco:
+    host: ftp.delbanco.de
+    port: '21'
+    server_dir: '.'
+    user: '{{ edifact_delbanco_user }}'
+    pass: '{{ edifact_delbanco_password }}'
+  Adlibris:
+    host: dataftp.adlibris.com
+    port: '21'
+    server_dir: '.'
+    user: '{{ edifact_adlibris_user }}'
+    pass: '{{ edifact_adlibris_password }}'
+

@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# koha-database-backup.sh
+#
+# This is a backup script for the koha database
+# It produces an uncompressed dump in the $BACKUPDIR
+#
+
+BACKUPDIR="{{ koha_database_backup_data_dir }}"
+BASENAME=koha-database-backup
+
+TIMESTAMP=`/bin/date '+%Y%m%d-%H%M'`
+FILENAME=${BASENAME}-${TIMESTAMP}
+
+echo "Backing up the koha_koha database..."
+mysqldump --defaults-extra-file=/etc/mysql/koha-common.cnf --single-transaction=TRUE -u debian-sys-maint koha_{{ koha_instance_name }} > ${BACKUPDIR}/${FILENAME}.sql
+gzip -9 ${BACKUPDIR}/${FILENAME}.sql
+echo "Done!"
+echo "Database saved in ${BACKUPDIR}/${FILENAME}.sql.gz"
+
