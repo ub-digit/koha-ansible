@@ -2,3 +2,7 @@
 koha_primo_export_home: /home/apps/koha-primo-export
 koha_primo_export_version: master
 koha_primo_export_data_dir: /opt/koha-primo-export
+koha_primo_export_export_dir: "/var/lib/koha/primo/{{ koha_instance_name }}"
+koha_primo_export_user: primo
+koha_primo_export_koha_path: "{{ koha_home }}"
+koha_primo_export_koha_instance: "{{ koha_instance_name }}"
