@@ -13,3 +13,5 @@ edifact_delbanco_password: "{{ vault_edifact_delbanco_password }}"
 
 edifact_adlibris_user: "{{ vault_edifact_adlibris_user }}"
 edifact_adlibris_password: "{{ vault_edifact_adlibris_password }}"
+
+edifact_cron_enabled: false

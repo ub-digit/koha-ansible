@@ -36,7 +36,7 @@
         minute: "{{ item.1 }}"
         hour: "22"
         job: "{{ edifact_home }}/upload_edi.sh {{ item.0 }} >> {{ edifact_data_dir }}/upload_edi.log 2>&1"
-        state: present
+        state: "{{ 'present' if edifact_cron_enabled else 'absent' }}"
         user: root
       loop: "{{ ['Dawson', 'Delbanco', 'Adlibris']|zip(['30', '32', 34])|list }}"
       become: yes
