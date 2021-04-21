@@ -2,3 +2,5 @@
 print_notice_home: /home/apps/koha-print-notice
 print_notice_version: master
 print_notice_data_dir: /opt/koha-print-notice
+print_notice_smtp_host: "{{ smtp_host }}"
+print_notice_smtp_port: "{{ smtp_port }}"
