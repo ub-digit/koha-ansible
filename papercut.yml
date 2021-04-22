@@ -1,0 +1,32 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml #TODO: Should always include vault before defaults? Probably
+    - vars/papercut_defaults.yml
+  tasks:
+    - name: Ensure data directory
+      ansible.builtin.file:
+        path: "{{ papercut_data_dir }}"
+        mode: 0755
+        state: directory
+      become: yes
+
+    - name: Checkout repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/koha-papercut.git
+        dest: "{{ papercut_home }}"
+        version: "{{ papercut_version }}"
+
+    - name: Write papercut.sh.conf
+      template:
+        src: koha-papercut.config.j2
+        dest: "{{ papercut_home }}/config"
+
+    - name: Schedule cron job
+      ansible.builtin.cron:
+        name: "koha-papercut"
+        minute: "*/5"
+        job: "{{ papercut_home }}/run_updated_borrowers.sh >> {{ papercut_data_dir }}/run_updated_borrowers.log 2>&1"
+        state: "{{ 'present' if papercut_cron_enabled else 'absent' }}"
+        user: root
+      become: yes
