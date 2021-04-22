@@ -10,6 +10,23 @@
         state: directory
       become: yes
 
+    - name: Create primo export user
+      ansible.builtin.user:
+        name: "{{ koha_primo_export_user }}"
+      become: yes
+
+    - name: Ensure export directories
+      ansible.builtin.file:
+        path: "{{ koha_primo_export_export_dir }}/{{ item }}"
+        mode: 0755
+        owner: "{{ koha_primo_export_user }}"
+        group: "{{ koha_primo_export_user }}"
+        state: directory
+      loop:
+        - full
+        - updates
+      become: yes
+
     - name: Checkout repo
       ansible.builtin.git:
         repo: https://github.com/ub-digit/koha-primo-export.git
