@@ -8,3 +8,5 @@ smtp_ssl_mode: disabled
 
 koha_database_backup_data_dir: /data/koha-database-backup
 koha_database_backup_log_dir: /opt/koha-database-backup/log
+
+gup_edifact_cron_enabled: false
