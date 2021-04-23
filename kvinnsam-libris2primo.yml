@@ -1,0 +1,33 @@
+---
+- hosts: all
+  vars_files:
+    - vars/vault.yml
+    - vars/kvinnsam_libris2primo_defaults.yml
+  tasks:
+    - name: Ensure export directory
+      ansible.builtin.file:
+        path: "{{ kvinnsam_libris2primo_export_dir }}"
+        mode: 0755
+        state: directory
+      become: yes
+
+    - name: Ensure kvinnsam home directory
+      ansible.builtin.file:
+        path: "{{ kvinnsam_libris2primo_home }}"
+        mode: 0755
+        state: directory
+
+    - name: Write script
+      template:
+        src: kvinnsam-libris2primo.sh.j2
+        dest: "{{ kvinnsam_libris2primo_home }}/libris2primo.sh"
+
+    - name: Schedule cron job
+      ansible.builtin.cron:
+        name: "koha-kvinnsam-libris2primo"
+        minute: "10"
+        hour: "05"
+        job: "{{ kvinnsam_libris2primo_home }}/libris2primo.sh"
+        state: present
+        user: root
+      become: yes

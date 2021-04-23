@@ -1,0 +1,6 @@
+---
+kvinnsam_libris2primo_home: /home/apps/kvinnsam-libris2primo
+kvinnsam_libris2primo_export_dir:  /var/lib/koha/primo/kvinnsam/updates
+kvinnsam_libris2primo_user: "{{ vault_kvinnsam_libris2primo_user }}"
+kvinnsam_libris2primo_pass: "{{ vault_kvinnsam_libris2primo_pass }}"
+# TODO: variable for primo user, or hardcode for both this and regular primo export

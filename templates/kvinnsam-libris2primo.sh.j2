@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Work directories
+workdir="/tmp/discovery/kvinnsam/updates"
+logdir="/tmp/discovery/kvinnsam/logs"
+
+# mkdir -p $archivedir
+mkdir -p $workdir
+mkdir -p $logdir
+
+# FTP settings for LIBRIS
+host="ftp.libris.kb.se"
+user="{{ kvinnsam_libris2primo_user }}"
+pass="{{ kvinnsam_libris2primo_pass }}"
+kvin_dir="pub/export2/KVIN/marc"
+
+# Date settings
+datetime=`date +%Y-%m-%d-%H-%M-%S`
+DATE=`date +%Y%m%d`
+YESTERDAY=`/bin/date -d "-1 day" +"%Y%m%d"`
+
+#Librisfil
+FILE="KVIN.$YESTERDAY.marc"
+#FILE="KVIN.20170210.marc"
+
+OUTPUT="$logdir/output.txt"
+
+cd $workdir
+
+ftp -nv $host > $OUTPUT.$DATE <<EOF
+quote USER $user
+quote PASS $pass
+cd $kvin_dir
+get $FILE
+bye
+EOF
+
+# Check if file exists
+if [ ! -f $FILE ]
+then
+    echo `date` "Ingen fil i dag" >> $OUTPUT.$DATE
+    echo `date` "Skriptet avslutas" >> $OUTPUT.$DATE
+    exit 1
+else
+mv $FILE 46GUB_KVINNSAM-delta-$datetime.marc | tar -czf /var/lib/koha/primo/kvinnsam/updates/46GUB_KVINNSAM-delta-$datetime.marc.tar.gz 46GUB_KVINNSAM-delta-$datetime.marc
+chown primo:primo /var/lib/koha/primo/kvinnsam/updates/46GUB_KVINNSAM-delta-$datetime.marc.tar.gz
+fi
+
+exit
