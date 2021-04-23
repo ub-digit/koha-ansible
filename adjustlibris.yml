@@ -1,0 +1,32 @@
+---
+- hosts: all
+  vars_files:
+    - vars/adjustlibris_defaults.yml
+  roles:
+    - { role: rvm.ruby,
+        tags: ruby, #???
+        rvm1_rubies: ['ruby-2.4.1'],
+        rvm1_user: "{{ ansible_user }}",
+        rvm1_install_path: '/home/{{ ansible_user }}/.rvm'
+    }
+  tasks:
+    - name: Ensure repo removed
+      ansible.builtin.file:
+        path: "{{ adjustlibris_home }}"
+        state: absent
+
+    - name: Checkout repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/adjustlibris.git
+        dest: "{{ adjustlibris_home }}"
+        version: "{{ adjustlibris_version }}"
+    - name: Run bundle install
+      ansible.builtin.command: /bin/bash -lc 'bundle install --deployment'
+      args:
+        chdir: "{{ adjustlibris_home }}"
+#    - name: Run bundler
+#      community.general.bundler:
+#        chdir: "{{ adjustlibris_home }}"
+#        deployment_mode: yes
+#        state: present
+#        executable: ~/.rvm/gems/ruby-2.4.1/bin/bundler #TODO version variable

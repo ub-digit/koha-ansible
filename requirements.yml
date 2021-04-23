@@ -1,4 +1,6 @@
 ---
+roles:
+  - name: rvm.ruby
 collections:
   - community.general # elasticsearch plugins install
   - community.mysql

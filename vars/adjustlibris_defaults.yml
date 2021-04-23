@@ -1,0 +1,3 @@
+---
+adjustlibris_home: /home/{{ ansible_user}}/adjustlibris
+adjustlibris_version: master
