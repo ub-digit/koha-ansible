@@ -318,6 +318,7 @@
         - headers
         - proxy_http
         - cgi
+        - ssl
       notify: restart apache
 
     - name: Copy Koha scripts
@@ -396,7 +397,6 @@
         mode: 0755
         state: directory
 
-
     # TODO: Only when instance not exists
 
     - name: Create symlink debian.cnf -> koha-common.cnf
@@ -426,9 +426,14 @@
       ignore_errors: yes
 
     - name: Create Koha instance
-      ansible.builtin.command:  koha-create --create-db {{ koha_instance_name }}
+      ansible.builtin.command: koha-create --create-db {{ koha_instance_name }}
       when: result.stdout == ""
       notify: restart apache
+
+    - name: Add ansible user to koha instance group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        group: "{{ koha_instance_name }}-koha"
 
     - name: Enable dev_install in koha-conf.xml
       ansible.builtin.replace:
@@ -442,35 +447,35 @@
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<intranetdir>[^<]+</intranetdir>'
         replace: "<intranetdir>{{ koha_home }}</intranetdir>"
-      when: result.stdout == ""
+      #when: result.stdout == ""
 
     - name: Set intrahtdocs in koha-conf.xml
       ansible.builtin.replace:
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<intrahtdocs>[^<]+</intrahtdocs>'
         replace: "<intrahtdocs>{{ koha_home }}/koha-tmpl/intranet-tmpl</intrahtdocs>"
-      when: result.stdout == ""
+      #when: result.stdout == ""
 
     - name: Set opacdir in koha-conf.xml
       ansible.builtin.replace:
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<opacdir>[^<]+</opacdir>'
         replace: "<opacdir>{{ koha_home }}/opac</opacdir>"
-      when: result.stdout == ""
+      #when: result.stdout == ""
 
     - name: Set opachtdocs in koha-conf.xml
       ansible.builtin.replace:
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<opachtdocs>[^<]+</opachtdocs>'
         replace: "<opachtdocs>{{ koha_home }}/koha-tmpl/opac-tmpl</opachtdocs>"
-      when: result.stdout == ""
+      #when: result.stdout == ""
 
     - name: Set included in koha-conf.xml
       ansible.builtin.replace:
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<includes>[^<]+</includes>'
         replace: "<includes>{{ koha_home }}/koha-tmpl/intranet-tmpl/prog/en/includes</includes>"
-      when: result.stdout == ""
+      #when: result.stdout == ""
 
     - name: Set smtp_server block setting in koha-conf.xml
       ansible.builtin.replace:
@@ -521,7 +526,7 @@
         - /etc/cron.d/koha
         - /etc/cron.daily/koha
         - /etc/cron.hourly/koha
-      when: result.stdout == ""
+      #when: result.stdout == ""
 
     - name: Copy database dump file
       ansible.builtin.copy:
@@ -535,6 +540,14 @@
         state: import
         target: /tmp/initial-db.sql
       when: result.stdout == ""
+
+    # Translation files
+    - name: Copy translation files
+      ansible.builtin.copy:
+        dest: "{{ koha_po_files_path }}"
+        src: "{{ playbook_dir }}/files/po/"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}" # group?
 
     # GUB-scripts
     - name: Write /usr/local/sbin/koha-database-backup.sh
