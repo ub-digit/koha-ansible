@@ -1,5 +1,5 @@
 ---
-koha_primo_export_home: /home/apps/koha-primo-export
+koha_primo_export_home: "/home/{{ ansible_user }}/koha-primo-export"
 koha_primo_export_version: master
 koha_primo_export_data_dir: /opt/koha-primo-export
 koha_primo_export_export_dir: "/var/lib/koha/primo/{{ koha_instance_name }}"

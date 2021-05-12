@@ -1,5 +1,5 @@
 ---
-edifact_home: /home/apps/koha-edifact
+edifact_home: "/home/{{ ansible_user }}/koha-edifact"
 edifact_version: master
 edifact_data_dir: /opt/koha-edifact
 edifact_base_dir: /opt/koha-edifact/vendors

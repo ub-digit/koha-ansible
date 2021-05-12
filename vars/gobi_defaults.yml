@@ -1,6 +1,6 @@
 ---
 gobi_version: master
-gobi_home: /home/apps/koha-gobi-import
+gobi_home: "/home/{{ ansible_user }}/koha-gobi-import"
 
 gobi_ftp_password: "{{ vault_gobi_ftp_password }}"
 gobi_koha_user: "{{ koha_instance_name }}"

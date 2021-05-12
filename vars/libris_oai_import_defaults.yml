@@ -1,4 +1,4 @@
 ---
-libris_oai_import_home: /home/apps/libris-oai-import
+libris_oai_import_home: "/home/{{ ansible_user }}/libris-oai-import"
 libris_oai_import_version: master
 libris_oai_import_log_dir: /opt/libris-oai-import/log
