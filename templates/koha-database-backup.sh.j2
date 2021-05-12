@@ -13,7 +13,7 @@ TIMESTAMP=`/bin/date '+%Y%m%d-%H%M'`
 FILENAME=${BASENAME}-${TIMESTAMP}
 
 echo "Backing up the koha_koha database..."
-mysqldump --defaults-extra-file=/etc/mysql/koha-common.cnf --single-transaction=TRUE -u debian-sys-maint koha_{{ koha_instance_name }} > ${BACKUPDIR}/${FILENAME}.sql
+mysqldump --defaults-extra-file=/etc/mysql/koha-common.cnf --single-transaction=TRUE -u root koha_{{ koha_instance_name }} > ${BACKUPDIR}/${FILENAME}.sql
 gzip -9 ${BACKUPDIR}/${FILENAME}.sql
 echo "Done!"
 echo "Database saved in ${BACKUPDIR}/${FILENAME}.sql.gz"
