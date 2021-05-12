@@ -4,6 +4,12 @@
     - vars/vault.yml
     - vars/kvinnsam_libris2primo_defaults.yml
   tasks:
+    - name: Install required packages
+      apt:
+        name: ftp
+        state: latest
+        update_cache: yes
+
     - name: Ensure export directory
       ansible.builtin.file:
         path: "{{ kvinnsam_libris2primo_export_dir }}"
