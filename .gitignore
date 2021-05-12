@@ -3,3 +3,5 @@ files/initial-db.sql
 .vagrant
 ansible_password
 work
+data/*
+!data/.gitkeep

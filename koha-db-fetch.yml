@@ -1,0 +1,29 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+    - vars/vault.yml
+  become: true
+  become_user: root
+  tasks:
+    - name: Create temporary working directory
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: "koha_db_dump."
+      register: dump_directory
+
+    - name: Dump database to temporary folder
+      ansible.builtin.shell:
+        cmd: mysqldump --defaults-extra-file=/etc/mysql/koha-common.cnf --single-transaction=TRUE -u root koha_koha > kohadump.sql
+        chdir: "{{ dump_directory.path }}"
+
+    - name: Fetch database dump
+      ansible.builtin.fetch:
+        src: "{{ dump_directory.path }}/kohadump.sql"
+        dest: "{{ playbook_dir }}/data/"
+        flat: yes
+
+    - name: Remove temporary working directory
+      ansible.builtin.file:
+        path: "{{ dump_directory.path }}"
+        state: absent

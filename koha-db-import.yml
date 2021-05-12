@@ -1,0 +1,36 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+    - vars/vault.yml
+  become: true
+  become_user: root
+  tasks:
+    - name: Drop current database
+      community.mysql.mysql_db:
+        name: "koha_{{ koha_instance_name }}"
+        config_file: /etc/mysql/koha-common.cnf #??
+        state: absent
+
+    - name: Create temporary working directory
+      ansible.builtin.tempfile:
+        prefix: "koha_db_import."
+        state: directory
+      register: import_directory
+
+    - name: Copy database dump to remote host
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/data/kohadump.sql"
+        dest: "{{ import_directory.path }}/"
+
+    - name: Import database
+      community.mysql.mysql_db:
+        name: "koha_{{ koha_instance_name }}"
+        config_file: /etc/mysql/koha-common.cnf #??
+        target: "{{ import_directory.path }}/kohadump.sql"
+        state: import
+
+    - name: Remove temporary working directory
+      ansible.builtin.file:
+        path: "{{ import_directory.path }}"
+        state: absent
