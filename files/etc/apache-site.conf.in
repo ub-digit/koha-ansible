@@ -15,7 +15,7 @@
    Include /etc/koha/apache-shared.conf
 #  Include /etc/koha/apache-shared-disable.conf
    Include /etc/koha/apache-shared-opac-plack.conf
-#  Include /etc/koha/apache-shared-opac.conf
+   Include /etc/koha/apache-shared-opac.conf
 
    ServerName __OPACSERVER__
    SetEnv KOHA_CONF "/etc/koha/sites/__KOHASITE__/koha-conf.xml"
@@ -44,7 +44,7 @@
    Include /etc/koha/apache-shared.conf
 #  Include /etc/koha/apache-shared-disable.conf
    Include /etc/koha/apache-shared-intranet-plack.conf
-#  Include /etc/koha/apache-shared-intranet.conf
+   Include /etc/koha/apache-shared-intranet.conf
 
    ServerName __INTRASERVER__
    SetEnv KOHA_CONF "/etc/koha/sites/__KOHASITE__/koha-conf.xml"

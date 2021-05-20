@@ -6,6 +6,13 @@
   become: true
   become_user: root
   tasks:
+
+    - name: Install gnupg
+      apt:
+        name: gnupg
+        state: present
+        update_cache: yes
+
     - name: Add official Koha repository (key)
       ansible.builtin.apt_key:
         url: http://debian.koha-community.org/koha/gpg.asc
@@ -247,7 +254,6 @@
         from_path: "{{ koha_home }}"
         installdeps: yes
 
-
     - name: Add Java key
       ansible.builtin.apt_key:
         keyserver: keyserver.ubuntu.com
@@ -262,20 +268,20 @@
 
     - name: Set Java licence as accepted
       debconf:
-        name: oracle-java15-installer
+        name: oracle-java16-installer
         question: shared/accepted-oracle-license-v1-2
         value: 'true'
-        vtype: select
+        vtype: 'select'
 
     - name: Install Java
       apt:
-        name: oracle-java15-installer
+        name: oracle-java16-installer
         state: latest
         update_cache: yes
 
     - name: Set Java version as default
       apt:
-        name: oracle-java15-set-default
+        name: oracle-java16-set-default
         state: latest
 
     - name: Add Elasticsearch key
@@ -331,22 +337,24 @@
 
     - name: Copy Koha scripts
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/scripts/"
+        src: "{{ koha_home }}/debian/scripts/"
         dest: "/usr/sbin/"
+        remote_src: yes
         mode: 0755
 
-        #    - name: Find all Koha scripts
-        #      find:
-        #        paths: "/usr/sbin/"
-        #        patterns: "koha-*"
-        #      register: scripts
+#    - name: Find all Koha scripts
+#      find:
+#        paths: "/usr/sbin/"
+#        patterns: "koha-*"
+#      register: scripts
 
-        #    - name: Replace koha-functions.sh path in scripts
-        #      replace:
-        #        path: "{{ item.path }}"
-        #        regexp: '/usr/share/koha/bin/koha-functions.sh'
-        #        replace: '{{ koha_home }}/debian/scripts/koha-functions.sh'
-        #      with_items: "{{ scripts.files }}"
+#    - name: Replace koha-functions.sh path in scripts
+#      replace:
+#        path: "{{ item.path }}"
+#        regexp: '/usr/share/koha/bin/koha-functions.sh'
+#        replace: '{{ koha_home }}/debian/scripts/koha-functions.sh'
+#      with_items: "{{ scripts.files }}"
+#
     - name: Fix koha-functions.sh path in scripts
       ansible.builtin.shell: ls /usr/sbin | grep '^koha-' | xargs -I{ sed -i 's#/usr/share/koha/bin/koha-functions.sh#{{ koha_home }}/debian/scripts/koha-functions.sh#g' '/usr/sbin/{'
 
@@ -368,10 +376,42 @@
         regexp: 'koha-zebra --start'
         replace: '#koha-zebra --start'
 
-    - name: Copy Koha config files
+    # Special care will have to be taken with these files on new Koha realse
+    # deployments.  Will have to manually compare with new release templates
+    # and manually merge
+    - name: Copy manually manged Koha config template files
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/etc/"
+        src: "{{ playbook_dir }}/files/etc/{{ item }}"
         dest: "/etc/koha/"
+      # worker-service???
+      loop:
+        - koha-conf-site.xml.in
+        - koha-common.conf
+        - koha-sites.conf
+        - koha-core.conf
+
+    # Will also get replaced later for instance after koha-create
+    # so only used once when koha-create is run, that is on instance creation
+    # (does not apply for plack.psgi which is not an instance level file)
+    # Note: we do not use apache-site-https.conf.in since have modified
+    # apache-site.conf.in instead (to escape koha (probably) trying to performe letsencrypt magick etc)
+    - name: Copy rest of unmanaged Koha config template files from release
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ koha_home }}/debian/templates/{{ item }}"
+        dest: "/etc/koha/"
+      loop:
+        - log4perl-site.conf.in
+        - SIPconfig.xml
+        - plack.psgi
+        - apache-shared.conf
+        - apache-shared-disable.conf
+        - apache-shared-intranet.conf
+        - apache-shared-intranet-plack.conf
+        - apache-shared-opac.conf
+        - apache-shared-opac-plack.conf
+        - apache-site.conf.in
+        - apache-site-https.conf.in
 
     - name: Write /etc/koha/passwd
       template:
@@ -405,8 +445,6 @@
         mode: 0755
         state: directory
 
-    # TODO: Only when instance not exists
-
     - name: Create symlink debian.cnf -> koha-common.cnf
       ansible.builtin.file:
         src: /etc/mysql/debian.cnf
@@ -414,19 +452,18 @@
         state: link
 
 
-      # TODO: Replace dir
+# TODO: Replace dir
+#   - name: Write koha-sites.conf file
+#     template:
+#       src: koha-sites.conf.j2
+#       dest: /etc/koha/koha-sites.conf
+#       mode: 0644
 
-        #- name: Write koha-sites.conf file
-        #template:
-        #src: koha-sites.conf.j2
-        #dest: /etc/koha/koha-sites.conf
-        #mode: 0644
-
-        #- name: Write koha-conf-site.xml file
-        #template:
-        #src: koha-conf-site.xml.in.j2
-        #dest: /etc/koha/koha-conf-site.xml.in
-        #mode: 0644
+#   - name: Write koha-conf-site.xml file
+#     template:
+#       src: koha-conf-site.xml.in.j2
+#       dest: /etc/koha/koha-conf-site.xml.in
+#       mode: 0644
 
     - name: Check for instance existence
       ansible.builtin.shell: koha-list | grep {{ koha_instance_name }}
@@ -438,6 +475,82 @@
       when: result.stdout == ""
       notify: restart apache
 
+    - name: Update ummanaged included Apache config files
+      ansible.builtin.copy:
+        src: "{{ koha_home }}/debian/templates/{{ item }}"
+        remote_src: yes
+        dest: "/etc/koha/"
+      loop:
+        - apache-shared.conf
+        - apache-shared-disable.conf
+        - apache-shared-intranet.conf
+        - apache-shared-intranet-plack.conf
+        - apache-shared-opac.conf
+        - apache-shared-opac-plack.conf
+        - apache-site.conf.in
+        - apache-site-https.conf.in
+
+    - name: Replace DocumentRoot path in apache-shared-intranet.conf and apache-shared-opac.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/{{ item }}"
+        regexp: '^DocumentRoot [^ ]+\s*$'
+        replace: "DocumentRoot {{ koha_home }}/koha-tmpl"
+      loop:
+        - apache-shared-intranet.conf
+        - apache-shared-opac.conf
+
+    - name: Replace ScriptAlias path in apache-shared-intranet.conf and apache-shared-opac.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/{{ item }}"
+        regexp: '^(ScriptAlias [^ ]+) "[^"]+/cgi-bin/([^"]*)"'
+        replace: "\\1 \"{{ koha_home }}/\\2\""
+      loop:
+        - apache-shared-intranet.conf
+        - apache-shared-opac.conf
+
+    - name: Replace API paths in apache-shared-intranet.conf and apache-shared-opac.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/{{ item }}"
+        regexp: '/usr/share/koha/api'
+        replace: "{{ koha_home}}/api"
+      loop:
+        - apache-shared-intranet.conf
+        - apache-shared-opac.conf
+
+    - name: Replace PERL5LIB path in apache-shared.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/apache-shared.conf"
+        regexp: '^SetEnv PERL5LIB "[^"]+"\s*$'
+        replace: "SetEnv PERL5LIB \"{{ koha_home }}\""
+
+    # TODO: enable SIP!
+    - name: Update unmanaged Koha instance config files from current release
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ koha_home }}/debian/templates/{{ item.0 }}"
+        dest: "/etc/koha/sites/{{ koha_instance_name}}/{{ item.1 }}"
+      loop: "{{ ['SIPconfig.xml', 'log4perl-site.conf.in']|zip(['SIPconfig.xml', 'log4perl.conf'])|list }}"
+
+    - name: Replace __LOG_DIR__ in log4perl.conf
+      ansible.builtin.replace:
+        dest: "/etc/koha/sites/{{ koha_instance_name}}/log4perl.conf"
+        regexp: '__LOG_DIR__'
+        replace: "/var/log/koha/{{ koha_instance_name }}"
+
+    - name: Copy Apache certificate
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/secret/koha.pem"
+        dest: /etc/ssl/certs/koha.pem
+        group: "{{ koha_instance_name }}-koha"
+
+    - name: Copy Apache certificate private key
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/secret/koha.key"
+        dest: /etc/ssl/private/koha.key
+        group: "{{ koha_instance_name }}-koha"
+        owner: root
+        group: root
+
     - name: Add ansible user to koha instance group
       ansible.builtin.user:
         name: "{{ ansible_user }}"
@@ -448,7 +561,7 @@
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<dev_install>0</dev_install>'
         replace: '<dev_install>1</dev_install>'
-      when: result.stdout == ""
+      #when: result.stdout == ""
 
     - name: Set intranetdir in koha-conf.xml
       ansible.builtin.replace:
@@ -525,7 +638,7 @@
         replace: '#\1'
       when: result.stdout == ""
 
-    - name: Ajust Koha paths for cron-scripts
+    - name: Adjust Koha paths for cron-scripts
       ansible.builtin.replace:
         path: "{{ item }}"
         regexp: '/usr/share/koha/bin'
@@ -534,7 +647,7 @@
         - /etc/cron.d/koha
         - /etc/cron.daily/koha
         - /etc/cron.hourly/koha
-      #when: result.stdout == ""
+      when: result.stdout == ""
 
     - name: Copy database dump file
       ansible.builtin.copy:
