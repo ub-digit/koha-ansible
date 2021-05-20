@@ -13,7 +13,7 @@
 
     - name: Ensure vendor directories
       ansible.builtin.file:
-        path: "{{ edifact_data_dir }}/vendors/{{ item.0 }}/{{item.1}}"
+        path: "{{ edifact_data_dir }}/vendors/{{ item.0 }}/{{ item.1 }}"
         mode: 0755
         state: directory
       loop: "{{ ['Dawson', 'Delbanco', 'Adlibris']|product(['archive', 'messages'])|list }}"
