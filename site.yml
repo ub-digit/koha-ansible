@@ -413,6 +413,11 @@
         - apache-site.conf.in
         - apache-site-https.conf.in
 
+    - name: Write custom apache config
+      ansible.builtin.template:
+        src: apache-shared-custom.conf.j2
+        dest: /etc/koha/apache-shared-custom.conf
+
     - name: Write /etc/koha/passwd
       template:
         src: koha_passwd.j2
