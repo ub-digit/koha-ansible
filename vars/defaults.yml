@@ -13,3 +13,5 @@ gup_edifact_cron_enabled: false
 
 mariadb_data_dir: /mnt/mysql
 elasticsearch_data_dir: /mnt/elasticsearch
+
+get_print_data_api_key: todo # get from vault variable

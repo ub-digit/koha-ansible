@@ -1,0 +1,12 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+    - vars/vault.yml
+  become: true
+  become_user: root
+  tasks:
+    - name: Anonymize db
+      ansible.builtin.shell:
+        cmd: "koha-shell -c 'perl misc/anonymize_db.pl' {{ koha_instance_name }}"
+        chdir: "{{ koha_home }}"

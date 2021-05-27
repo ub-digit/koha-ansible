@@ -1,0 +1,12 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+    - vars/vault.yml
+  become: true
+  become_user: root
+  tasks:
+    - name: Adjust settings for current environment
+      ansible.builtin.shell:
+        cmd: "koha-shell -c 'perl misc/set_environment_preferences.pl --environment=\"{{ environment_name }}\" --get_print_data_api_key=\"{{ get_print_data_api_key }}\" --adjustlibris_home=\"/home/{{ ansible_user }}\"' {{ koha_instance_name }}"
+        chdir: "{{ koha_home }}"
