@@ -245,7 +245,11 @@
 
     - name: Install dependecies not included in cpanfile
       community.general.cpanm:
-        name: Alien::Tidyp
+        name: "{{ item }}"
+      loop:
+        - Alien::Tidyp
+        - Switch # koha-plugin-format-facet dependency
+        - LWP::Simple::Post # koha-plugin-get-print-data dependency
 
   # - name: Install Koha perl dependencies
   #    ansible.builtin.shell: "cd {{ koha_home }} && cpanm --installdeps ."
@@ -581,18 +585,27 @@
         name: "{{ ansible_user }}"
         group: "{{ koha_instance_name }}-koha"
 
-    - name: Enable dev_install in koha-conf.xml
+    - name: Set dev_install in koha-conf.xml
       ansible.builtin.replace:
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<dev_install>0</dev_install>'
         replace: '<dev_install>1</dev_install>'
+      notify: restart memcached
       #when: result.stdout == ""
+
+    - name: Set enable_plugins in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<enable_plugins>0</enable_plugins>'
+        replace: '<enable_plugins>1</enable_plugins>'
+      notify: restart memcached
 
     - name: Set intranetdir in koha-conf.xml
       ansible.builtin.replace:
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<intranetdir>[^<]+</intranetdir>'
         replace: "<intranetdir>{{ koha_home }}</intranetdir>"
+      notify: restart memcached
       #when: result.stdout == ""
 
     - name: Set intrahtdocs in koha-conf.xml
@@ -600,6 +613,7 @@
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<intrahtdocs>[^<]+</intrahtdocs>'
         replace: "<intrahtdocs>{{ koha_home }}/koha-tmpl/intranet-tmpl</intrahtdocs>"
+      notify: restart memcached
       #when: result.stdout == ""
 
     - name: Set opacdir in koha-conf.xml
@@ -607,6 +621,7 @@
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<opacdir>[^<]+</opacdir>'
         replace: "<opacdir>{{ koha_home }}/opac</opacdir>"
+      notify: restart memcached
       #when: result.stdout == ""
 
     - name: Set opachtdocs in koha-conf.xml
@@ -614,6 +629,7 @@
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<opachtdocs>[^<]+</opachtdocs>'
         replace: "<opachtdocs>{{ koha_home }}/koha-tmpl/opac-tmpl</opachtdocs>"
+      notify: restart memcached
       #when: result.stdout == ""
 
     - name: Set included in koha-conf.xml
@@ -621,6 +637,7 @@
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         regexp: '<includes>[^<]+</includes>'
         replace: "<includes>{{ koha_home }}/koha-tmpl/intranet-tmpl/prog/en/includes</includes>"
+      notify: restart memcached
       #when: result.stdout == ""
 
     - name: Set smtp_server block setting in koha-conf.xml
@@ -637,6 +654,7 @@
             <password>{{ smtp_password }}</password>
             <debug>0</debug>
           </smtp_server>
+      notify: restart memcached
       #when: result.stdout == ""
     - name: Copy cronjobs (cron.d)
       ansible.builtin.copy:
@@ -730,7 +748,26 @@
         job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} 2>&1"
         state: "{{ 'present' if gup_edifact_cron_enabled else 'absent' }}"
 
-  # TODO: Handler for restaring memcached??
+    - name: Write log config for koha-plugin-marc-import
+      ansible.builtin.template:
+        src: koha-plugin-marc-import-log4perl.conf.j2
+        dest: "/etc/koha/sites/{{ koha_instance_name }}/koha-plugin-marc-import-log4perl.conf"
+
+    # Hack to install from git reposity, works but ugly as hell
+    # TODO: checkout as ansible_user to be consistent?
+    - name: Checkout MimeMailSender repo, required by marc import plugin
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/Log-Dispatch-Email-MimeMailSender.git
+        dest: "/home/{{ ansible_user}}/Log-Dispatch-Email-MimeMailSender"
+        version: master
+
+    - name: Inject MIMEMailSender in perl lib path
+      ansible.builtin.file:
+        src: "/home/{{ ansible_user}}/Log-Dispatch-Email-MimeMailSender/lib/Log/Dispatch/Email/MIMEMailSender.pm"
+        dest: "/usr/share/perl5/Log/Dispatch/Email/MIMEMailSender.pm"
+        state: link
+
+  # TODO: Handlers for restarting plack/zipserver etc
   handlers:
     - name: restart apache
       service:
@@ -739,6 +776,11 @@
       become: yes
     - name: restart mysql
       service:
-        name: mysql
+        name: mariadb
+        state: restarted
+      become: yes
+    - name: restart memcached
+      service:
+        name: memcached
         state: restarted
       become: yes
