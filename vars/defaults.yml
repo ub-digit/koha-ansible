@@ -1,4 +1,8 @@
 ---
+docker_install_compose: true
+#docker_compose_version: "1.29.2"
+docker_users: ["{{ ansible_user }}"]
+
 smtp_host: 127.0.0.1
 smtp_port: 1025
 smtp_username: ''
@@ -15,3 +19,5 @@ mariadb_data_dir: /mnt/mysql
 elasticsearch_data_dir: /mnt/elasticsearch
 
 get_print_data_api_key: todo # get from vault variable
+
+ansible_python_interpreter: /usr/bin/python3

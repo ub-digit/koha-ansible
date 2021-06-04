@@ -1,6 +1,9 @@
 ---
 roles:
   - name: rvm.ruby
+  - name: geerlingguy.docker
+  - name: geerlingguy.pip
 collections:
   - community.general # elasticsearch plugins install
   - community.mysql
+  - community.docker

@@ -1,0 +1,17 @@
+version: '3.7'
+services:
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    environment:
+      - MH_STORAGE=mongodb
+      - MH_MONGO_URI=mongodb:27017
+    ports:
+      - 127.0.0.1:8025:8025
+      - 127.0.0.1:1025:1025
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:4.4.4-bionic
+    #environment:
+            #- MONGO_INITDB_ROOT_USERNAME=root
+            #- MONGO_INITDB_ROOT_PASSWORD=mongopassword

@@ -1,8 +1,15 @@
 ---
 - hosts: all
+  vars:
+    pip_install_packages:
+      - name: docker
+      - name: docker-compose
   vars_files:
     - vars/defaults.yml
     - vars/vault.yml
+  roles:
+    - geerlingguy.pip
+    - geerlingguy.docker
   become: true
   become_user: root
   tasks:
@@ -56,6 +63,7 @@
                'libbusiness-isbn-perl',
                'libbusiness-issn-perl',
                'libbytes-random-secure-perl',
+               'python3-apt', # Warning in ansible-role-pip
                'python-mysqldb', # required for ansible mysql collection
                #'libcache-memcached-fast-safe-perl',
 #               'libcache-memcached-perl',
@@ -570,13 +578,12 @@
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/secret/koha.pem"
         dest: /etc/ssl/certs/koha.pem
-        group: "{{ koha_instance_name }}-koha"
+        group: "{{ koha_instance_name }}-koha" #??
 
     - name: Copy Apache certificate private key
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/secret/koha.key"
         dest: /etc/ssl/private/koha.key
-        group: "{{ koha_instance_name }}-koha"
         owner: root
         group: root
 
@@ -640,22 +647,67 @@
       notify: restart memcached
       #when: result.stdout == ""
 
-    - name: Set smtp_server block setting in koha-conf.xml
+    # TODO: Create loop for this to avoid duplication, possible?
+    # TODO: restart plack/memcached?
+    - name: Set smtp_server/host in koha-conf.xml
       ansible.builtin.replace:
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        regexp: '<smtp_server>.+?</smtp_server>'
-        replace: |-
-          <smtp_server>
-            <host>{{ smtp_host }}</host>
-            <port>{{ smtp_port }}<port>
-            <timeout>120</timeout>
-            <ssl_mode>{{ smtp_ssl_mode }}</ssl_mode>
-            <user_name>{{ smtp_username }}</user_name>
-            <password>{{ smtp_password }}</password>
-            <debug>0</debug>
-          </smtp_server>
-      notify: restart memcached
-      #when: result.stdout == ""
+        after: '<smtp_server>'
+        before: '</smtp_server>'
+        regexp: '<host>[^<]*</host>'
+        replace: "<host>{{ smtp_host }}</host>"
+
+    - name: Set smtp_server/port  in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        after: '<smtp_server>'
+        before: '</smtp_server>'
+        regexp: '<port>[^<]*</port>'
+        replace: "<port>{{ smtp_port }}</port>"
+
+    - name: Set smtp_server/ssl_mode in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        after: '<smtp_server>'
+        before: '</smtp_server>'
+        regexp: '<ssl_mode>[^<]*</ssl_mode>'
+        replace: "<ssl_mode>{{ smtp_ssl_mode }}</ssl_mode>"
+
+    - name: Set smtp_server/user_name  in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        after: '<smtp_server>'
+        before: '</smtp_server>'
+        regexp: '<user_name>[^<]*</user_name>'
+        replace: "<user_name>{{ smtp_username }}</user_name>"
+
+    - name: Set smtp_server/password  in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        after: '<smtp_server>'
+        before: '</smtp_server>'
+        regexp: '<password>[^<]*</password>'
+        replace: "<password>{{ smtp_password }}</password>"
+
+    # Hack
+    - name: Set smtp host in system perl Sendmail.pm
+      ansible.builtin.replace:
+        path: /usr/share/perl5/Mail/Sendmail.pm
+        after: '# \*+ Configuration you may want to change \*+'
+        before: '\);\s+# \*+'
+        regexp: "^(\\s+'smtp'\\s+=>\\s+).*$"
+        replace: '\1[ qw( {{ smtp_host }} ) ],'
+
+    - name: Set smtp port in system perl Sendmail.pm
+      ansible.builtin.replace:
+        path: /usr/share/perl5/Mail/Sendmail.pm
+        after: '# \*+ Configuration you may want to change \*+'
+        before: '\);\s+# \*+'
+        #regexp: "^(\\s+'port'\\s+=>\\s+).*$"
+        #replace: '\1{{ smtp_port }},'
+        regexp: "^(\\s+'port'\\s+=>).*$"
+        replace: '\1 {{ smtp_port }},' # Weird behavior no space between \1{{ will cause issues
+
     - name: Copy cronjobs (cron.d)
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/cron/koha-common.cron.d"
@@ -747,6 +799,18 @@
         hour: "22"
         job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} 2>&1"
         state: "{{ 'present' if gup_edifact_cron_enabled else 'absent' }}"
+
+    # Deploy mailhog docker service
+    #
+    - name: Ensure mailhog docker-compose directory
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/mailhog"
+        dest: "/home/{{ ansible_user }}/"
+
+    - name: Run mailhog service
+      community.docker.docker_compose:
+        project_src: "/home/{{ ansible_user }}/mailhog"
+        state: present
 
     - name: Write log config for koha-plugin-marc-import
       ansible.builtin.template:
