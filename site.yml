@@ -27,7 +27,7 @@
 
     - name: Add official Koha repository (repo)
       ansible.builtin.apt_repository:
-        repo: deb [trusted=yes] http://debian.koha-community.org/koha unstable main
+        repo: deb [trusted=yes] http://debian.koha-community.org/koha dev main
         update_cache: yes
         state: present
 
