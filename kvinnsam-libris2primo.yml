@@ -9,6 +9,7 @@
         name: ftp
         state: latest
         update_cache: yes
+      become: yes
 
     - name: Ensure export directory
       ansible.builtin.file:
