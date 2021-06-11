@@ -1,5 +1,8 @@
 # koha-ansible
 
+For some reason sudo apt-get update --fix-missing needs to be run for newly provisioned vagrant box.
+Does not seems to be an issue for other environments.
+
 For test setup, after running vagrant up (which also runs provison), get box id by running:
 
 `vagrant global-status`
