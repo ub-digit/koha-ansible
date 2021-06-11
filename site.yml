@@ -344,7 +344,7 @@
       apache2_module:
         name: "{{ item }}"
         state: present
-      with_items:
+      loop:
         - rewrite
         - headers
         - proxy_http
