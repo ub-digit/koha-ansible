@@ -20,6 +20,16 @@ Vagrant.configure("2") do |config|
   #
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "site.yml"
+    ansible.vault_password_file = "ansible_password"
+    ansible.extra_vars = {
+      environment_name: "vagrant",
+      koha_home: "/home/{{ ansible_user }}/kohadev/current",
+      koha_po_files_path: "/home/{{ ansible_user }}/koha-staging/shared/misc/translator/po",
+      koha_instance_name: "koha",
+      koha_db_password: "koha_password",
+      gobi_report_mail_to: "david.gustafsson@ub.gu.se,g.katalog@ub.gu.se",
+      gobi_error_mail_to: "david.gustafsson@ub.gu.se,g.katalog@ub.gu.se,stefan.berndtsson@ub.gu.se"
+    };
   end
 
   sync_repo_dir = ENV['KOHA_REPO']
