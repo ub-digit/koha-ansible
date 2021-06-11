@@ -357,13 +357,19 @@
         src: "{{ koha_home }}/debian/scripts/"
         dest: "/usr/sbin/"
         remote_src: yes
-        mode: 0755
+        mode: preserve # Should be fixed here https://github.com/Shrews/ansible/commit/3c1ca809614863aaa6b85d460be9846494cdb802 but still does not retain permissions, so fixing this manually below
 
-#    - name: Find all Koha scripts
-#      find:
-#        paths: "/usr/sbin/"
-#        patterns: "koha-*"
-#      register: scripts
+    - name: Find all Koha scripts
+      find:
+        paths: "/usr/sbin/"
+        patterns: "koha-*"
+      register: scripts
+
+    - name: Ensure Koha scripts are executable
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: 0755
+      loop: "{{ scripts.files }}"
 
 #    - name: Replace koha-functions.sh path in scripts
 #      replace:
