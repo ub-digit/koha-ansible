@@ -412,12 +412,11 @@
         - koha-common.conf
         - koha-sites.conf
         - koha-core.conf
+        - apache-site.conf.in
 
-    # Will also get replaced later for instance after koha-create
-    # so only used once when koha-create is run, that is on instance creation
-    # (does not apply for plack.psgi which is not an instance level file)
-    # Note: we do not use apache-site-https.conf.in since have modified
-    # apache-site.conf.in instead (to escape koha (probably) trying to performe letsencrypt magick etc)
+    # Note: we do not use apache-site.conf.in since have modified
+    # apache-site.conf.in instead (to don't have to deal with koha-create
+    # trying to perform letsencrypt magick etc if run with ssl option)
     - name: Copy rest of unmanaged Koha config template files from release
       ansible.builtin.copy:
         remote_src: yes
@@ -433,7 +432,6 @@
         - apache-shared-intranet-plack.conf
         - apache-shared-opac.conf
         - apache-shared-opac-plack.conf
-        - apache-site.conf.in
         - apache-site-https.conf.in
 
     - name: Write custom apache config
@@ -518,21 +516,21 @@
       when: result.stdout == ""
       notify: restart apache
 
-    - name: Update ummanaged included Apache config files
-      ansible.builtin.copy:
-        remote_src: yes
-        src: "{{ koha_home }}/debian/templates/{{ item }}"
-        dest: "/etc/koha/"
-      loop:
-        - apache-shared.conf
-        - apache-shared-disable.conf
-        - apache-shared-intranet.conf
-        - apache-shared-intranet-plack.conf
-        - apache-shared-opac.conf
-        - apache-shared-opac-plack.conf
-        - apache-site.conf.in
-        - apache-site-https.conf.in
-
+#    - name: Update ummanaged included Apache config files
+#      ansible.builtin.copy:
+#        remote_src: yes
+#        src: "{{ koha_home }}/debian/templates/{{ item }}"
+#        dest: "/etc/koha/"
+#      loop:
+#        - apache-shared.conf
+#        - apache-shared-disable.conf
+#        - apache-shared-intranet.conf
+#        - apache-shared-intranet-plack.conf
+#        - apache-shared-opac.conf
+#        - apache-shared-opac-plack.conf
+#        - apache-site.conf.in
+#        - apache-site-https.conf.in
+#
     - name: Replace DocumentRoot path in apache-shared-intranet.conf and apache-shared-opac.conf
       ansible.builtin.replace:
         path: "/etc/koha/{{ item }}"
