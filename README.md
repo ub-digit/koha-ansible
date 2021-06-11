@@ -1,5 +1,7 @@
 # koha-ansible
 
+## Vagrant setup
+
 For some reason sudo apt-get update --fix-missing needs to be run for newly provisioned vagrant box.
 Does not seems to be an issue for other environments.
 
@@ -11,16 +13,10 @@ Set KOHA_DEPLOY_TESTING_DEVBOX_ID:
 
 `export KOHA_DEPLOY_TESTING_DEVBOX_ID=<id>`
 
-Adjust apache-configuration by running:
+This environmental variable is used by Koha-deply "testing" stage (in config/deploy/testing.rb)
+and should be enough to be able to deploy to the vagrant box.
 
-`cap testing koha:adjust-apache-conf`
-
-Right now plack is not enabled or started automatically, so inside the box
-enable plack configuration in /etc/apache2/kohadev.conf and run:
-
-`koha-plack --start kohadev`
-
-Deployment:
+## Deployment
 
 `ansible-playbook --vault-password-file ansible_password -i <stage> <playbook>.yml`
 
@@ -29,3 +25,16 @@ For example:
 `ansible-playbook --vault-password-file ansible_password -i staging gobi.yml`
 
 Where ansible_password is a file containing the vault password in plain text.
+
+`deploy_jobs.sh` is a helper script for deploying miscellaneous scripts and jobs, but not Koha itself (the `site.yml` playbook).
+
+## Database import/export tasks
+
+Koha database can be exported and downloaded to local data directory (`./data`) by running the `koha-db-fetch.yml` playbook.
+
+`koha-db-import.yml` will import the sql-dump currently present in the local data directory. Dumps may also be placed
+manually in this directroy instead of running `koha-db-fetch.yml`. The file must be compressed and named `kohadump.sql.gz`.
+
+## Post import tasks
+
+After importing a production database, run `koha-db-anonymize.yml` to anonymize sensitive use data, and `koha-set-environment-preferences.yml` to set preferences for the specific environment.
