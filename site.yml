@@ -493,6 +493,10 @@
         dest: /etc/mysql/mariadb.conf.d/50-server.cnf
       notify: restart mysql
 
+    - name: Check if mariadb data directory exist
+      stat:
+        path: "{{ mariadb_data_dir }}"
+      register: mariadb_data
 # TODO: Replace dir
 #   - name: Write koha-sites.conf file
 #     template:
@@ -505,6 +509,15 @@
 #       src: koha-conf-site.xml.in.j2
 #       dest: /etc/koha/koha-conf-site.xml.in
 #       mode: 0644
+#
+    - name: Ensure Elasticsearch data directory
+      ansible.builtin.file:
+        path: "{{ elasticsearch_data_dir }}"
+        owner: elasticsearch
+        group: elasticsearch
+        # NOTE: 2 = setguid flag. The prefix 0 is required by Ansible
+        mode: 02750
+        state: directory
 
     - name: Check for instance existence
       ansible.builtin.shell: koha-list | grep {{ koha_instance_name }}
