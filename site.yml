@@ -607,7 +607,8 @@
     - name: Add ansible user to koha instance group
       ansible.builtin.user:
         name: "{{ ansible_user }}"
-        group: "{{ koha_instance_name }}-koha"
+        append: yes
+        groups: "{{ koha_instance_name }}-koha"
 
     - name: Set dev_install in koha-conf.xml
       ansible.builtin.replace:
