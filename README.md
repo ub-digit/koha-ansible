@@ -38,3 +38,7 @@ manually in this directroy instead of running `koha-db-fetch.yml`. The file must
 ## Post import tasks
 
 After importing a production database, run `koha-db-anonymize.yml` to anonymize sensitive use data, and `koha-set-environment-preferences.yml` to set preferences for the specific environment.
+
+## Setting up a new environment
+
+Since some capistrano tasks depends on a working Koha environment, it's easiest to initially manually copy the Koha repo into the target `koha_home` directory (for example `/home/apps/koha-lab/current`) and then run `site.yml`. After this the temporary source directory can be removed and capistrany be used for deployment.
