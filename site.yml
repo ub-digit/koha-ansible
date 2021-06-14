@@ -818,6 +818,11 @@
         job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} 2>&1"
         state: "{{ 'present' if gup_edifact_cron_enabled else 'absent' }}"
 
+    - name: Start plack if not started
+      ansible.builtin.shell:
+        cmd: "koha-plack --start {{ koha_instance_name }}"
+        creates: "/var/run/koha/{{ koha_instance_name }}/plack.pid"
+
     # Deploy mailhog docker service
     #
     - name: Ensure mailhog docker-compose directory
@@ -852,17 +857,21 @@
   # TODO: Handlers for restarting plack/zipserver etc
   handlers:
     - name: restart apache
-      service:
+      ansible.builtin.service:
         name: apache2
         state: restarted
       become: yes
     - name: restart mysql
-      service:
+      ansible.builtin.service:
         name: mariadb
         state: restarted
       become: yes
     - name: restart memcached
-      service:
+      ansible.builtin.service:
         name: memcached
         state: restarted
+      become: yes
+    - name: restart plack # Untested!
+      ansible.builtin.shell:
+        cmd: "if [ -f /var/run/koha/{{ koha_instance_name }}/plack.pid ]; then koha-plack --restart {{ koha_instance_name }}; else koha-plack --start {{ koha_instance_name }}; fi"
       become: yes
