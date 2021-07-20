@@ -1,9 +1,58 @@
 Alias "/intranet-tmpl/prog/img/background-image.png" "{{ koha_home }}/koha-tmpl/intranet-tmpl/prog/img/background-image-{{ environment_name }}.png"
-
 #<Directory {{ koha_home }}/koha-tmpl/intranet-tmpl/prog/img/background-image-{{ environment_name }}.png>
+#  Require all granted
+#</Directory>
+
+Alias "/intranet-tmpl/prog/img/favicon.ico" "{{ koha_home }}/koha-tmpl/intranet-tmpl/prog/img/favicon-{{ environment_name }}.ico"
+#<Directory {{ koha_home }}/koha-tmpl/intranet-tmpl/prog/img/favicon-{{ environment_name }}.ico>
 #  Require all granted
 #</Directory>
 
 <Directory "{{ koha_home }}">
   Require all granted
 </Directory>
+
+<Location />
+  Order deny,allow
+  Deny from all
+
+  Allow from 130.241.0.0/16
+
+  # xberns:
+  Allow from 65.21.159.105
+
+  Allow from 82.196.108.171
+  Allow from 89.45.233.132
+  Allow from 13.48.38.158
+
+  # xlpero
+  Allow from 155.4.128.217
+
+  # Lars Berglen
+  Allow from 212.85.66.9
+
+  # xgudav
+  Allow from 188.151.49.233
+</Location>
+<Location /cgi-bin>
+  Order deny,allow
+  Deny from all
+
+  Allow from 130.241.0.0/16
+
+  # xberns:
+  Allow from 65.21.159.105
+
+  Allow from 82.196.108.171
+  Allow from 89.45.233.132
+  Allow from 13.48.38.158
+
+  # xlpero
+  Allow from 155.4.128.217
+
+  # Lars Berglen
+  Allow from 212.85.66.9
+
+  # xgudav
+  Allow from 188.151.49.233
+</Location>
