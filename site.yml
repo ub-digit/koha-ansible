@@ -439,17 +439,51 @@
         src: apache-shared-custom.conf.j2
         dest: /etc/koha/apache-shared-custom.conf
 
-    - name: Write /etc/koha/passwd
+    - name: Ensure /etc/koha/passwd
       template:
         src: koha_passwd.j2
         dest: /etc/koha/passwd
         mode: 0644
 
-    - name: Write /etc/default/koha-common
+    - name: Ensure /etc/default/koha-common
       template:
         src: koha-common.j2
         dest: /etc/default/koha-common
         mode: 0644
+
+    - name: Ensure Koha init script
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ koha_home }}/debian/koha-common.init"
+        dest: "/etc/init.d/koha-common"
+        mode: 0755
+
+    - name: Replace koha-functions.sh path in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '/usr/share/koha/bin/koha-functions.sh'
+        replace: "{{ koha_home }}/debian/scripts/koha-functions.sh"
+
+    - name: Comment out package check in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '(\[ -x /usr/sbin/koha-zebra)'
+        replace: '# \1'
+
+    - name: Comment out koha-zebra in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '(\skoha-zebra\s)'
+        replace: '#\1'
+
+    - name: Comment out zebra_status in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '(\szebra_status\s)'
+        replace: '#\1'
+
+    - name: Enable Koha init script
+      ansible.builtin.command: update-rc.d koha-common defaults
 
     # Can't figure out where these are created, at least not in koha-common package, koha-create (or koha-create-dirs)
     # koha-common.dirs
@@ -818,11 +852,6 @@
         job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} 2>&1"
         state: "{{ 'present' if gup_edifact_cron_enabled else 'absent' }}"
 
-    - name: Start plack if not started
-      ansible.builtin.shell:
-        cmd: "koha-plack --start {{ koha_instance_name }}"
-        creates: "/var/run/koha/{{ koha_instance_name }}/plack.pid"
-
     # Deploy mailhog docker service
     #
     - name: Ensure mailhog docker-compose directory
@@ -853,6 +882,11 @@
         src: "/home/{{ ansible_user}}/Log-Dispatch-Email-MimeMailSender/lib/Log/Dispatch/Email/MIMEMailSender.pm"
         dest: "/usr/share/perl5/Log/Dispatch/Email/MIMEMailSender.pm"
         state: link
+
+    - name: Start koha-common service
+      ansible.builtin.service:
+        name: koha-common
+        state: started
 
   # TODO: Handlers for restarting plack/zipserver etc
   handlers:
