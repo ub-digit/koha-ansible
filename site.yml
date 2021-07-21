@@ -482,9 +482,6 @@
         regexp: '(\szebra_status\s)'
         replace: '#\1'
 
-    - name: Enable Koha init script
-      ansible.builtin.command: update-rc.d koha-common defaults
-
     # Can't figure out where these are created, at least not in koha-common package, koha-create (or koha-create-dirs)
     # koha-common.dirs
     - name: Create /etc/koha/sites directory
@@ -883,9 +880,25 @@
         dest: "/usr/share/perl5/Log/Dispatch/Email/MIMEMailSender.pm"
         state: link
 
+    # Use service instead?
+    - name: Enable Koha service
+      ansible.builtin.command: update-rc.d koha-common defaults
+
     - name: Start koha-common service
       ansible.builtin.service:
         name: koha-common
+        state: started
+
+    - name: Enable Elasticsearch service
+      ansible.builtin.service:
+        name: elasticsearch
+        enabled: yes
+        state: started
+
+    - name: Enable mysql/mariadb service
+      ansible.builtin.service:
+        name: mariadb
+        enabled: yes
         state: started
 
   # TODO: Handlers for restarting plack/zipserver etc
