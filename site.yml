@@ -312,11 +312,18 @@
         name: elasticsearch
         state: latest
         update_cache: yes
+      register: elastic
 
     - name: Write Elasticsearch config
       ansible.builtin.template:
         src: elasticsearch.yml.j2
         dest: /etc/elasticsearch/elasticsearch.yml
+
+    - name: Install Elasticsearch plugins
+      community.general.elasticsearch_plugin:
+        name: analysis-icu
+        state: absent
+      when: elastic.changed
 
     - name: Install Elasticsearch plugins
       community.general.elasticsearch_plugin:
