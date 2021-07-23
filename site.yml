@@ -64,7 +64,8 @@
                'libbusiness-issn-perl',
                'libbytes-random-secure-perl',
                'python3-apt', # Warning in ansible-role-pip
-               'python-mysqldb', # required for ansible mysql collection
+               'python-mysqldb', # Required for ansible mysql collection
+               'libpq-dev', # Required for DBD::Pg
                #'libcache-memcached-fast-safe-perl',
 #               'libcache-memcached-perl',
 #               'libcgi-compile-perl',
@@ -258,6 +259,7 @@
         - Alien::Tidyp
         - Switch # koha-plugin-format-facet dependency
         - LWP::Simple::Post # koha-plugin-get-print-data dependency
+        - DBD::Pg # GUB postgres reports
 
   # - name: Install Koha perl dependencies
   #    ansible.builtin.shell: "cd {{ koha_home }} && cpanm --installdeps ."
