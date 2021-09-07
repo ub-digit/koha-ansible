@@ -36,7 +36,8 @@
       apt:
         name: ['curl',
                'ntp',
-               'vim',
+               'emacs-nox',
+               'vim', # vim-nox?
                'byobu',
                'htop',
                'tree',
