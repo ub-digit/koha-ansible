@@ -622,12 +622,12 @@
       ansible.builtin.copy:
         remote_src: yes
         src: "{{ koha_home }}/debian/templates/{{ item.0 }}"
-        dest: "/etc/koha/sites/{{ koha_instance_name}}/{{ item.1 }}"
+        dest: "/etc/koha/sites/{{ koha_instance_name }}/{{ item.1 }}"
       loop: "{{ ['SIPconfig.xml', 'log4perl-site.conf.in']|zip(['SIPconfig.xml', 'log4perl.conf'])|list }}"
 
     - name: Replace __LOG_DIR__ in log4perl.conf
       ansible.builtin.replace:
-        dest: "/etc/koha/sites/{{ koha_instance_name}}/log4perl.conf"
+        dest: "/etc/koha/sites/{{ koha_instance_name }}/log4perl.conf"
         regexp: '__LOG_DIR__'
         replace: "/var/log/koha/{{ koha_instance_name }}"
 
@@ -715,7 +715,7 @@
         regexp: '<host>[^<]*</host>'
         replace: "<host>{{ smtp_host }}</host>"
 
-    - name: Set smtp_server/port  in koha-conf.xml
+    - name: Set smtp_server/port in koha-conf.xml
       ansible.builtin.replace:
         path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
         after: '<smtp_server>'
