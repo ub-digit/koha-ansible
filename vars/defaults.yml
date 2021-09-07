@@ -22,3 +22,15 @@ elasticsearch_data_dir: /mnt/elasticsearch
 get_print_data_api_key: todo # get from vault variable
 
 ansible_python_interpreter: /usr/bin/python3
+
+# GUB custom koha-conf.xml options
+
+koha_pg_database: marcdb
+koha_pg_hostname: 89.45.233.127
+koha_pg_port: 5432
+koha_pg_user: man_tuesday
+koha_pg_pass: "{{ vault_koha_pg_pass }}"
+koha_online_payments: 1
+koha_online_payment_exclude_patron_categories: BA|BE|BF|BK|BL|BM|BN|BU|EI|TN|TJ|PE
+koha_online_payment_info_url_en: https://www.ub.gu.se/en/borrow-and-log-in/borrowing-from-the-library
+koha_online_payment_info_url_sv: https://www.ub.gu.se/sv/lana-och-logga-in/lana-pa-biblioteket

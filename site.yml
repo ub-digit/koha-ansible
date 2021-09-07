@@ -4,6 +4,7 @@
     pip_install_packages:
       - name: docker
       - name: docker-compose
+      - name: PyMySQL
   vars_files:
     - vars/defaults.yml
     - vars/vault.yml
@@ -533,23 +534,45 @@
         dest: /etc/mysql/mariadb.conf.d/50-server.cnf
       notify: restart mysql
 
-    - name: Check if mariadb data directory exist
-      stat:
-        path: "{{ mariadb_data_dir }}"
-      register: mariadb_data
-# TODO: Replace dir
-#   - name: Write koha-sites.conf file
-#     template:
-#       src: koha-sites.conf.j2
-#       dest: /etc/koha/koha-sites.conf
-#       mode: 0644
+    - name: Enable mysql/mariadb service
+      ansible.builtin.service:
+        name: mariadb
+        enabled: yes
+        state: started
 
-#   - name: Write koha-conf-site.xml file
-#     template:
-#       src: koha-conf-site.xml.in.j2
-#       dest: /etc/koha/koha-conf-site.xml.in
-#       mode: 0644
-#
+    - name: Remove anonymous mariadb users
+      community.mysql.mysql_user:
+        name: ''
+        host_all: yes
+        config_file: /etc/mysql/koha-common.cnf
+        state: absent
+
+    - name: Set password for mariadb root users
+      community.mysql.mysql_user:
+        name: root
+        host_all: yes
+        update_password: always # this is the default
+        password: "{{ mariadb_root_password }}"
+        config_file: /etc/mysql/koha-common.cnf
+
+    - name: Set root password in koha-common.cnf (debian.cnf) # Don't know how else to handle this
+      ansible.builtin.replace:
+        path: "/etc/mysql/koha-common.cnf"
+        regexp: '^password =.*$'
+        replace: "password = {{ mariadb_root_password }}"
+
+    - name: Ensure koha database users
+      community.mysql.mysql_user:
+        name: "koha_{{ koha_instance_name }}"
+        host: "{{ item }}"
+        password: "{{ koha_db_password }}"
+        priv: "koha_{{ koha_instance_name }}.*:ALL"
+        config_file: /etc/mysql/koha-common.cnf
+        state: present
+      loop:
+        - '%'
+        - 'localhost'
+
     - name: Ensure Elasticsearch data directory
       ansible.builtin.file:
         path: "{{ elasticsearch_data_dir }}"
@@ -649,6 +672,30 @@
         name: "{{ ansible_user }}"
         append: yes
         groups: "{{ koha_instance_name }}-koha"
+
+    - name: Set GUB-specific configuration in koha-conf.xml
+      ansible.builtin.blockinfile:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        marker: '<!-- {mark} GUP custom config (ansible managed) -->'
+        insertafter: '^<config>$'
+        block: |
+          <pg_database>{{ koha_pg_database }}</pg_database>
+          <pg_hostname>{{ koha_pg_hostname }}</pg_hostname>
+          <pg_port>{{ koha_pg_port }}</pg_port>
+          <pg_user>{{ koha_pg_user }}</pg_user>
+          <pg_pass>{{ koha_pg_pass }}</pg_pass>
+          <online_payments>{{ koha_online_payments }}</online_payments>
+          <online_payment_portal_url>{{ koha_online_payment_portal_url }}</online_payment_portal_url>
+          <online_payment_exclude_patron_categories>{{ koha_online_payment_exclude_patron_categories }}</online_payment_exclude_patron_categories>
+          <online_payment_info_url_en>{{ koha_online_payment_info_url_en }}</online_payment_info_url_en>
+          <online_payment_info_url_sv>{{ koha_online_payment_info_url_sv }}</online_payment_info_url_sv>
+
+    - name: Set database password in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<pass>[^<]*</pass>'
+        replace: "<pass>{{ koha_db_password }}</pass>"
+      notify: restart memcached
 
     - name: Set dev_install in koha-conf.xml
       ansible.builtin.replace:
