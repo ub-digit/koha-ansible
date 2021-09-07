@@ -238,7 +238,7 @@
                'libgd-dev'
                ]
         state: latest
-        force: yes
+        force: no
         update_cache: yes
 
     # TODO: replace shell with command?
