@@ -904,12 +904,6 @@
         enabled: yes
         state: started
 
-    - name: Enable mysql/mariadb service
-      ansible.builtin.service:
-        name: mariadb
-        enabled: yes
-        state: started
-
   # TODO: Handlers for restarting plack/zipserver etc
   handlers:
     - name: restart apache
