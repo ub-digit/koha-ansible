@@ -243,6 +243,12 @@
         force: no
         update_cache: yes
 
+    - name: Checkout Koha repo
+      ansible.builtin.git:
+        repo: "{{ koha_repo_url }}"
+        dest: "{{ koha_repo_path }}"
+        version: "{{ koha_repo_version }}"
+
     # TODO: replace shell with command?
     - name: Install troublesome Perl modules (with failing tests)
       community.general.cpanm:
@@ -267,7 +273,7 @@
   #    ansible.builtin.shell: "cd {{ koha_home }} && cpanm --installdeps ."
     - name: Install Koha perl dependencies
       community.general.cpanm:
-        from_path: "{{ koha_home }}"
+        from_path: "{{ koha_repo_path }}"
         installdeps: yes
 
     - name: Add Java key
@@ -365,7 +371,7 @@
 
     - name: Copy Koha scripts
       ansible.builtin.copy:
-        src: "{{ koha_home }}/debian/scripts/"
+        src: "{{ koha_repo_path }}/debian/scripts/"
         dest: "/usr/sbin/"
         remote_src: yes
         mode: preserve # Should be fixed here https://github.com/Shrews/ansible/commit/3c1ca809614863aaa6b85d460be9846494cdb802 but still does not retain permissions, so fixing this manually below
@@ -431,7 +437,7 @@
     - name: Copy rest of unmanaged Koha config template files from release
       ansible.builtin.copy:
         remote_src: yes
-        src: "{{ koha_home }}/debian/templates/{{ item }}"
+        src: "{{ koha_repo_path }}/debian/templates/{{ item }}"
         dest: "/etc/koha/"
       loop:
         - log4perl-site.conf.in
@@ -465,7 +471,7 @@
     - name: Ensure Koha init script
       ansible.builtin.copy:
         remote_src: yes
-        src: "{{ koha_home }}/debian/koha-common.init"
+        src: "{{ koha_repo_path }}/debian/koha-common.init"
         dest: "/etc/init.d/koha-common"
         mode: 0755
 
@@ -593,21 +599,6 @@
       when: result.stdout == ""
       notify: restart apache
 
-#    - name: Update ummanaged included Apache config files
-#      ansible.builtin.copy:
-#        remote_src: yes
-#        src: "{{ koha_home }}/debian/templates/{{ item }}"
-#        dest: "/etc/koha/"
-#      loop:
-#        - apache-shared.conf
-#        - apache-shared-disable.conf
-#        - apache-shared-intranet.conf
-#        - apache-shared-intranet-plack.conf
-#        - apache-shared-opac.conf
-#        - apache-shared-opac-plack.conf
-#        - apache-site.conf.in
-#        - apache-site-https.conf.in
-#
     - name: Replace DocumentRoot path in apache-shared-intranet.conf and apache-shared-opac.conf
       ansible.builtin.replace:
         path: "/etc/koha/{{ item }}"
@@ -645,7 +636,7 @@
     - name: Update unmanaged Koha instance config files from current release
       ansible.builtin.copy:
         remote_src: yes
-        src: "{{ koha_home }}/debian/templates/{{ item.0 }}"
+        src: "{{ koha_repo_path }}/debian/templates/{{ item.0 }}"
         dest: "/etc/koha/sites/{{ koha_instance_name }}/{{ item.1 }}"
       loop: "{{ ['SIPconfig.xml', 'log4perl-site.conf.in']|zip(['SIPconfig.xml', 'log4perl.conf'])|list }}"
 

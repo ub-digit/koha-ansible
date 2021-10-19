@@ -1,4 +1,8 @@
 ---
+
+koha_repo_url: https://github.com/ub-digit/Koha-build.git
+koha_repo_path: "/home/{{ ansible_user }}/koha-repo"
+
 docker_install_compose: true
 #docker_compose_version: "1.29.2"
 docker_users: ["{{ ansible_user }}"]
