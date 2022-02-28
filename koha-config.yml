@@ -1,0 +1,192 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+    - vars/vault.yml
+  become: true
+  become_user: root
+  tasks:
+    # This needs to be done before trying to enable the cgi module
+    - name: Apache | MPM fix
+      apache2_module:
+        name: mpm_event
+        state: absent
+
+    - name: Apache | Disable default vhost
+      ansible.builtin.shell: a2dissite 000-default
+      notify: restart apache
+
+    - name: Apache | Set ports
+      template:
+        src: ports.conf.j2
+        dest: /etc/apache2/ports.conf
+        mode: 0644
+      notify: restart apache
+
+    - name: Apache | Enable needed modules
+      apache2_module:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - rewrite
+        - headers
+        - proxy_http
+        - cgi
+        - ssl
+      notify: restart apache
+
+    - name: Copy Koha scripts
+      ansible.builtin.copy:
+        src: "{{ koha_repo_path }}/debian/scripts/"
+        dest: "/usr/sbin/"
+        remote_src: yes
+        mode: preserve # Should be fixed here https://github.com/Shrews/ansible/commit/3c1ca809614863aaa6b85d460be9846494cdb802 but still does not retain permissions, so fixing this manually below
+
+    - name: Find all Koha scripts
+      find:
+        paths: "/usr/sbin/"
+        patterns: "koha-*"
+      register: scripts
+
+    - name: Ensure Koha scripts are executable
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: 0755
+      loop: "{{ scripts.files }}"
+
+#    - name: Replace koha-functions.sh path in scripts
+#      replace:
+#        path: "{{ item.path }}"
+#        regexp: '/usr/share/koha/bin/koha-functions.sh'
+#        replace: '{{ koha_home }}/debian/scripts/koha-functions.sh'
+#      with_items: "{{ scripts.files }}"
+#
+    - name: Fix koha-functions.sh path in scripts
+      ansible.builtin.shell: ls /usr/sbin | grep '^koha-' | xargs -I{ sed -i 's#/usr/share/koha/bin/koha-functions.sh#{{ koha_home }}/debian/scripts/koha-functions.sh#g' '/usr/sbin/{'
+
+    - name: Comment out check_apache_config (to avoid warning causing crash)
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-create'
+        regexp: 'check_apache_config\s*$'
+        replace: '#check_apache_config'
+
+    - name: Comment out create Zebra config files
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-create'
+        regexp: '((?:generate_config_file zebra)|(?:"/etc/koha/sites/\$name/zebra))'
+        replace: '#\1'
+
+    - name: Comment out start-zebra
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-create'
+        regexp: 'koha-zebra --start'
+        replace: '#koha-zebra --start'
+
+    # Special care will have to be taken with these files on new Koha realse
+    # deployments.  Will have to manually compare with new release templates
+    # and manually merge
+    - name: Copy manually manged Koha config template files
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/etc/{{ item }}"
+        dest: "/etc/koha/"
+      # worker-service???
+      loop:
+        - koha-conf-site.xml.in
+        - koha-common.conf
+        - koha-sites.conf
+        - koha-core.conf
+        - apache-site.conf.in
+
+    # Note: we do not use apache-site.conf.in since have modified
+    # apache-site.conf.in instead (to don't have to deal with koha-create
+    # trying to perform letsencrypt magick etc if run with ssl option)
+    - name: Copy rest of unmanaged Koha config template files from release
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ koha_repo_path }}/debian/templates/{{ item }}"
+        dest: "/etc/koha/"
+      loop:
+        - log4perl-site.conf.in
+        - SIPconfig.xml
+        - plack.psgi
+        - apache-shared.conf
+        - apache-shared-disable.conf
+        - apache-shared-intranet.conf
+        - apache-shared-intranet-plack.conf
+        - apache-shared-opac.conf
+        - apache-shared-opac-plack.conf
+        - apache-site-https.conf.in
+
+    - name: Write custom apache config
+      ansible.builtin.template:
+        src: apache-shared-custom.conf.j2
+        dest: /etc/koha/apache-shared-custom.conf
+
+    - name: Ensure /etc/koha/passwd
+      template:
+        src: koha_passwd.j2
+        dest: /etc/koha/passwd
+        mode: 0644
+
+    - name: Ensure /etc/default/koha-common
+      template:
+        src: koha-common.j2
+        dest: /etc/default/koha-common
+        mode: 0644
+
+    - name: Ensure Koha init script
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ koha_repo_path }}/debian/koha-common.init"
+        dest: "/etc/init.d/koha-common"
+        mode: 0755
+
+    - name: Replace koha-functions.sh path in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '/usr/share/koha/bin/koha-functions.sh'
+        replace: "{{ koha_home }}/debian/scripts/koha-functions.sh"
+
+    - name: Comment out package check in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '(\[ -x /usr/sbin/koha-zebra)'
+        replace: '# \1'
+
+    - name: Comment out koha-zebra in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '(\skoha-zebra\s)'
+        replace: '#\1'
+
+    - name: Comment out zebra_status in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '(\szebra_status\s)'
+        replace: '#\1'
+
+    # Can't figure out where these are created, at least not in koha-common package, koha-create (or koha-create-dirs)
+    # koha-common.dirs
+    - name: Create /etc/koha/sites directory
+      ansible.builtin.file:
+        path: /etc/koha/sites
+        mode: 0755
+        state: directory
+
+    - name: Create /var/log/koha directory
+      ansible.builtin.file:
+        path: /var/log/koha
+        mode: 0755
+        state: directory
+
+    - name: Ensure koha_home directory
+      ansible.builtin.file:
+        path: "{{ koha_home }}"
+        mode: 0755
+        state: directory
+  handlers:
+    - name: restart apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
+      become: yes

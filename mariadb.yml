@@ -1,0 +1,74 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+    - vars/vault.yml
+  become: true
+  become_user: root
+  tasks:
+    - name: Create symlink debian.cnf -> koha-common.cnf
+      ansible.builtin.file:
+        src: /etc/mysql/debian.cnf
+        dest: /etc/mysql/koha-common.cnf
+        state: link
+
+    - name: Check if mariadb data directory exist
+      stat:
+        path: "{{ mariadb_data_dir }}"
+      register: mariadb_data
+
+    - name: Ensure mysql data directory exists and contain system tables
+      ansible.builtin.shell: "cp -a /var/lib/mysql {{ mariadb_data_dir }}"
+      when: mariadb_data.isdir is not defined
+      notify: restart mysql
+
+    - name: Write mariadb config
+      ansible.builtin.template:
+        src: mariadb-50-server.cnf.j2
+        dest: /etc/mysql/mariadb.conf.d/50-server.cnf
+      notify: restart mysql
+
+    - name: Enable mysql/mariadb service
+      ansible.builtin.service:
+        name: mariadb
+        enabled: yes
+        state: started
+
+    - name: Remove anonymous mariadb users
+      community.mysql.mysql_user:
+        name: ''
+        host_all: yes
+        config_file: /etc/mysql/koha-common.cnf
+        state: absent
+
+    - name: Set password for mariadb root users
+      community.mysql.mysql_user:
+        name: root
+        host_all: yes
+        update_password: always # this is the default
+        password: "{{ mariadb_root_password }}"
+        config_file: /etc/mysql/koha-common.cnf
+
+    - name: Set root password in koha-common.cnf (debian.cnf) # Don't know how else to handle this
+      ansible.builtin.replace:
+        path: "/etc/mysql/koha-common.cnf"
+        regexp: '^password =.*$'
+        replace: "password = {{ mariadb_root_password }}"
+
+    - name: Ensure koha database users
+      community.mysql.mysql_user:
+        name: "koha_{{ koha_instance_name }}"
+        host: "{{ item }}"
+        password: "{{ koha_db_password }}"
+        priv: "koha_{{ koha_instance_name }}.*:ALL"
+        config_file: /etc/mysql/koha-common.cnf
+        state: present
+      loop:
+        - '%'
+        - 'localhost'
+  handlers:
+    - name: restart mysql
+      ansible.builtin.service:
+        name: mariadb
+        state: restarted
+      become: yes

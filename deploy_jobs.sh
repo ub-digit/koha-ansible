@@ -14,6 +14,7 @@ auto-enable-printer.yml \
 edifact.yml \
 fetchlibris.yml \
 gobi.yml \
+mailhog.yml \
 kvinnsam-libris2primo.yml \
 libris-oai-import.yml \
 loadlibris.yml \

@@ -1,0 +1,21 @@
+---
+- hosts: all
+  vars:
+    pip_install_packages:
+      - name: docker
+      - name: docker-compose
+  roles:
+    - geerlingguy.pip
+    - geerlingguy.docker
+  tasks:
+    # Deploy mailhog docker service
+    #
+    - name: Ensure mailhog docker-compose directory
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/mailhog"
+        dest: "/home/{{ ansible_user }}/"
+
+    - name: Run mailhog service
+      community.docker.docker_compose:
+        project_src: "/home/{{ ansible_user }}/mailhog"
+        state: present

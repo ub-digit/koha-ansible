@@ -1,0 +1,332 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+    - vars/vault.yml
+  become: true
+  become_user: root
+  tasks:
+    - name: Check for instance existence
+      ansible.builtin.shell: koha-list | grep {{ koha_instance_name }}
+      register: result
+      ignore_errors: yes
+
+    - name: Create Koha instance
+      ansible.builtin.command: koha-create --create-db {{ koha_instance_name }}
+      when: result.stdout == ""
+      notify: restart apache
+
+    - name: Replace DocumentRoot path in apache-shared-intranet.conf and apache-shared-opac.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/{{ item }}"
+        regexp: '^DocumentRoot [^ ]+\s*$'
+        replace: "DocumentRoot {{ koha_home }}/koha-tmpl"
+      loop:
+        - apache-shared-intranet.conf
+        - apache-shared-opac.conf
+
+    - name: Replace ScriptAlias path in apache-shared-intranet.conf and apache-shared-opac.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/{{ item }}"
+        regexp: '^(ScriptAlias [^ ]+) "[^"]+/cgi-bin/([^"]*)"'
+        replace: "\\1 \"{{ koha_home }}/\\2\""
+      loop:
+        - apache-shared-intranet.conf
+        - apache-shared-opac.conf
+
+    - name: Replace API paths in apache-shared-intranet.conf and apache-shared-opac.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/{{ item }}"
+        regexp: '/usr/share/koha/api'
+        replace: "{{ koha_home}}/api"
+      loop:
+        - apache-shared-intranet.conf
+        - apache-shared-opac.conf
+
+    - name: Replace PERL5LIB path in apache-shared.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/apache-shared.conf"
+        regexp: '^SetEnv PERL5LIB "[^"]+"\s*$'
+        replace: "SetEnv PERL5LIB \"{{ koha_home }}\""
+
+    # TODO: enable SIP!
+    - name: Update unmanaged Koha instance config files from current release
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ koha_repo_path }}/debian/templates/{{ item.0 }}"
+        dest: "/etc/koha/sites/{{ koha_instance_name }}/{{ item.1 }}"
+      loop: "{{ ['SIPconfig.xml', 'log4perl-site.conf.in']|zip(['SIPconfig.xml', 'log4perl.conf'])|list }}"
+
+    - name: Replace __LOG_DIR__ in log4perl.conf
+      ansible.builtin.replace:
+        dest: "/etc/koha/sites/{{ koha_instance_name }}/log4perl.conf"
+        regexp: '__LOG_DIR__'
+        replace: "/var/log/koha/{{ koha_instance_name }}"
+
+    - name: Copy Apache certificate
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/secret/koha.pem"
+        dest: /etc/ssl/certs/koha.pem
+        group: "{{ koha_instance_name }}-koha" #??
+
+    - name: Copy Apache certificate private key
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/secret/koha.key"
+        dest: /etc/ssl/private/koha.key
+        owner: root
+        group: root
+
+    - name: Add ansible user to koha instance group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        append: yes
+        groups: "{{ koha_instance_name }}-koha"
+
+    - name: Set GUB-specific configuration in koha-conf.xml
+      ansible.builtin.blockinfile:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        marker: '<!-- {mark} GUP custom config (ansible managed) -->'
+        insertafter: '^<config>$'
+        block: |
+          <pg_database>{{ koha_pg_database }}</pg_database>
+          <pg_hostname>{{ koha_pg_hostname }}</pg_hostname>
+          <pg_port>{{ koha_pg_port }}</pg_port>
+          <pg_user>{{ koha_pg_user }}</pg_user>
+          <pg_pass>{{ koha_pg_pass }}</pg_pass>
+          <online_payments>{{ koha_online_payments }}</online_payments>
+          <online_payment_portal_url>{{ koha_online_payment_portal_url }}</online_payment_portal_url>
+          <online_payment_exclude_patron_categories>{{ koha_online_payment_exclude_patron_categories }}</online_payment_exclude_patron_categories>
+          <online_payment_info_url_en>{{ koha_online_payment_info_url_en }}</online_payment_info_url_en>
+          <online_payment_info_url_sv>{{ koha_online_payment_info_url_sv }}</online_payment_info_url_sv>
+
+    - name: Set database password in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<pass>[^<]*</pass>'
+        replace: "<pass>{{ koha_db_password }}</pass>"
+      notify: restart memcached
+
+    - name: Set dev_install in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<dev_install>0</dev_install>'
+        replace: '<dev_install>1</dev_install>'
+      notify: restart memcached
+      #when: result.stdout == ""
+
+    - name: Set enable_plugins in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<enable_plugins>0</enable_plugins>'
+        replace: '<enable_plugins>1</enable_plugins>'
+      notify: restart memcached
+
+    - name: Set intranetdir in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<intranetdir>[^<]+</intranetdir>'
+        replace: "<intranetdir>{{ koha_home }}</intranetdir>"
+      notify: restart memcached
+      #when: result.stdout == ""
+
+    - name: Set intrahtdocs in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<intrahtdocs>[^<]+</intrahtdocs>'
+        replace: "<intrahtdocs>{{ koha_home }}/koha-tmpl/intranet-tmpl</intrahtdocs>"
+      notify: restart memcached
+      #when: result.stdout == ""
+
+    - name: Set opacdir in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<opacdir>[^<]+</opacdir>'
+        replace: "<opacdir>{{ koha_home }}/opac</opacdir>"
+      notify: restart memcached
+      #when: result.stdout == ""
+
+    - name: Set opachtdocs in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<opachtdocs>[^<]+</opachtdocs>'
+        replace: "<opachtdocs>{{ koha_home }}/koha-tmpl/opac-tmpl</opachtdocs>"
+      notify: restart memcached
+      #when: result.stdout == ""
+
+    - name: Set included in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        regexp: '<includes>[^<]+</includes>'
+        replace: "<includes>{{ koha_home }}/koha-tmpl/intranet-tmpl/prog/en/includes</includes>"
+      notify: restart memcached
+      #when: result.stdout == ""
+
+    # TODO: Create loop for this to avoid duplication, possible?
+    # TODO: restart plack/memcached?
+    - name: Set smtp_server/host in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        after: '<smtp_server>'
+        before: '</smtp_server>'
+        regexp: '<host>[^<]*</host>'
+        replace: "<host>{{ smtp_host }}</host>"
+
+    - name: Set smtp_server/port in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        after: '<smtp_server>'
+        before: '</smtp_server>'
+        regexp: '<port>[^<]*</port>'
+        replace: "<port>{{ smtp_port }}</port>"
+
+    - name: Set smtp_server/ssl_mode in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        after: '<smtp_server>'
+        before: '</smtp_server>'
+        regexp: '<ssl_mode>[^<]*</ssl_mode>'
+        replace: "<ssl_mode>{{ smtp_ssl_mode }}</ssl_mode>"
+
+    - name: Set smtp_server/user_name  in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        after: '<smtp_server>'
+        before: '</smtp_server>'
+        regexp: '<user_name>[^<]*</user_name>'
+        replace: "<user_name>{{ smtp_username }}</user_name>"
+
+    - name: Set smtp_server/password  in koha-conf.xml
+      ansible.builtin.replace:
+        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
+        after: '<smtp_server>'
+        before: '</smtp_server>'
+        regexp: '<password>[^<]*</password>'
+        replace: "<password>{{ smtp_password }}</password>"
+
+    # Hack
+    - name: Set smtp host in system perl Sendmail.pm
+      ansible.builtin.replace:
+        path: /usr/share/perl5/Mail/Sendmail.pm
+        after: '# \*+ Configuration you may want to change \*+'
+        before: '\);\s+# \*+'
+        regexp: "^(\\s+'smtp'\\s+=>\\s+).*$"
+        replace: '\1[ qw( {{ smtp_host }} ) ],'
+
+    - name: Set smtp port in system perl Sendmail.pm
+      ansible.builtin.replace:
+        path: /usr/share/perl5/Mail/Sendmail.pm
+        after: '# \*+ Configuration you may want to change \*+'
+        before: '\);\s+# \*+'
+        #regexp: "^(\\s+'port'\\s+=>\\s+).*$"
+        #replace: '\1{{ smtp_port }},'
+        regexp: "^(\\s+'port'\\s+=>).*$"
+        replace: '\1 {{ smtp_port }},' # Weird behavior no space between \1{{ will cause issues
+
+    - name: Copy cronjobs (cron.d)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/cron/koha-common.cron.d"
+        dest: /etc/cron.d/koha
+      when: result.stdout == ""
+
+    - name: Copy cronjobs (cron.daily)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/cron/koha-common.cron.daily"
+        dest: /etc/cron.daily/koha
+      when: result.stdout == ""
+
+    - name: Copy cronjobs (cron.hourly)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/cron/koha-common.cron.hourly"
+        dest: /etc/cron.hourly/koha
+      when: result.stdout == ""
+
+    - name: Comment out zebraqueue job
+      ansible.builtin.replace:
+        path: /etc/cron.daily/koha
+        regexp: '(koha-foreach.+?--zebraqueue)'
+        replace: '#\1'
+      when: result.stdout == ""
+
+    - name: Adjust Koha paths for cron-scripts
+      ansible.builtin.replace:
+        path: "{{ item }}"
+        regexp: '/usr/share/koha/bin'
+        replace: '{{ koha_home }}/misc'
+      loop:
+        - /etc/cron.d/koha
+        - /etc/cron.daily/koha
+        - /etc/cron.hourly/koha
+      when: result.stdout == ""
+    
+    # Translation files
+    - name: Copy translation files
+      ansible.builtin.copy:
+        dest: "{{ koha_po_files_path }}"
+        src: "{{ playbook_dir }}/files/po/"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}" # group?
+
+    # GUB-scripts
+    - name: Write /usr/local/sbin/koha-database-backup.sh
+      template:
+        src: koha-database-backup.sh.j2
+        dest: /usr/local/sbin/koha-database-backup.sh
+        mode: 0544
+
+    - name: Ensure log directory for koha-database-backup.sh
+      ansible.builtin.file:
+        path: "{{ koha_database_backup_log_dir }}"
+        mode: 0755
+        state: directory
+
+    - name: Ensure data directory for koha-database-backup.sh
+      ansible.builtin.file:
+        path: "{{ koha_database_backup_data_dir }}"
+        mode: 0755
+        state: directory
+
+    - name: Schedule cron job for koha-database-backup.sh
+      ansible.builtin.cron:
+        name: "koha-database-backup"
+        minute: "00"
+        hour: "23"
+        job: "/usr/local/sbin/koha-database-backup.sh >> {{ koha_database_backup_log_dir }}/backup.log 2>&1"
+        state: "{{ 'present' if koha_database_backup_cron_enabled else 'absent' }}"
+
+    - name: Schedule cron job for gub_edifact.pl
+      ansible.builtin.cron:
+        name: koha-gub-edifact
+        minute: "00"
+        hour: "22"
+        job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} 2>&1"
+        state: "{{ 'present' if gup_edifact_cron_enabled else 'absent' }}"
+
+    - name: Write log config for koha-plugin-marc-import
+      ansible.builtin.template:
+        src: koha-plugin-marc-import-log4perl.conf.j2
+        dest: "/etc/koha/sites/{{ koha_instance_name }}/koha-plugin-marc-import-log4perl.conf"
+
+    # Hack to install from git reposity, works but ugly as hell
+    # TODO: checkout as ansible_user to be consistent?
+    - name: Checkout MimeMailSender repo, required by marc import plugin
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/Log-Dispatch-Email-MimeMailSender.git
+        dest: "/home/{{ ansible_user}}/Log-Dispatch-Email-MimeMailSender"
+        version: master
+
+    - name: Inject MIMEMailSender in perl lib path
+      ansible.builtin.file:
+        src: "/home/{{ ansible_user}}/Log-Dispatch-Email-MimeMailSender/lib/Log/Dispatch/Email/MIMEMailSender.pm"
+        dest: "/usr/share/perl5/Log/Dispatch/Email/MIMEMailSender.pm"
+        state: link
+  handlers:
+    - name: restart apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
+      become: yes
+    - name: restart memcached
+      ansible.builtin.service:
+        name: memcached
+        state: restarted
+      become: yes

@@ -2,15 +2,12 @@
 - hosts: all
   vars:
     pip_install_packages:
-      - name: docker
-      - name: docker-compose
       - name: PyMySQL
   vars_files:
     - vars/defaults.yml
     - vars/vault.yml
   roles:
     - geerlingguy.pip
-    - geerlingguy.docker
   become: true
   become_user: root
   tasks:
@@ -66,7 +63,7 @@
                'libbusiness-issn-perl',
                'libbytes-random-secure-perl',
                'python3-apt', # Warning in ansible-role-pip
-               'python-mysqldb', # Required for ansible mysql collection
+               'python3-mysqldb', # Required for ansible mysql collection
                'libpq-dev', # Required for DBD::Pg
                #'libcache-memcached-fast-safe-perl',
 #               'libcache-memcached-perl',
@@ -214,7 +211,7 @@
                'gettext',
                'xsltproc',
                'docbook-xsl',
-               'ttf-dejavu',
+               'fonts-dejavu',
                'libxml2-utils',
                'bash-completion',
                'libtest-simple-perl',
@@ -896,18 +893,6 @@
         hour: "22"
         job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} 2>&1"
         state: "{{ 'present' if gup_edifact_cron_enabled else 'absent' }}"
-
-    # Deploy mailhog docker service
-    #
-    - name: Ensure mailhog docker-compose directory
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/mailhog"
-        dest: "/home/{{ ansible_user }}/"
-
-    - name: Run mailhog service
-      community.docker.docker_compose:
-        project_src: "/home/{{ ansible_user }}/mailhog"
-        state: present
 
     - name: Write log config for koha-plugin-marc-import
       ansible.builtin.template:
