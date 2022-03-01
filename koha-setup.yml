@@ -12,6 +12,12 @@
         dest: "{{ koha_repo_path }}"
         version: "{{ koha_repo_version }}"
 
+    - name: Disable Net::Z3950::ZOOM from cpan. Installed via packages.
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .Net::Z3950::ZOOM., .1.16.;\s*)$'
+        replace: "# \\1"
+
     # TODO: replace shell with command?
     - name: Install troublesome Perl modules (with failing tests)
       community.general.cpanm:

@@ -97,6 +97,14 @@
         - koha-core.conf
         - apache-site.conf.in
 
+    # Special care will have to be taken with these files on new Koha realse
+    # deployments.  Will have to manually compare with new release templates
+    # and manually merge
+    - name: Copy manually manged Koha config template for apache
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/etc/apache-site.conf.in{{ apache_site_suffix }}"
+        dest: "/etc/koha/apache-site.conf.in"
+
     # Note: we do not use apache-site.conf.in since have modified
     # apache-site.conf.in instead (to don't have to deal with koha-create
     # trying to perform letsencrypt magick etc if run with ssl option)

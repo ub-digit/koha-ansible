@@ -12,7 +12,7 @@
       ignore_errors: yes
 
     - name: Create Koha instance
-      ansible.builtin.command: koha-create --create-db {{ koha_instance_name }}
+      ansible.builtin.command: koha-create --use-db --dbhost {{ koha_db_host }} --database koha_{{ koha_instance_name }} --elasticsearch-server {{ koha_elasticsearch_server }} {{ koha_instance_name }}
       when: result.stdout == ""
       notify: restart apache
 
