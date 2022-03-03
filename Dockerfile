@@ -27,4 +27,8 @@ RUN ansible-playbook -i devbox koha-setup.yml
 COPY . /install/
 RUN mv devbox/vault.yml vars/vault.yml
 RUN ansible-playbook -i devbox koha-config.yml
-# RUN ansible-playbook -i devbox koha-instance-setup.yml
+RUN ansible-playbook -i devbox koha-instance-setup.yml
+RUN chown -R koha-koha:koha-koha /home/apps/koha-repo
+WORKDIR /home/apps/koha-repo
+ENV SHELL=/bin/bash
+CMD ["apachectl", "-DFOREGROUND", "-e", "debug"]

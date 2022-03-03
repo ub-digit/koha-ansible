@@ -14,7 +14,11 @@ Alias "/intranet-tmpl/prog/img/favicon.ico" "{{ koha_home }}/koha-tmpl/intranet-
 
 <Location />
   Order deny,allow
+  {% if environment_name == "devbox" %}
+  Allow from all
+  {% else %}
   Deny from all
+  {% endif %}
 
   Allow from 130.241.0.0/16
 
@@ -36,7 +40,11 @@ Alias "/intranet-tmpl/prog/img/favicon.ico" "{{ koha_home }}/koha-tmpl/intranet-
 </Location>
 <Location /cgi-bin>
   Order deny,allow
+  {% if environment_name == "devbox" %}
+  Allow from all
+  {% else %}
   Deny from all
+  {% endif %}
 
   Allow from 130.241.0.0/16
 

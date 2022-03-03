@@ -12,7 +12,7 @@
       ignore_errors: yes
 
     - name: Create Koha instance
-      ansible.builtin.command: koha-create --use-db --dbhost {{ koha_db_host }} --database koha_{{ koha_instance_name }} --elasticsearch-server {{ koha_elasticsearch_server }} {{ koha_instance_name }}
+      ansible.builtin.command: koha-create --use-db --memcached-servers {{ koha_memcached_servers }} --dbhost {{ koha_db_host }} --database koha_{{ koha_instance_name }} --elasticsearch-server {{ koha_elasticsearch_server }} {{ koha_instance_name }}
       when: result.stdout == ""
       notify: restart apache
 
@@ -47,7 +47,7 @@
       ansible.builtin.replace:
         path: "/etc/koha/apache-shared.conf"
         regexp: '^SetEnv PERL5LIB "[^"]+"\s*$'
-        replace: "SetEnv PERL5LIB \"{{ koha_home }}\""
+        replace: "SetEnv PERL5LIB \"{{ perl5lib_paths }}\""
 
     # TODO: enable SIP!
     - name: Update unmanaged Koha instance config files from current release
@@ -68,6 +68,7 @@
         src: "{{ playbook_dir }}/files/secret/koha.pem"
         dest: /etc/ssl/certs/koha.pem
         group: "{{ koha_instance_name }}-koha" #??
+      when: environment_name != 'devbox'
 
     - name: Copy Apache certificate private key
       ansible.builtin.copy:
@@ -75,6 +76,7 @@
         dest: /etc/ssl/private/koha.key
         owner: root
         group: root
+      when: environment_name != 'devbox'
 
     - name: Add ansible user to koha instance group
       ansible.builtin.user:
