@@ -15,10 +15,10 @@ IMAGE_ELASTICSEARCH_INTER=elasticsearch:inter1
 IMAGE_ELASTICSEARCH_FINAL=elasticsearch:1
 IMAGE_MARIADB_FINAL=mariadb:1
 
+sudo rm -Rf "./data/build"
 docker build -t $IMAGE_KOHA .
 docker build -f Dockerfile.elasticsearch -t $IMAGE_ELASTICSEARCH_INTER .
 
-sudo rm -Rf "./data/build"
 mkdir -p $ELASTICSEARCH_DATADIR
 mkdir -p $MARIADB_DATADIR
 docker-compose -f docker-compose.yml -f docker-compose.build.yml down

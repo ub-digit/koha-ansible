@@ -1,0 +1,9 @@
+version: '3.5'
+
+services:
+  koha-devbox:
+    volumes:
+      - "$KOHA_REPO:/home/apps/koha-repo"
+    ports:
+      - "7300:80"
+      - "7301:8080"

@@ -1,9 +1,17 @@
+{% if environment_name == "devbox" %}
+Alias "/intranet-tmpl/prog/img/background-image.png" "/home/{{ ansible_user }}/img/background-image-{{ environment_name }}.png"
+{% else %}
 Alias "/intranet-tmpl/prog/img/background-image.png" "{{ koha_home }}/koha-tmpl/intranet-tmpl/prog/img/background-image-{{ environment_name }}.png"
+{% endif %}
 #<Directory {{ koha_home }}/koha-tmpl/intranet-tmpl/prog/img/background-image-{{ environment_name }}.png>
 #  Require all granted
 #</Directory>
 
+{% if environment_name == "devbox" %}
+Alias "/intranet-tmpl/prog/img/favicon.ico" "/home/{{ ansible_user }}/img/favicon-{{ environment_name }}.ico"
+{% else %}
 Alias "/intranet-tmpl/prog/img/favicon.ico" "{{ koha_home }}/koha-tmpl/intranet-tmpl/prog/img/favicon-{{ environment_name }}.ico"
+{% endif %}
 #<Directory {{ koha_home }}/koha-tmpl/intranet-tmpl/prog/img/favicon-{{ environment_name }}.ico>
 #  Require all granted
 #</Directory>
@@ -12,13 +20,15 @@ Alias "/intranet-tmpl/prog/img/favicon.ico" "{{ koha_home }}/koha-tmpl/intranet-
   Require all granted
 </Directory>
 
+{% if environment_name == "devbox" %}
+<Directory "/home/{{ ansible_user }}/img">
+  Require all granted
+</Directory>
+{% else %}
+
 <Location />
   Order deny,allow
-  {% if environment_name == "devbox" %}
-  Allow from all
-  {% else %}
   Deny from all
-  {% endif %}
 
   Allow from 130.241.0.0/16
 
@@ -40,11 +50,7 @@ Alias "/intranet-tmpl/prog/img/favicon.ico" "{{ koha_home }}/koha-tmpl/intranet-
 </Location>
 <Location /cgi-bin>
   Order deny,allow
-  {% if environment_name == "devbox" %}
-  Allow from all
-  {% else %}
   Deny from all
-  {% endif %}
 
   Allow from 130.241.0.0/16
 
@@ -64,3 +70,4 @@ Alias "/intranet-tmpl/prog/img/favicon.ico" "{{ koha_home }}/koha-tmpl/intranet-
   # xgudav
   Allow from 188.151.49.233
 </Location>
+{% endif %}
