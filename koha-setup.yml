@@ -11,6 +11,7 @@
         repo: "{{ koha_repo_url }}"
         dest: "{{ koha_repo_path }}"
         version: "{{ koha_repo_version }}"
+        force: yes
 
     - name: Disable Net::Z3950::ZOOM from cpan. Installed via packages.
       ansible.builtin.replace:
@@ -46,6 +47,7 @@
         - JSON::Validator
         - JSON::Validator::OpenAPI::Mojolicious
         - Cache::Memcached::Fast::Safe
+        - DBD::mysql
 
     - name: Install dependecies not included in cpanfile
       community.general.cpanm:

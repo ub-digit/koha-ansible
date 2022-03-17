@@ -39,9 +39,9 @@
                'htop',
                'tree',
                'libstring-similarity-perl', #??
-               'mariadb-server',
                'apt-transport-https',
                'cpanminus',
+               'libmariadb-dev-compat',
                'dh-make-perl',
                'git',
                'git-email',
