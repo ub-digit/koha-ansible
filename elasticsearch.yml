@@ -14,26 +14,26 @@
     - name: Add Java repository
       ansible.builtin.apt_repository:
        #repo: ppa:linuxuprising/java
-       repo: deb http://ppa.launchpad.net/linuxuprising/java/ubuntu bionic main
+       repo: deb http://ppa.launchpad.net/linuxuprising/java/ubuntu focal main
        update_cache: yes
        state: present
 
     - name: Set Java licence as accepted
       debconf:
-        name: oracle-java16-installer
-        question: shared/accepted-oracle-license-v1-2
+        name: oracle-java17-installer
+        question: shared/accepted-oracle-license-v1-3
         value: 'true'
         vtype: 'select'
 
     - name: Install Java
       apt:
-        name: oracle-java16-installer
+        name: oracle-java17-installer
         state: latest
         update_cache: yes
 
     - name: Set Java version as default
       apt:
-        name: oracle-java16-set-default
+        name: oracle-java17-set-default
         state: latest
 
     - name: Add Elasticsearch key
@@ -69,7 +69,7 @@
       community.general.elasticsearch_plugin:
         name: analysis-icu
         state: present
-        
+
     - name: Ensure Elasticsearch data directory
       ansible.builtin.file:
         path: "{{ elasticsearch_data_dir }}"
