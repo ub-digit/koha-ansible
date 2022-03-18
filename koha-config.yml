@@ -193,6 +193,7 @@
         path: "{{ koha_home }}"
         mode: 0755
         state: directory
+      become_user: "{{ ansible_user }}"
   handlers:
     - name: restart apache
       ansible.builtin.service:
