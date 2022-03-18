@@ -190,7 +190,7 @@
 
     - name: Ensure koha_home directory
       ansible.builtin.file:
-        path: "{{ koha_home }}"
+        path: "{{ koha_home | dirname }}"
         mode: 0755
         state: directory
       become_user: "{{ ansible_user }}"
