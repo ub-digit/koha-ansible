@@ -58,11 +58,12 @@
 #      replace:
 #        path: "{{ item.path }}"
 #        regexp: '/usr/share/koha/bin/koha-functions.sh'
-#        replace: '{{ koha_home }}/debian/scripts/koha-functions.sh'
+#        replace: '/usr/sbin/koha-functions.sh'
 #      with_items: "{{ scripts.files }}"
-#
+
+# This is way faster
     - name: Fix koha-functions.sh path in scripts
-      ansible.builtin.shell: ls /usr/sbin | grep '^koha-' | xargs -I{ sed -i 's#/usr/share/koha/bin/koha-functions.sh#{{ koha_home }}/debian/scripts/koha-functions.sh#g' '/usr/sbin/{'
+      ansible.builtin.shell: ls /usr/sbin | grep '^koha-' | xargs -I{ sed -i 's#/usr/share/koha/bin/koha-functions.sh#/usr/sbin/koha-functions.sh#g' '/usr/sbin/{'
 
     - name: Comment out check_apache_config (to avoid warning causing crash)
       ansible.builtin.replace:
@@ -153,7 +154,7 @@
       ansible.builtin.replace:
         path: "/etc/init.d/koha-common"
         regexp: '/usr/share/koha/bin/koha-functions.sh'
-        replace: "{{ koha_home }}/debian/scripts/koha-functions.sh"
+        replace: "/usr/sbin/koha-functions.sh"
 
     - name: Comment out package check in Koha init script
       ansible.builtin.replace:
