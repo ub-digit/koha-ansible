@@ -65,6 +65,7 @@
                'python3-apt', # Warning in ansible-role-pip
                'python3-mysqldb', # Required for ansible mysql collection
                'libpq-dev', # Required for DBD::Pg
+               'libnet-z3950-zoom-perl',
                #'libcache-memcached-fast-safe-perl',
 #               'libcache-memcached-perl',
 #               'libcgi-compile-perl',

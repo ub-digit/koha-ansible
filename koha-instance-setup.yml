@@ -6,15 +6,39 @@
   become: true
   become_user: root
   tasks:
+
     - name: Check for instance existence
       ansible.builtin.shell: koha-list | grep {{ koha_instance_name }}
       register: result
       ignore_errors: yes
 
+    - name: Write apache site config template if creating new instance so that koha-create does not complain
+      ansible.builtin.template:
+        src: apache-site.conf.in.j2
+        dest: /etc/koha/apache-site.conf.in
+      when: result.stdout == ""
+
     - name: Create Koha instance
       ansible.builtin.command: koha-create --use-db --memcached-servers {{ koha_memcached_servers }} --dbhost {{ koha_db_host }} --database koha_{{ koha_instance_name }} --elasticsearch-server {{ koha_elasticsearch_server }} {{ koha_instance_name }}
       when: result.stdout == ""
       notify: restart apache
+
+    - name: Overwrite apache site configuration
+      ansible.builtin.template:
+        src: apache-site.conf.in.j2
+        dest: "/etc/apache2/sites-enabled/{{ koha_instance_name }}.conf"
+      notify: restart apache
+
+    - name: Create empty log files with the correct owner
+      ansible.builtin.file:
+        mode: 0644
+        path: "/var/log/koha/{{ koha_instance_name }}/{{ item }}"
+        owner: "{{ koha_instance_name }}-koha"
+        group: "{{ koha_instance_name }}-koha"
+        state: touch
+      loop:
+        - intranet-error.log
+        - opac-error.log
 
     - name: Replace DocumentRoot path in apache-shared-intranet.conf and apache-shared-opac.conf
       ansible.builtin.replace:
@@ -259,7 +283,7 @@
         - /etc/cron.daily/koha
         - /etc/cron.hourly/koha
       when: result.stdout == ""
-    
+
     # Translation files
     - name: Copy translation files
       ansible.builtin.copy:
