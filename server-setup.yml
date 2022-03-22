@@ -14,7 +14,7 @@
 
     - name: Install gnupg
       apt:
-        name: gnupg
+        name: gnupg2
         state: present
         update_cache: yes
 

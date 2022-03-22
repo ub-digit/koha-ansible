@@ -7,9 +7,9 @@
   roles:
     - geerlingguy.pip
     - geerlingguy.docker
+  become: true
   tasks:
     # Deploy mailhog docker service
-    #
     - name: Ensure mailhog docker-compose directory
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/mailhog"
