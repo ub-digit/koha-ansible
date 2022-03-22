@@ -252,26 +252,22 @@
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/cron/koha-common.cron.d"
         dest: /etc/cron.d/koha
-      when: result.stdout == ""
 
     - name: Copy cronjobs (cron.daily)
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/cron/koha-common.cron.daily"
         dest: /etc/cron.daily/koha
-      when: result.stdout == ""
 
     - name: Copy cronjobs (cron.hourly)
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/cron/koha-common.cron.hourly"
         dest: /etc/cron.hourly/koha
-      when: result.stdout == ""
 
     - name: Comment out zebraqueue job
       ansible.builtin.replace:
         path: /etc/cron.daily/koha
         regexp: '(koha-foreach.+?--zebraqueue)'
         replace: '#\1'
-      when: result.stdout == ""
 
     - name: Adjust Koha paths for cron-scripts
       ansible.builtin.replace:
@@ -282,7 +278,6 @@
         - /etc/cron.d/koha
         - /etc/cron.daily/koha
         - /etc/cron.hourly/koha
-      when: result.stdout == ""
 
     # Translation files
     - name: Copy translation files
