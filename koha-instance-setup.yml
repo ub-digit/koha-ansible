@@ -6,17 +6,26 @@
   become: true
   become_user: root
   tasks:
+    - name: Set koha_conf_dir
+      set_fact:
+        koha_conf_dir: "/etc/koha/sites/{{ koha_instance_name }}"
 
     - name: Check for instance existence
       ansible.builtin.shell: koha-list | grep {{ koha_instance_name }}
       register: result
       ignore_errors: yes
 
-    - name: Write apache site config template if creating new instance so that koha-create does not complain
+    - name: Write apache site config template if creating new instance so koha-create doesn't complain
       ansible.builtin.template:
         src: apache-site.conf.in.j2
         dest: /etc/koha/apache-site.conf.in
       when: result.stdout == ""
+
+    - name: Write koha configuration template if creating new instance so koha-create doesn't complain
+      ansible.builtin.template:
+        src: koha-conf-site.xml.in.j2
+        dest: "/etc/koha/sites/koha-conf-site.xml.in"
+      notify: restart memcached
 
     - name: Create Koha instance
       ansible.builtin.command: koha-create --use-db --memcached-servers {{ koha_memcached_servers }} --dbhost {{ koha_db_host }} --database koha_{{ koha_instance_name }} --elasticsearch-server {{ koha_elasticsearch_server }} {{ koha_instance_name }}
@@ -28,6 +37,12 @@
         src: apache-site.conf.in.j2
         dest: "/etc/apache2/sites-enabled/{{ koha_instance_name }}.conf"
       notify: restart apache
+
+    - name: Overwrite koha configuration
+      ansible.builtin.template:
+        src: koha-conf-site.xml.in.j2
+        dest: "/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml"
+      notify: restart memcached
 
     - name: Create empty log files with the correct owner
       ansible.builtin.file:
@@ -107,127 +122,6 @@
         name: "{{ ansible_user }}"
         append: yes
         groups: "{{ koha_instance_name }}-koha"
-
-    - name: Set GUB-specific configuration in koha-conf.xml
-      ansible.builtin.blockinfile:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        marker: '<!-- {mark} GUP custom config (ansible managed) -->'
-        insertafter: '^<config>$'
-        block: |
-          <pg_database>{{ koha_pg_database }}</pg_database>
-          <pg_hostname>{{ koha_pg_hostname }}</pg_hostname>
-          <pg_port>{{ koha_pg_port }}</pg_port>
-          <pg_user>{{ koha_pg_user }}</pg_user>
-          <pg_pass>{{ koha_pg_pass }}</pg_pass>
-          <online_payments>{{ koha_online_payments }}</online_payments>
-          <online_payment_portal_url>{{ koha_online_payment_portal_url }}</online_payment_portal_url>
-          <online_payment_exclude_patron_categories>{{ koha_online_payment_exclude_patron_categories }}</online_payment_exclude_patron_categories>
-          <online_payment_info_url_en>{{ koha_online_payment_info_url_en }}</online_payment_info_url_en>
-          <online_payment_info_url_sv>{{ koha_online_payment_info_url_sv }}</online_payment_info_url_sv>
-
-    - name: Set database password in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        regexp: '<pass>[^<]*</pass>'
-        replace: "<pass>{{ koha_db_password }}</pass>"
-      notify: restart memcached
-
-    - name: Set dev_install in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        regexp: '<dev_install>0</dev_install>'
-        replace: '<dev_install>1</dev_install>'
-      notify: restart memcached
-      #when: result.stdout == ""
-
-    - name: Set enable_plugins in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        regexp: '<enable_plugins>0</enable_plugins>'
-        replace: '<enable_plugins>1</enable_plugins>'
-      notify: restart memcached
-
-    - name: Set intranetdir in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        regexp: '<intranetdir>[^<]+</intranetdir>'
-        replace: "<intranetdir>{{ koha_home }}</intranetdir>"
-      notify: restart memcached
-      #when: result.stdout == ""
-
-    - name: Set intrahtdocs in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        regexp: '<intrahtdocs>[^<]+</intrahtdocs>'
-        replace: "<intrahtdocs>{{ koha_home }}/koha-tmpl/intranet-tmpl</intrahtdocs>"
-      notify: restart memcached
-      #when: result.stdout == ""
-
-    - name: Set opacdir in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        regexp: '<opacdir>[^<]+</opacdir>'
-        replace: "<opacdir>{{ koha_home }}/opac</opacdir>"
-      notify: restart memcached
-      #when: result.stdout == ""
-
-    - name: Set opachtdocs in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        regexp: '<opachtdocs>[^<]+</opachtdocs>'
-        replace: "<opachtdocs>{{ koha_home }}/koha-tmpl/opac-tmpl</opachtdocs>"
-      notify: restart memcached
-      #when: result.stdout == ""
-
-    - name: Set included in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        regexp: '<includes>[^<]+</includes>'
-        replace: "<includes>{{ koha_home }}/koha-tmpl/intranet-tmpl/prog/en/includes</includes>"
-      notify: restart memcached
-      #when: result.stdout == ""
-
-    # TODO: Create loop for this to avoid duplication, possible?
-    # TODO: restart plack/memcached?
-    - name: Set smtp_server/host in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        after: '<smtp_server>'
-        before: '</smtp_server>'
-        regexp: '<host>[^<]*</host>'
-        replace: "<host>{{ smtp_host }}</host>"
-
-    - name: Set smtp_server/port in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        after: '<smtp_server>'
-        before: '</smtp_server>'
-        regexp: '<port>[^<]*</port>'
-        replace: "<port>{{ smtp_port }}</port>"
-
-    - name: Set smtp_server/ssl_mode in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        after: '<smtp_server>'
-        before: '</smtp_server>'
-        regexp: '<ssl_mode>[^<]*</ssl_mode>'
-        replace: "<ssl_mode>{{ smtp_ssl_mode }}</ssl_mode>"
-
-    - name: Set smtp_server/user_name  in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        after: '<smtp_server>'
-        before: '</smtp_server>'
-        regexp: '<user_name>[^<]*</user_name>'
-        replace: "<user_name>{{ smtp_username }}</user_name>"
-
-    - name: Set smtp_server/password  in koha-conf.xml
-      ansible.builtin.replace:
-        path: /etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml
-        after: '<smtp_server>'
-        before: '</smtp_server>'
-        regexp: '<password>[^<]*</password>'
-        replace: "<password>{{ smtp_password }}</password>"
 
     # Hack
     - name: Set smtp host in system perl Sendmail.pm
