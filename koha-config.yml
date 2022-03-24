@@ -104,7 +104,7 @@
         dest: "/etc/koha/"
       loop:
         - log4perl-site.conf.in
-        - SIPconfig.xml
+        - SIPconfig.xml # Remove?
         - plack.psgi
         - apache-shared.conf
         - apache-shared-disable.conf

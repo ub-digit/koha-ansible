@@ -1,0 +1,72 @@
+<acsconfig xmlns="http://openncip.org/acs-config/1.0/">
+<!-- above address gets nothing, it's just a namespace -->
+  <error-detect enabled="true" />
+
+<!--
+  Set Net::Server::PreFork runtime parameters
+  syslog_ident will identify SIP2 Koha server entries in syslog
+  For OpenSolaris, add: syslog_logsock=stream
+-->
+  <server-params
+    min_servers='20'
+    min_spare_servers='20'
+    max_spare_servers='30'
+    log_file='Sys::Syslog'
+    syslog_ident='koha_sip'
+    syslog_facility='local6'
+  />
+
+  <listeners>
+<!-- vestigial HTTP, never implemented: just use the OPAC!
+    <service
+      port="0:8080/tcp"
+      transport="http"
+      protocol="NCIP/1.0" />
+-->
+    <service
+      port="8023/tcp"
+      transport="telnet"
+      protocol="SIP/2.00"
+      timeout="60" />
+
+    <service
+      port="*:6001/tcp"
+      transport="RAW"
+      protocol="SIP/2.00"
+      client_timeout="600"
+      timeout="60" />
+<!--- client_timeout times out active connections which have not received
+     input from the client. Many persistent connections will send a status request
+     every 5-7 mins so setting this to less than that will add instability to the connection
+     if explicitly set to zero, no timeout is applied to the connection.
+     NB the parameter timeout applies to the login process only and should be set to a lower value
+     to time out failed connections
+-->
+  </listeners>
+
+  <accounts>
+{% for institution in vault_koha_sip_config_institutions %}
+{% for login in institution.logins %}
+    <login id="{{ login.id }}" password="{{ login.password }}" delimiter="{{ login.delimiter }}" error-detect="{{ login.error_detect }}" institution="{{ institution.id }}" encoding="{{ login.encoding }}" checked_in_ok="{{ login.checked_in_ok }}" allow_empty_passwords="{{ login.allow_empty_passwords }}{{ ' terminator="' + login.terminator + '"' if 'terminator' in login }}/>
+{% endfor %}
+{% endfor %}
+  </accounts>
+
+<!--
+Institution tags are for enabled branches.  There needs to be one
+institution stanza for each institution named in the accounts above.
+The implementation attribute is actually used to find the code to run,
+in our case "ILS".
+-->
+
+<institutions>
+{% for institution in vault_koha_sip_config_institutions %}
+  <institution id="{{ institution.id }}" implementation="{{ institution.implementation }}" parms="{{ institution.parms }}">
+    <policy checkin="{{ institution.policy.checkin }}" renewal="{{ institution.policy.renewal }}" checkout="{{ institution.policy.checkout }}"
+      status_update="{{ institution.policy.status_update }}" offline="{{ institution.policy.offline }}"
+      timeout="{{ institution.policy.timeout }}"
+      retries="{{ institution.policy.retries }}" />
+  </institution>
+{% endfor %}
+</institutions>
+</acsconfig>

@@ -1,0 +1,75 @@
+# Koha instance {{ koha_instance_name }} Apache config.
+
+{% if https %}
+# GUB custom changes
+<VirtualHost *:80>
+  ServerName {{ opac_server_name }}
+  Redirect permanent / https://{{ opac_server_name }}
+</VirtualHost>
+# END
+{% endif %}
+
+# OPAC
+<VirtualHost *:{{ opac_port }}>
+  <IfVersion >= 2.4>
+   Define instance "{{ koha_instance_name }}"
+  </IfVersion>
+   Include /etc/koha/apache-shared.conf
+#  Include /etc/koha/apache-shared-disable.conf
+{% if plack %}
+   Include /etc/koha/apache-shared-opac-plack.conf
+{% endif %}
+   Include /etc/koha/apache-shared-opac.conf
+
+   Include /etc/koha/apache-shared-custom.conf
+
+   ServerName {{ opac_server_name }}
+   SetEnv KOHA_CONF "/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml"
+   AssignUserID koha-{{ koha_instance_name }} koha-{{ koha_instance_name }}
+
+{% if https %}
+   SSLEngine on
+   SSLCertificateFile /etc/ssl/certs/koha.pem
+   SSLCertificateKeyFile /etc/ssl/private/koha.key
+{% endif %}
+
+   ErrorLog    /var/log/koha/{{ koha_instance_name }}/opac-error.log
+#  TransferLog /var/log/koha/{{ koha_instance_name }}/opac-access.log
+</VirtualHost>
+
+{% if https %}
+# GUB custom changes
+<VirtualHost *:80>
+  ServerName {{ intranet_server_name }}
+  Redirect permanent / https://{{ intranet_server_name }}
+</VirtualHost>
+# END
+{% endif %}
+
+# Intranet
+<VirtualHost *:{{ intranet_port }}>
+  <IfVersion >= 2.4>
+   Define instance "{{ koha_instance_name }}"
+  </IfVersion>
+   Include /etc/koha/apache-shared.conf
+#  Include /etc/koha/apache-shared-disable.conf
+{% if plack %}
+   Include /etc/koha/apache-shared-intranet-plack.conf
+{% endif %}
+   Include /etc/koha/apache-shared-intranet.conf
+
+   Include /etc/koha/apache-shared-custom.conf
+
+   ServerName {{ intranet_server_name }}
+   SetEnv KOHA_CONF "/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml"
+   AssignUserID koha-{{ koha_instance_name }} koha-{{ koha_instance_name }}
+
+{% if https %}
+   SSLEngine on
+   SSLCertificateFile /etc/ssl/certs/koha.pem
+   SSLCertificateKeyFile /etc/ssl/private/koha.key
+{% endif %}
+
+   ErrorLog    /var/log/koha/{{ koha_instance_name }}/intranet-error.log
+#  TransferLog /var/log/koha/{{ koha_instance_name }}/intranet-access.log
+</VirtualHost>

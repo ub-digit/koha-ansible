@@ -1,0 +1,16 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+*/3 * * * * root koha-shell {{ koha_instance_name }} -c "(cd {{ koha_home }}; misc/cronjobs/process_message_queue.pl -v --delay=30)" >> /var/tmp/message_queue.log 2>&1
+30 00 * * * root koha-shell {{ koha_instance_name }} -c "(cd {{ koha_home }}; misc/cronjobs/cleanup_three_year_old_loans.pl)" >> /var/tmp/cleaning_borrowers.log 2>&1
+01 00 * * * root koha-shell {{ koha_instance_name }} -c "(cd {{ koha_home }}; misc/cronjobs/writeoff_old_charges.pl -v --delay=30)" >> /var/tmp/cleaning_borrowers.log 2>&1
+02 00 * * * root koha-shell {{ koha_instance_name }} -c "(cd {{ koha_home }}; misc/cronjobs/clean_old_borrowers.pl -v --delay=30)" >> /var/tmp/cleaning_borrowers.log 2>&1
+03 00 * * * root koha-shell {{ koha_instance_name }} -c "(cd {{ koha_home }}; misc/cronjobs/clean_deleted_borrowers.pl -v --delay=30)" >> /var/tmp/cleaning_borrowers.log 2>&1
+47 23 * * * root koha-shell {{ koha_instance_name }} -c "(cd {{ koha_home }}; misc/cronjobs/automatic_renewal_borrower_account.pl)" >> /var/tmp/renew_borrower.log 2>&1
+*/5 * * * * root koha-shell {{ koha_instance_name }} -c "(cd {{ koha_home }}; misc/cronjobs/add_missing_biblio_to_orders.pl -b 2685865)"
+
+*/10 * * * * root koha-shell {{ koha_instance_name }} -c "(cd {{ koha_home }}; misc/cronjobs/update_lost_status.pl -tovalue 5)" >> /var/tmp/update_lost_status.log 2>&1
+
+#10 21 * * * root koha-shell {{ koha_instance_name }} -c "(cd /home/koha/gusid-update; ./student-update.pl)" >> /var/tmp/student-update.log 2>&1
+#30 21 * * * root koha-shell {{ koha_instance_name }} -c "(cd /home/koha/gusid-update; ./gusid-update.pl)" >> /var/tmp/gusid-update.log 2>&1
+0 23 * * * root koha-shell {{ koha_instance_name }} -c "(cd {{ koha_home }}; misc/cronjobs/gub_update_permissions.pl)" >> /var/tmp/update_permissions.log 2>&1
