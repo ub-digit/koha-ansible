@@ -44,13 +44,20 @@
         dest: "/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml"
       notify: restart memcached
 
+    - name: Touch sip.enabled to emulate koha-sip --enable
+      ansible.builtin.file:
+        path: "/var/lib/koha/{{ koha_instance_name }}/sip.enabled"
+        owner: "{{ koha_instance_name }}-koha"
+        group: "{{ koha_instance_name }}-koha"
+        state: touch
+
     - name: Ensure SIP-server configuration
       ansible.builtin.template:
         src: SIPconfig.xml.j2
         dest: "/etc/koha/sites/{{ koha_instance_name }}/SIPconfig.xml"
       tags:
       - sip
-      #notify: todo restart zip server
+      notify: restart sip
 
     - name: Create empty log files with the correct owner
       ansible.builtin.file:
@@ -96,7 +103,6 @@
         regexp: '^SetEnv PERL5LIB "[^"]+"\s*$'
         replace: "SetEnv PERL5LIB \"{{ perl5lib_paths }}\""
 
-    # TODO: enable SIP!
     - name: Update unmanaged Koha instance config files from current release
       ansible.builtin.copy:
         remote_src: yes
@@ -150,46 +156,20 @@
         regexp: "^(\\s+'port'\\s+=>).*$"
         replace: '\1 {{ smtp_port }},' # Weird behavior no space between \1{{ will cause issues
 
-#    - name: Ensure cronjobs (cron.d)
-#      ansible.builtin.template:
-#        src: koha-common.cron.d.j2
-#        dest: /etc/cron.d/koha-common
-#
-#    - name: Ensure cronjobs (cron.daily)
-#      ansible.builtin.template:
-#        src: koha-common.cron.daily.j2
-#        dest: /etc/cron.daily/koha-common
-#
-#    - name: Copy cronjobs (cron.d)
-#      ansible.builtin.copy:
-#        src: "{{ playbook_dir }}/files/cron/koha-common.cron.d"
-#        dest: /etc/cron.d/koha
-#
-#    - name: Copy cronjobs (cron.daily)
-#      ansible.builtin.copy:
-#        src: "{{ playbook_dir }}/files/cron/koha-common.cron.daily"
-#        dest: /etc/cron.daily/koha
-#
-#    - name: Copy cronjobs (cron.hourly)
-#      ansible.builtin.copy:
-#        src: "{{ playbook_dir }}/files/cron/koha-common.cron.hourly"
-#        dest: /etc/cron.hourly/koha
-#
-#    - name: Comment out zebraqueue job
-#      ansible.builtin.replace:
-#        path: /etc/cron.daily/koha
-#        regexp: '(koha-foreach.+?--zebraqueue)'
-#        replace: '#\1'
-#
-#    - name: Adjust Koha paths for cron-scripts
-#      ansible.builtin.replace:
-#        path: "{{ item }}"
-#        regexp: '/usr/share/koha/bin'
-#        replace: '{{ koha_home }}/misc'
-#      loop:
-#        - /etc/cron.d/koha
-#        - /etc/cron.daily/koha
-#        - /etc/cron.hourly/koha
+    - name: Ensure cronjobs (cron.d)
+      ansible.builtin.template:
+        src: koha-common.cron.d.j2
+        dest: /etc/cron.d/koha-common
+
+    - name: Ensure cronjobs (cron.daily)
+      ansible.builtin.template:
+        src: koha-common.cron.daily.j2
+        dest: /etc/cron.daily/koha-common
+
+    - name: Copy cronjobs (cron.d)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/cron/koha-common.cron.d"
+        dest: /etc/cron.d/koha
 
     # Translation files
     - name: Copy translation files
@@ -252,7 +232,36 @@
         src: "/home/{{ ansible_user}}/Log-Dispatch-Email-MimeMailSender/lib/Log/Dispatch/Email/MIMEMailSender.pm"
         dest: "/usr/share/perl5/Log/Dispatch/Email/MIMEMailSender.pm"
         state: link
+
+    - name: Ensure koha background worker init script
+      ansible.builtin.template:
+        src: koha-background-worker.service.j2
+        dest: "/etc/systemd/system/koha-background-worker.service"
+      notify: reload systemd
+
+    - name: Ensure background worker enabled and started
+      ansible.builtin.systemd:
+        name: koha-background-worker
+        enabled: yes
+        state: started
+
+    - name: Ensure plack is running
+      ansible.builtin.shell:
+        cmd: ". /usr/sbin/koha-functions.sh && if ! is_plack_running {{ koha_instance_name }}; then koha-plack --start {{ koha_instance_name }}; fi"
+
   handlers:
+    # remove become: yes?
+    - name: restart sip
+      ansible.builtin.shell:
+        cmd: ". /usr/sbin/koha-functions.sh && if is_sip_running {{ koha_instance_name }}; then koha-sip --restart {{ koha_instance_name }}; else koha-sip --start {{ koha_instance_name }}; fi"
+      become: yes
+    - name: restart plack # Currently unused and untested
+      ansible.builtin.shell:
+        cmd: ". /usr/sbin/koha-functions.sh && if is_plack_running {{ koha_instance_name }}; then koha-plack --restart {{ koha_instance_name }}; else koha-plack --start {{ koha_instance_name }}; fi"
+      become: yes
+    - name: reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: yes
     - name: restart apache
       ansible.builtin.service:
         name: apache2

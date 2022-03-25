@@ -1,0 +1,18 @@
+[Unit]
+Description=Koha Background Job Worker
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStartPre=
+ExecStart=koha-shell {{ koha_instance_name }} -c "(cd {{ koha_home }}/misc; ./background_jobs_worker.pl > /dev/null 2>&1)"
+ExecStartPost=
+ExecStop=
+ExecReload=
+
+[Install]
+WantedBy=multi-user.target
