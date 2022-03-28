@@ -78,3 +78,15 @@
         # NOTE: 2 = setguid flag. The prefix 0 is required by Ansible
         mode: 02750
         state: directory
+
+    - name: Increase memory limit
+      ansible.builtin.replace:
+        path: /etc/elasticsearch/jvm.options
+        regexp: "(-Xms|x)\\d+g"
+        replace: "\\g<1>8g"
+
+    - name: Enable and start Elasticsearch service
+      ansible.builtin.service:
+        name: elasticsearch
+        state: restarted
+        enabled: yes
