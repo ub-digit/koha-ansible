@@ -91,7 +91,6 @@
         dest: "/etc/koha/"
       # worker-service???
       loop:
-        - koha-conf-site.xml.in
         - koha-sites.conf
 
     # Note: we do not use apache-site.conf.in since have modified
