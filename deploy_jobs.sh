@@ -8,17 +8,22 @@ if [ -z "$1" ]; then
   exit 1;
 fi
 
-printf '%s\0' \
-adjustlibris.yml \
-auto-enable-printer.yml \
-upload-edifact.yml \ # endast prod
-fetchlibris.yml \
-gobi.yml \
-mailhog.yml \
-kvinnsam-libris2primo.yml \ # endast prod
-libris-oai-import.yml \
-loadlibris.yml \
-papercut.yml \ # endast prod
-print-notice.yml \ # endast prod
-primo-export.yml\ # endast prod
-| xargs --null -I{ bash -c "echo 'RUNNING {' && ansible-playbook --vault-password-file ansible_password -i $1 {"
+run_playbook () {
+  echo "RUNNING $2" && ansible-playbook --vault-password-file ansible_password -i $1 $2
+}
+
+run_playbook $1 adjustlibris.yml
+run_playbook $1 auto-enable-printer.yml
+run_playbook $1 afetchlibris.yml
+run_playbook $1 gobi.yml
+run_playbook $1 mailhog.yml
+run_playbook $1 libris-oai-import.yml
+run_playbook $1 loadlibris.yml
+
+if [[ "$1" == "production" ]]; then
+  run_playbook $1 upload-edifact.yml
+  run_playbook $1 kvinnsam-libris2primo.yml
+  run_playbook $1 papercut.yml
+  run_playbook $1 print-notice.yml
+  run_playbook $1 primo-export.yml
+fi
