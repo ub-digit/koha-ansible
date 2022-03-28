@@ -27,7 +27,7 @@
 
     - name: Ensure mysql data directory exists and contain system tables
       ansible.builtin.shell: "cp -a /var/lib/mysql {{ mariadb_data_dir }}"
-      when: mariadb_data.isdir is not defined
+      when: mariadb_data.stat.isdir is not defined
       notify: restart mysql
 
     - name: Write mariadb config
@@ -73,6 +73,14 @@
         insertafter: 'user'
         line: "password = {{ mariadb_root_password }}"
         state: present
+
+    - name: Ensure koha database
+      community.mysql.mysql_db:
+        name: "koha_{{ koha_instance_name }}"
+        state: present
+        login_user: root
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        login_password: "{{ mariadb_root_password }}"
 
     - name: Ensure koha database users
       community.mysql.mysql_user:
