@@ -240,3 +240,9 @@
         state: latest
         force: no
         update_cache: yes
+
+    - name: Set timezone to Europe/Stockholm
+      community.general.timezone:
+        name: Europe/Stockholm
+      tags:
+        - test
