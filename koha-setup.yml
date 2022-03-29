@@ -57,6 +57,7 @@
         - Switch # koha-plugin-format-facet dependency
         - LWP::Simple::Post # koha-plugin-get-print-data dependency
         - DBD::Pg # GUB postgres reports
+        - UNIVERSAL::require # Recommended in cpanfile but not installed, SIP dependency
 
   # - name: Install Koha perl dependencies
   #    ansible.builtin.shell: "cd {{ koha_home }} && cpanm --installdeps ."

@@ -47,7 +47,7 @@
   <accounts>
 {% for institution in vault_koha_sip_config_institutions %}
 {% for login in institution.logins %}
-    <login id="{{ login.id }}" password="{{ login.password }}" delimiter="{{ login.delimiter }}" error-detect="{{ login.error_detect }}" institution="{{ institution.id }}" encoding="{{ login.encoding }}" checked_in_ok="{{ login.checked_in_ok }}" allow_empty_passwords="{{ login.allow_empty_passwords }}{{ ' terminator="' + login.terminator + '"' if 'terminator' in login }}/>
+    <login id="{{ login.id }}" password="{{ login.password }}" delimiter="{{ login.delimiter }}" error-detect="{{ login.error_detect }}" institution="{{ institution.id }}" encoding="{{ login.encoding }}" checked_in_ok="{{ login.checked_in_ok }}" allow_empty_passwords="{{ login.allow_empty_passwords }}"{{ ' terminator="' + login.terminator + '"' if 'terminator' in login }}/>
 {% endfor %}
 {% endfor %}
   </accounts>
