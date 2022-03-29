@@ -41,7 +41,7 @@ USER root
 RUN mv /install/files/background-image-devbox.png /home/apps/img/background-image-devbox.png
 RUN mv /install/files/favicon-devbox.ico /home/apps/img/favicon-devbox.ico
 RUN chown -R koha-koha:koha-koha /home/apps/koha-repo
-USER apps
+USER root
 WORKDIR /home/apps/koha-repo
 ENV SHELL=/bin/bash
 CMD ["apachectl", "-DFOREGROUND", "-e", "debug"]
