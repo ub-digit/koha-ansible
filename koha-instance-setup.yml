@@ -165,6 +165,7 @@
       ansible.builtin.template:
         src: koha-common.cron.daily.j2
         dest: /etc/cron.daily/koha-common
+        mode: 0755
 
     - name: Copy cronjobs (cron.d)
       ansible.builtin.copy:

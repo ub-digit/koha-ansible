@@ -1,3 +1,5 @@
+#!/bin/bash
+
 koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/automatic_renewals.pl -c" >> /var/tmp/automatic_renewals.log 2>&1
 koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/overdue_notices.pl -t --frombranch=item-homebranch" >> /var/tmp/overdue_notices.log 2>&1
 koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/advance_notices.pl -c --frombranch=item-homebranch" >> /var/tmp/advance_notices.log  2>&1
