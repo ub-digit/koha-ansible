@@ -1,0 +1,3 @@
+mailhog_htpasswd_filepath: /etc/apache2/.mailhog_htpasswd
+mailhog_proxy_user: "{{ vault_mailhog_proxy_user }}"
+mailhog_proxy_password: "{{ vault_mailhog_proxy_password }}"
