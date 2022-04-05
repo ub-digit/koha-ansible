@@ -30,7 +30,7 @@
         name: "koha-export-nix"
         minute: "*"
         hour: "*"
-        job: "{{ libris_oai_import_home }}/export_nix.sh > {{ libris_oai_import_log_dir }}/libris_oai.log 2>&1"
+        job: "{{ libris_oai_import_home }}/export_nix.sh >> {{ libris_oai_import_log_dir }}/libris_oai.log 2>&1"
         state: present
         user: root
       become: yes
