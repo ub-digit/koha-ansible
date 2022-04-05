@@ -14,7 +14,7 @@ run_playbook () {
 
 run_playbook $1 adjustlibris.yml
 run_playbook $1 auto-enable-printer.yml
-run_playbook $1 afetchlibris.yml
+run_playbook $1 fetchlibris.yml
 run_playbook $1 gobi.yml
 run_playbook $1 mailhog.yml
 run_playbook $1 libris-oai-import.yml
