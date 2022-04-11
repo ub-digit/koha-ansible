@@ -3,6 +3,13 @@
   vars_files:
     - vars/fetchlibris_defaults.yml
   tasks:
+    - name: Install required packages
+      apt:
+        name: ncftp
+        state: latest
+        update_cache: yes
+      become: yes
+
     - name: Ensure required directories
       ansible.builtin.file:
         path: "{{ fetchlibris_data_dir }}/{{ item }}"

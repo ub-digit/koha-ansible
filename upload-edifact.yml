@@ -4,6 +4,13 @@
     - vars/vault.yml
     - vars/edifact_defaults.yml
   tasks:
+    - name: Install required packages
+      apt:
+        name: ftp
+        state: latest
+        update_cache: yes
+      become: yes
+
     - name: Ensure data directory
       ansible.builtin.file:
         path: "{{ edifact_data_dir }}"

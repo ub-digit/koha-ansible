@@ -11,10 +11,18 @@
         state: directory
       become: yes
       loop:
-        - done
+        - in
         - in_archive
-        - bulkmarcimport_err
+        - done
+        - err
         - log
+
+    - name: Ensure bulkmarcimport.log exists with correct owner
+      ansible.builtin.file:
+        path: "{{ loadlibris_data_dir }}/log/bulkmarcimport.log"
+        owner: "{{ koha_instance_name }}-koha"
+        group: "{{ koha_instance_name }}-koha"
+        state: touch
 
     - name: Checkout repo
       ansible.builtin.git:
