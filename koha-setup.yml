@@ -1,0 +1,67 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+    - vars/vault.yml
+  become: true
+  become_user: root
+  tasks:
+    - name: Checkout Koha repo
+      ansible.builtin.git:
+        repo: "{{ koha_repo_url }}"
+        dest: "{{ koha_repo_path }}"
+        version: "{{ koha_repo_version }}"
+        force: yes
+
+    - name: Disable Net::Z3950::ZOOM from cpan. Installed via packages.
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .Net::Z3950::ZOOM., .1.16.;\s*)$'
+        replace: "# \\1"
+
+    - name: Limit version of Mojolicious
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .Mojolicious., .)[\d\.]+(.;\s*)$'
+        replace: "# \\1<= 8.73\\2"
+
+    - name: Limit version of Mojolicious::Plugin::OpenAPI
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .Mojolicious::Plugin::OpenAPI., .)[\d\.]+(.;\s*)$'
+        replace: "# \\1<= 3.39\\2"
+
+    - name: Limit version of JSON::Validator
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .JSON::Validator., .)[\d\.]+(.;\s*)$'
+        replace: "# \\1<= 4.05\\2"
+
+    # TODO: replace shell with command?
+    - name: Install troublesome Perl modules (with failing tests)
+      community.general.cpanm:
+        name: "{{ item }}"
+        notest: True
+      loop:
+        - Mojolicious::Plugin::OpenAPI
+        - JSON::Validator
+        - JSON::Validator::OpenAPI::Mojolicious
+        - Cache::Memcached::Fast::Safe
+        - DBD::mysql
+
+    - name: Install dependecies not included in cpanfile
+      community.general.cpanm:
+        name: "{{ item }}"
+      loop:
+        - Alien::Tidyp
+        - Switch # koha-plugin-format-facet dependency
+        - LWP::Simple::Post # koha-plugin-get-print-data dependency
+        - DBD::Pg # GUB postgres reports
+        - UNIVERSAL::require # Recommended in cpanfile but not installed, SIP dependency
+
+  # - name: Install Koha perl dependencies
+  #    ansible.builtin.shell: "cd {{ koha_home }} && cpanm --installdeps ."
+    - name: Install Koha perl dependencies
+      community.general.cpanm:
+        from_path: "{{ koha_repo_path }}"
+        installdeps: yes

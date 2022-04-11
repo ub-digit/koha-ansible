@@ -1,0 +1,42 @@
+---
+- hosts: all
+  vars:
+    pip_install_packages:
+      - name: docker
+      - name: docker-compose
+  vars_files:
+    - vars/vault.yml
+    - vars/mailhog_defaults.yml
+  roles:
+    - geerlingguy.pip
+    - geerlingguy.docker
+  become: true
+  tasks:
+    # Deploy mailhog docker service
+    - name: Ensure mailhog docker-compose directory
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/mailhog"
+        dest: "/home/{{ ansible_user }}/"
+
+    - name: Run mailhog service
+      community.docker.docker_compose:
+        project_src: "/home/{{ ansible_user }}/mailhog"
+        state: present
+
+    - name: Generate htpasswd file
+      ansible.builtin.command:
+        cmd: "htpasswd -cb {{ mailhog_htpasswd_filepath }} '{{ mailhog_proxy_user }}' '{{ mailhog_proxy_password }}'"
+        creates: "{{ mailhog_htpasswd_filepath }}"
+
+    - name: Add apache reverse auth proxy vhost
+      ansible.builtin.template:
+        src: mailhog-site.conf.js
+        dest: /etc/apache2/sites-enabled/mailhog.conf
+      notify: restart apache
+
+  handlers:
+    - name: restart apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
+      become: yes

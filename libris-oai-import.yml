@@ -6,8 +6,12 @@
   tasks:
     - name: Ensure required directories
       ansible.builtin.file:
-        path: "{{ libris_oai_import_log_dir }}"
+        path: "{{ item }}"
         state: directory
+      loop:
+        - "{{ libris_oai_import_log_dir }}"
+        - "{{ libris_oai_import_data_dir }}/download"
+        - "{{ libris_oai_import_data_dir }}/archive"
       become: yes
 
     - name: Checkout repo
@@ -24,9 +28,9 @@
     - name: Schedule cron job
       ansible.builtin.cron:
         name: "koha-export-nix"
-        minute: "00"
-        hour: "05"
-        job: "{{ libris_oai_import_home }}/export_nix.sh"
+        minute: "*"
+        hour: "*"
+        job: "{{ libris_oai_import_home }}/export_nix.sh >> {{ libris_oai_import_log_dir }}/libris_oai.log 2>&1"
         state: present
         user: root
       become: yes

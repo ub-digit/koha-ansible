@@ -1,5 +1,15 @@
 # koha-ansible
 
+## Ansible setup
+
+[Install ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+
+(A newer version is required, probably newer than 5.0.x, verified to work with >= 5.4.x)
+
+Install playbook dependencies:
+
+`ansible-galaxy install -r requirements.yml`
+
 ## Vagrant setup
 
 For some reason sudo apt-get update --fix-missing needs to be run for newly provisioned vagrant box.

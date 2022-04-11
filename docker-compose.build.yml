@@ -1,0 +1,10 @@
+services:
+  mariadb:
+    image: "mariadb:10.8"
+    volumes:
+      - "$PWD/data/build/mariadb:/var/lib/mysql"
+      - "$PWD/data/db-init:/docker-entrypoint-initdb.d"
+  elasticsearch:
+    image: "elasticsearch:inter1"
+    volumes:
+      - "$PWD/data/build/elasticsearch:/usr/share/elasticsearch/data"

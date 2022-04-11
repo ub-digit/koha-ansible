@@ -1,0 +1,4 @@
+FROM mariadb:10.8
+
+COPY ./data/build/mariadb/. /var/lib/mysql/.
+RUN chown -R 999 /var/lib/mysql

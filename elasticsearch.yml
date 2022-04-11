@@ -1,0 +1,92 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+    - vars/vault.yml
+  become: true
+  become_user: root
+  tasks:
+    - name: Add Java key
+      ansible.builtin.apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: 73C3DB2A
+
+    - name: Add Java repository
+      ansible.builtin.apt_repository:
+       #repo: ppa:linuxuprising/java
+       repo: deb http://ppa.launchpad.net/linuxuprising/java/ubuntu focal main
+       update_cache: yes
+       state: present
+
+    - name: Set Java licence as accepted
+      debconf:
+        name: oracle-java17-installer
+        question: shared/accepted-oracle-license-v1-3
+        value: 'true'
+        vtype: 'select'
+
+    - name: Install Java
+      apt:
+        name: oracle-java17-installer
+        state: latest
+        update_cache: yes
+
+    - name: Set Java version as default
+      apt:
+        name: oracle-java17-set-default
+        state: latest
+
+    - name: Add Elasticsearch key
+      ansible.builtin.apt_key:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        state: present
+
+    - name: Add Elasticsearch repository
+      ansible.builtin.apt_repository:
+        repo: deb https://artifacts.elastic.co/packages/6.x/apt stable main
+        state: present
+        filename: elastic-6.x.list
+
+    - name: Install Elasticsearch
+      apt:
+        name: elasticsearch
+        state: latest
+        update_cache: yes
+      register: elastic
+
+    - name: Write Elasticsearch config
+      ansible.builtin.template:
+        src: elasticsearch.yml.j2
+        dest: /etc/elasticsearch/elasticsearch.yml
+
+    - name: Install Elasticsearch plugins
+      community.general.elasticsearch_plugin:
+        name: analysis-icu
+        state: absent
+      when: elastic.changed
+
+    - name: Install Elasticsearch plugins
+      community.general.elasticsearch_plugin:
+        name: analysis-icu
+        state: present
+
+    - name: Ensure Elasticsearch data directory
+      ansible.builtin.file:
+        path: "{{ elasticsearch_data_dir }}"
+        owner: elasticsearch
+        group: elasticsearch
+        # NOTE: 2 = setguid flag. The prefix 0 is required by Ansible
+        mode: 02750
+        state: directory
+
+    - name: Increase memory limit
+      ansible.builtin.replace:
+        path: /etc/elasticsearch/jvm.options
+        regexp: "(-Xms|x)\\d+g"
+        replace: "\\g<1>8g"
+
+    - name: Enable and start Elasticsearch service
+      ansible.builtin.service:
+        name: elasticsearch
+        state: restarted
+        enabled: yes

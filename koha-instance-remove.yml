@@ -1,0 +1,33 @@
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+  become: true
+  become_user: root
+  tasks:
+
+#    - name: Remove ansible user from koha instance group
+#      ansible.builtin.user:
+#        name: "{{ ansible_user }}"
+#        groups: ""
+
+    - name: Remove koha user
+      ansible.builtin.user:
+        name: "koha-{{ koha_instance_name }}"
+        state: absent
+        remove: yes
+
+    - name: Remove koha group
+      ansible.builtin.group:
+        name: "koha-{{ koha_instance_name }}"
+        state: absent
+
+    - name: Remove koha-instance files/directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/var/lib/koha/{{ koha_instance_name }}"
+        - "/etc/koha/sites/{{ koha_instance_name }}"
+        - "/var/log/koha/{{ koha_instance_name }}"
+        - "/etc/apache2/sites-enabled/{{ koha_instance_name }}"
+        - "/etc/apache2/sites-available/{{ koha_instance_name }}"

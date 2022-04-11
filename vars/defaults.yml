@@ -27,6 +27,9 @@ get_print_data_api_key: todo # get from vault variable
 
 ansible_python_interpreter: /usr/bin/python3
 
+koha_mojilicious_secret_passphrase: "vault TODO"
+koha_bcrypt_settings: "vault TODO"
+
 # GUB custom koha-conf.xml options
 
 koha_pg_database: marcdb

@@ -1,0 +1,102 @@
+---
+- hosts: all
+  vars_files:
+    - vars/defaults.yml
+    - vars/vault.yml
+  become: true
+  become_user: root
+  tasks:
+
+    - name: Install required packages
+      apt:
+        name: ['mariadb-server']
+        state: latest
+        force: no
+        update_cache: yes
+
+    - name: Create symlink debian.cnf -> koha-common.cnf
+      ansible.builtin.file:
+        src: /etc/mysql/debian.cnf
+        dest: /etc/mysql/koha-common.cnf
+        state: link
+
+    - name: Check if mariadb data directory exist
+      stat:
+        path: "{{ mariadb_data_dir }}"
+      register: mariadb_data
+
+    - name: Ensure mysql data directory exists and contain system tables
+      ansible.builtin.shell: "cp -a /var/lib/mysql {{ mariadb_data_dir }}"
+      when: mariadb_data.stat.isdir is not defined
+      notify: restart mysql
+
+    - name: Write mariadb config
+      ansible.builtin.template:
+        src: mariadb-50-server.cnf.j2
+        dest: /etc/mysql/mariadb.conf.d/50-server.cnf
+      notify: restart mysql
+
+    - name: Enable mysql/mariadb service
+      ansible.builtin.service:
+        name: mariadb
+        enabled: yes
+        state: started
+
+    # Password not yet set but this seams to work
+    # when root password is empty and when it's
+    # set which avoid issues if stuck in a state
+    # when root password changes but writing password
+    # to koha-common.cnf fails for some reason.
+    - name: Remove anonymous mariadb users
+      community.mysql.mysql_user:
+        name: ''
+        host_all: yes
+        login_user: root
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        login_password: "{{ mariadb_root_password }}"
+        state: absent
+
+    - name: Set password for mariadb root users
+      community.mysql.mysql_user:
+        name: root
+        host_all: yes
+        update_password: always # this is the default
+        password: "{{ mariadb_root_password }}"
+        login_user: root
+        login_password: "{{ mariadb_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Set root password in koha-common.cnf (debian.cnf) # Don't know how else to handle this
+      ansible.builtin.lineinfile:
+        path: "/etc/mysql/koha-common.cnf"
+        firstmatch: yes
+        insertafter: 'user'
+        line: "password = {{ mariadb_root_password }}"
+        state: present
+
+    - name: Ensure koha database
+      community.mysql.mysql_db:
+        name: "koha_{{ koha_instance_name }}"
+        state: present
+        login_user: root
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        login_password: "{{ mariadb_root_password }}"
+
+    - name: Ensure koha database users
+      community.mysql.mysql_user:
+        name: "koha_{{ koha_instance_name }}"
+        host: "{{ item }}"
+        password: "{{ koha_db_password }}"
+        priv: "koha_{{ koha_instance_name }}.*:ALL"
+        config_file: /etc/mysql/koha-common.cnf
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        state: present
+      loop:
+        - '%'
+        - 'localhost'
+  handlers:
+    - name: restart mysql
+      ansible.builtin.service:
+        name: mariadb
+        state: restarted
+      become: yes

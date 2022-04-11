@@ -1,0 +1,25 @@
+# GUB custom koha-conf.xml config
+vault_koha_pg_pass: NOT_RELEVANT
+vault_koha_db_password: password
+vault_mariadb_root_password: root_password
+vault_koha_sip_config_institutions:
+  - implementation: "ILS"
+    parms: ""
+    id: 42
+    policy:
+      checkin: "true"
+      renewal: "false"
+      checkout: "true"
+      status_update: "false"
+      offline: "false"
+      timeout: 100
+      retries: 5
+    logins:
+      - delimiter: "|"
+        error_detect: "enabled"
+        encoding: "iso-8859-1"
+        checked_in_ok: "1"
+        allow_empty_passwords: "true"
+        id: "db00"
+        password: "devboxDB00"
+        terminator: "CR"

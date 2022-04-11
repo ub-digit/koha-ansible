@@ -1,0 +1,18 @@
+#!/bin/bash
+
+koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/automatic_renewals.pl -c" >> /var/tmp/automatic_renewals.log 2>&1
+koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/overdue_notices.pl -t --frombranch=item-homebranch" >> /var/tmp/overdue_notices.log 2>&1
+koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/advance_notices.pl -c --frombranch=item-homebranch" >> /var/tmp/advance_notices.log  2>&1
+
+# AVST 2020-11-12 koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/fines.pl --run_everyday -v --maxdays=16" >> /var/tmp/fines.log 2>&1
+# AKTIVERAD IGEN 2021-09-29
+koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/fines.pl -d 2021-09-30 -v --maxdays=16" >> /var/tmp/fines.log 2>&1
+
+# Sätt bara LOST 2 för dessa kategorier, och lägg inte på några LOST-avgifter
+koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/longoverdue.pl --category=BA --category=BE --category=BF --category=BK --category=BL --category=BM --category=BN --category=BU --category=EI --category=TN --category=TJ --category=PE -c 99 --confirm" > /var/tmp/longoverdue-without-lost-fine.log 2>&1
+
+# Sätt både LOST 2 och relevanta LOST-avgifter för alla som inte hör till dessa kategorier
+koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/longoverdue.pl --skip-category=BA --skip-category=BE --skip-category=BF --skip-category=BK --skip-category=BL --skip-category=BM --skip-category=BN --skip-category=BU --skip-category=EI --skip-category=TN --skip-category=TJ --skip-category=PE --confirm" > /var/tmp/longoverdue-with-lost-fine.log 2>&1
+
+# GAMMAL koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/longoverdue.pl --confirm" >> /var/tmp/longoverdue.log 2>&1
+koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/holds/cancel_expired_holds.pl" >> /var/tmp/cancel_expire_holds.log 2>&1
