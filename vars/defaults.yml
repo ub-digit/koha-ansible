@@ -14,14 +14,11 @@ smtp_username: ''
 smtp_password: ''
 smtp_ssl_mode: disabled
 
-koha_database_backup_data_dir: /mnt/backup/koha-database-backup
+koha_database_backup_data_dir: "{{ koha_data_dir }}/backup/koha-database-backup"
 koha_database_backup_log_dir: /opt/koha-database-backup/log
 
 gup_edifact_cron_enabled: false
 koha_database_backup_cron_enabled: false
-
-mariadb_data_dir: /mnt/mysql
-elasticsearch_data_dir: /mnt/elasticsearch
 
 get_print_data_api_key: todo # get from vault variable
 
