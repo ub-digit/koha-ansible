@@ -71,7 +71,7 @@
         path: "/etc/mysql/koha-common.cnf"
         firstmatch: yes
         insertafter: 'user'
-        line: "password = {{ mariadb_root_password }}"
+        line: "password = \"{{ mariadb_root_password }}\""
         state: present
 
     - name: Ensure koha database
