@@ -1,2 +1,2 @@
 ---
-koha_db_import_data_dir: /mnt/koha_db_import
+koha_db_import_data_dir: "{{ koha_data_dir }}/koha_db_import"
