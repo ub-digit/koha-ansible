@@ -116,21 +116,6 @@
         regexp: '__LOG_DIR__'
         replace: "/var/log/koha/{{ koha_instance_name }}"
 
-    - name: Copy Apache certificate
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/secret/koha.pem"
-        dest: /etc/ssl/certs/koha.pem
-        group: "{{ koha_instance_name }}-koha" #??
-      when: environment_name != 'devbox'
-
-    - name: Copy Apache certificate private key
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/secret/koha.key"
-        dest: /etc/ssl/private/koha.key
-        owner: root
-        group: root
-      when: environment_name != 'devbox'
-
     - name: Add ansible user to koha instance group
       ansible.builtin.user:
         name: "{{ ansible_user }}"
