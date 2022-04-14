@@ -35,7 +35,7 @@
     - name: Ensure apache site configuration
       ansible.builtin.template:
         src: apache-site.conf.in.j2
-        dest: "/etc/apache2/sites-enabled/{{ koha_instance_name }}.conf"
+        dest: "/etc/apache2/sites-available/{{ koha_instance_name }}.conf"
       notify: restart apache
 
     - name: Ensure koha configuration
