@@ -38,3 +38,5 @@ koha_online_payments: 1
 koha_online_payment_exclude_patron_categories: BA|BE|BF|BK|BL|BM|BN|BU|EI|TN|TJ|PE
 koha_online_payment_info_url_en: https://www.ub.gu.se/en/borrow-and-log-in/borrowing-from-the-library
 koha_online_payment_info_url_sv: https://www.ub.gu.se/sv/lana-och-logga-in/lana-pa-biblioteket
+
+koha_readonly_db_user_password: "{{ vault_koha_readonly_db_user_password }}"

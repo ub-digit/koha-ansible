@@ -94,6 +94,17 @@
       loop:
         - '%'
         - 'localhost'
+
+    - name: Ensure read-only koha database user
+      community.mysql.mysql_user:
+        name: "{{ koha_instance_name }}ReadOnly"
+        host: '%'
+        password: "{{ koha_readonly_db_user_password }}"
+        priv: "koha_{{ koha_instance_name }}.*:SELECT,SHOW VIEW"
+        config_file: /etc/mysql/koha-common.cnf
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        state: present
+
   handlers:
     - name: restart mysql
       ansible.builtin.service:
