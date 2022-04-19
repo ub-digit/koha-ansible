@@ -3,16 +3,12 @@
 koha_repo_url: https://github.com/ub-digit/Koha-build.git
 koha_repo_path: "/home/{{ ansible_user }}/koha-repo"
 
+koha_po_files_path: "/home/{{ ansible_user }}/koha-{{ environment_name }}/shared/misc/translator/po"
+perl5lib_paths: "{{ koha_home }}/lib:{{ koha_home }}"
+
 docker_install_compose: true
 #docker_compose_version: "1.29.2"
 docker_users: ["{{ ansible_user }}"]
-
-smtp_host: 127.0.0.1
-smtp_port: 1025
-smtp_username: ''
-#smtp_password: {{ vault_smtp_password }}
-smtp_password: ''
-smtp_ssl_mode: disabled
 
 koha_database_backup_data_dir: "{{ koha_data_dir }}/backup/koha-database-backup"
 koha_database_backup_log_dir: /opt/koha-database-backup/log
@@ -20,11 +16,8 @@ koha_database_backup_log_dir: /opt/koha-database-backup/log
 gup_edifact_cron_enabled: false
 koha_database_backup_cron_enabled: false
 
-get_print_data_api_key: todo # get from vault variable
-
 ansible_python_interpreter: /usr/bin/python3
 
-koha_mojilicious_secret_passphrase: "vault TODO"
 koha_bcrypt_settings: "vault TODO"
 
 # GUB custom koha-conf.xml options
