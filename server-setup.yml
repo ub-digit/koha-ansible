@@ -3,6 +3,8 @@
   vars:
     pip_install_packages:
       - name: PyMySQL
+      - name: docker
+      - name: docker-compose
   vars_files:
     - vars/defaults.yml
     - vars/vault.yml
@@ -11,7 +13,6 @@
   become: true
   become_user: root
   tasks:
-
     - name: Install gnupg
       apt:
         name: gnupg2
