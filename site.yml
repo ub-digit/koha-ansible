@@ -4,4 +4,5 @@
 - import_playbook: koha-config.yml
 - import_playbook: mariadb.yml
 - import_playbook: koha-instance-setup.yml
+- import_playbook: exim-setup.yml
 - import_playbook: printers-setup.yml

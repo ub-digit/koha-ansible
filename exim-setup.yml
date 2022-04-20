@@ -1,0 +1,22 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Install exim4
+      apt:
+        name: exim4-daemon-light
+        state: present
+        update_cache: yes
+      when: environment_name == 'production'
+
+    - name: Copy configuration
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/etc/exim4/update-exim4.conf.conf"
+        dest: "/etc/exim4/update-exim4.conf.conf"
+      when: environment_name == 'production'
+      notify: restart exim4
+
+  handlers:
+    - name: restart exim4
+      ansible.builtin.service:
+        name: exim4
+        state: restarted
