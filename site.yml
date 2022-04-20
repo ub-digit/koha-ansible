@@ -6,3 +6,4 @@
 - import_playbook: koha-instance-setup.yml
 - import_playbook: exim-setup.yml
 - import_playbook: printers-setup.yml
+- import_playbook: koha-set-environment-preferences.yml

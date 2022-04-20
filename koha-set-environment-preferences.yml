@@ -6,10 +6,17 @@
   become: true
   become_user: root
   tasks:
+    - name: Copy set_environment_preferences.pl script
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/set_environment_preferences.pl"
+        dest: "/home/{{ ansible_user }}"
+        owner: "{{ koha_instance_name }}-koha"
+        mode: 0755
+
     - name: Adjust settings for current environment
       ansible.builtin.shell:
-        cmd: "koha-shell -c 'perl misc/set_environment_preferences.pl --environment=\"{{ environment_name }}\" --get_print_data_api_key=\"{{ get_print_data_api_key }}\" --adjustlibris_home=\"/home/{{ ansible_user }}\"' {{ koha_instance_name }}"
-        chdir: "{{ koha_home }}"
+        cmd: "koha-shell -c 'perl set_environment_preferences.pl --environment=\"{{ environment_name }}\" --get_print_data_api_key=\"{{ get_print_data_api_key }}\" --adjustlibris_home=\"/home/{{ ansible_user }}\"' {{ koha_instance_name }}"
+        chdir: "/home/{{ ansible_user }}"
       notify: restart memcached
 
   handlers:
