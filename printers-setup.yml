@@ -1,0 +1,28 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Install cups
+      apt:
+        name: cups
+        state: present
+        update_cache: yes
+
+    - name: Ensure cups stopped
+      ansible.builtin.service:
+        name: cups
+        state: stopped
+
+    - name: Copy configuration
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/etc/cups/printers.conf"
+        dest: "/etc/cups/printers.conf"
+
+    - name: Copy drivers
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/etc/cups/ppd"
+        dest: "/etc/cups/"
+
+    - name: Ensure cups started
+      ansible.builtin.service:
+        name: cups
+        state: started
