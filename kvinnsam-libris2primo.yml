@@ -25,9 +25,10 @@
         state: directory
 
     - name: Write script
-      template:
+      ansible.builtin.template:
         src: kvinnsam-libris2primo.sh.j2
         dest: "{{ kvinnsam_libris2primo_home }}/libris2primo.sh"
+        mode: 0755
 
     - name: Schedule cron job
       ansible.builtin.cron:
