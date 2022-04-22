@@ -15,6 +15,13 @@
         name: "{{ koha_primo_export_user }}"
       become: yes
 
+    - name: Add public key of drupal-deploy user to authorized_keys
+      ansible.builtin.authorized_key:
+        user: "{{ koha_primo_export_user }}"
+        state: present
+        key: "{{ lookup('file', '{{ playbook_dir }}/files/primo_export_user_authorized_keys') }}"
+      become: yes
+
     - name: Ensure export directories
       ansible.builtin.file:
         path: "{{ koha_primo_export_export_dir }}/{{ item }}"
@@ -25,6 +32,7 @@
       loop:
         - full
         - updates
+        - databases # Drupal databases primo export directory
       become: yes
 
     - name: Checkout repo
