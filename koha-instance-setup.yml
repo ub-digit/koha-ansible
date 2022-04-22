@@ -37,6 +37,8 @@
         src: apache-site.conf.in.j2
         dest: "/etc/apache2/sites-available/{{ koha_instance_name }}.conf"
       notify: restart apache
+      tags:
+      - apache
 
     - name: Ensure koha configuration
       ansible.builtin.template:
@@ -145,17 +147,16 @@
       ansible.builtin.template:
         src: koha-common.cron.d.j2
         dest: /etc/cron.d/koha-common
+      tags:
+      - cronjobs
 
     - name: Ensure cronjobs (cron.daily)
       ansible.builtin.template:
         src: koha-common.cron.daily.j2
         dest: /etc/cron.daily/koha-common
         mode: 0755
-
-    - name: Copy cronjobs (cron.d)
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/cron/koha-common.cron.d"
-        dest: /etc/cron.d/koha
+      tags:
+      - cronjobs
 
     # Translation files
     - name: Copy translation files
@@ -191,6 +192,8 @@
         hour: "23"
         job: "/usr/local/sbin/koha-database-backup.sh >> {{ koha_database_backup_log_dir }}/backup.log 2>&1"
         state: "{{ 'present' if koha_database_backup_cron_enabled else 'absent' }}"
+      tags:
+      - cronjobs
 
     - name: Schedule cron job for gub_edifact.pl
       ansible.builtin.cron:
@@ -199,6 +202,8 @@
         hour: "22"
         job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} 2>&1"
         state: "{{ 'present' if gup_edifact_cron_enabled else 'absent' }}"
+      tags:
+      - cronjobs
 
     - name: Write log config for koha-plugin-marc-import
       ansible.builtin.template:
