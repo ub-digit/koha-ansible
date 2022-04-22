@@ -201,7 +201,7 @@
         minute: "00"
         hour: "22"
         job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} 2>&1"
-        state: "{{ 'present' if gup_edifact_cron_enabled else 'absent' }}"
+        state: "{{ 'present' if gub_edifact_cron_enabled else 'absent' }}"
       tags:
       - cronjobs
 
