@@ -3,6 +3,7 @@
 koha_repo_url: https://github.com/ub-digit/Koha-build.git
 koha_repo_path: "/home/{{ ansible_user }}/koha-repo"
 
+koha_user: "koha-{{ koha_instance_name }}"
 koha_po_files_path: "/home/{{ ansible_user }}/koha-{{ environment_name }}/shared/misc/translator/po"
 perl5lib_paths: "{{ koha_home }}/lib:{{ koha_home }}"
 

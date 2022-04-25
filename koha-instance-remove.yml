@@ -12,13 +12,13 @@
 
     - name: Remove koha user
       ansible.builtin.user:
-        name: "koha-{{ koha_instance_name }}"
+        name: "{{ koha_user }}"
         state: absent
         remove: yes
 
     - name: Remove koha group
       ansible.builtin.group:
-        name: "koha-{{ koha_instance_name }}"
+        name: "{{ koha_user }}"
         state: absent
 
     - name: Remove koha-instance files/directories

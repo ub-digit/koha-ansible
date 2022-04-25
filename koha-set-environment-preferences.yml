@@ -10,7 +10,7 @@
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/set_environment_preferences.pl"
         dest: "/home/{{ ansible_user }}"
-        owner: "{{ koha_instance_name }}-koha"
+        owner: "{{ koha_user }}"
         mode: 0755
 
     - name: Adjust settings for current environment

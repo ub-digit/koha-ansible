@@ -49,8 +49,8 @@
     - name: Touch sip.enabled to emulate koha-sip --enable
       ansible.builtin.file:
         path: "/var/lib/koha/{{ koha_instance_name }}/sip.enabled"
-        owner: "{{ koha_instance_name }}-koha"
-        group: "{{ koha_instance_name }}-koha"
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
         state: touch
 
     - name: Ensure SIP-server configuration
@@ -65,8 +65,8 @@
       ansible.builtin.file:
         mode: 0644
         path: "/var/log/koha/{{ koha_instance_name }}/{{ item }}"
-        owner: "{{ koha_instance_name }}-koha"
-        group: "{{ koha_instance_name }}-koha"
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
         state: touch
       loop:
         - intranet-error.log
@@ -122,7 +122,7 @@
       ansible.builtin.user:
         name: "{{ ansible_user }}"
         append: yes
-        groups: "{{ koha_instance_name }}-koha"
+        groups: "{{ koha_user }}"
 
     # Hack
     - name: Set smtp host in system perl Sendmail.pm

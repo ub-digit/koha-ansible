@@ -20,8 +20,8 @@
     - name: Ensure bulkmarcimport.log exists with correct owner
       ansible.builtin.file:
         path: "{{ loadlibris_data_dir }}/log/bulkmarcimport.log"
-        owner: "{{ koha_instance_name }}-koha"
-        group: "{{ koha_instance_name }}-koha"
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
         state: touch
 
     - name: Checkout repo

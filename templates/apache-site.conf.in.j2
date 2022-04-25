@@ -25,7 +25,7 @@
 
    ServerName {{ opac_server_name }}
    SetEnv KOHA_CONF "/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml"
-   AssignUserID koha-{{ koha_instance_name }} koha-{{ koha_instance_name }}
+   AssignUserID {{ koha_user }} {{ koha_user }}
 
 {% if https %}
    SSLEngine on
@@ -63,7 +63,7 @@
    ServerName {{ intranet_server_name }}
    SetEnv KOHA_CONF "/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml"
    RequestHeader add X-Koha-IPAC-API-KEY "{{ koha_ipac_api_key }}"
-   AssignUserID koha-{{ koha_instance_name }} koha-{{ koha_instance_name }}
+   AssignUserID {{ koha_user }} {{ koha_user }}
 
 {% if https %}
    SSLEngine on
