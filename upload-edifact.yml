@@ -2,6 +2,7 @@
 - hosts: all
   vars_files:
     - vars/vault.yml
+    - vars/defaults.yml
     - vars/edifact_defaults.yml
   tasks:
     - name: Install required packages
@@ -15,6 +16,8 @@
       ansible.builtin.file:
         path: "{{ edifact_data_dir }}"
         mode: 0755
+        owner: "koha-{{ koha_instance_name }}"
+        group: "koha-{{ koha_instance_name }}"
         state: directory
       become: yes
 
@@ -23,7 +26,9 @@
         path: "{{ edifact_data_dir }}/vendors/{{ item.0 }}/{{ item.1 }}"
         mode: 0755
         state: directory
-      loop: "{{ ['Dawson', 'Delbanco', 'Adlibris']|product(['archive', 'messages'])|list }}"
+        owner: "koha-{{ koha_instance_name }}"
+        group: "koha-{{ koha_instance_name }}"
+      loop: "{{ ['Dawson', 'Delbanco', 'Adlibris', 'Bokus']|product(['archive', 'messages'])|list }}"
       become: yes
 
     - name: Checkout repo
@@ -42,8 +47,8 @@
         name: "koha-edifact-{{ item.0 }}"
         minute: "{{ item.1 }}"
         hour: "22"
-        job: "{{ edifact_home }}/upload_edi.sh {{ item.0 }} >> {{ edifact_data_dir }}/upload_edi.log 2>&1"
+        job: "{{ edifact_home }}/upload_edi.pl {{ item.0 }} >> {{ edifact_data_dir }}/upload_edi.log 2>&1"
         state: "{{ 'present' if edifact_cron_enabled else 'absent' }}"
         user: root
-      loop: "{{ ['Dawson', 'Delbanco', 'Adlibris']|zip(['30', '32', 34])|list }}"
+      loop: "{{ ['Dawson', 'Delbanco', 'Adlibris', 'Bokus']|zip(['30', '32', '34', '36'])|list }}"
       become: yes
