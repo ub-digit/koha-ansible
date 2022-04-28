@@ -1,7 +1,6 @@
 ---
 edifact_home: "/home/{{ ansible_user }}/koha-edifact"
 edifact_version: master
-edifact_data_dir: /opt/koha-edifact
 edifact_base_dir: /opt/koha-edifact/vendors
 edifact_email: gunda@ub.gu.se
 
@@ -13,3 +12,6 @@ edifact_delbanco_password: "{{ vault_edifact_delbanco_password }}"
 
 edifact_adlibris_user: "{{ vault_edifact_adlibris_user }}"
 edifact_adlibris_password: "{{ vault_edifact_adlibris_password }}"
+
+edifact_bokus_user: "{{ vault_edifact_bokus_user }}"
+edifact_bokus_password: "{{ vault_edifact_bokus_password }}"

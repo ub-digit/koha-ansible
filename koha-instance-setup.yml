@@ -200,7 +200,7 @@
         name: koha-gub-edifact
         minute: "00"
         hour: "22"
-        job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} 2>&1"
+        job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} >> {{ edifact_data_dir }}/gub_edifact_cron.log 2>&1"
         state: "{{ 'present' if gub_edifact_cron_enabled else 'absent' }}"
       tags:
       - cronjobs

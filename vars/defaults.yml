@@ -30,3 +30,6 @@ koha_online_payment_info_url_en: https://www.ub.gu.se/en/borrow-and-log-in/borro
 koha_online_payment_info_url_sv: https://www.ub.gu.se/sv/lana-och-logga-in/lana-pa-biblioteket
 
 koha_readonly_db_user_password: "{{ vault_koha_readonly_db_user_password }}"
+
+# Used by koha-instance-setup
+edifact_data_dir: /opt/koha-edifact

@@ -2,6 +2,7 @@ todo
 files/initial-db.sql
 .vagrant
 ansible_password
+.vault_password
 work
 data/*
 !data/.gitkeep
