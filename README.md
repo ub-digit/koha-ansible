@@ -28,13 +28,13 @@ and should be enough to be able to deploy to the vagrant box.
 
 ## Deployment
 
-`ansible-playbook --vault-password-file ansible_password -i <stage> <playbook>.yml`
+`ansible-playbook --vault-password-file .vault_password -i <stage> <playbook>.yml`
 
 For example:
 
-`ansible-playbook --vault-password-file ansible_password -i staging gobi.yml`
+`ansible-playbook --vault-password-file .vault_password -i staging gobi.yml`
 
-Where ansible_password is a file containing the vault password in plain text.
+Where .vault_password is a file containing the vault password in plain text.
 
 `deploy_jobs.sh` is a helper script for deploying miscellaneous scripts and jobs, but not Koha itself (the `site.yml` playbook).
 
@@ -52,3 +52,9 @@ After importing a production database, run `koha-db-anonymize.yml` to anonymize 
 ## Setting up a new environment
 
 Since some capistrano tasks depends on a working Koha environment, it's easiest to initially manually copy the Koha repo into the target `koha_home` directory (for example `/home/apps/koha-lab/current`) and then run `site.yml`. After this the temporary source directory can be removed and capistrany be used for deployment.
+
+## Set ansible vault password environment variable
+`export ANSIBLE_VAULT_PASSWORD_FILE=/path/to/repo/.vault_password`
+
+## Vault git config (diffs for vault-encryted files)
+`git config --global diff.ansible-vault.textconv "ansible-vault view"`
