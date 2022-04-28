@@ -3,4 +3,3 @@ papercut_home: "/home/{{ ansible_user }}/koha-papercut"
 papercut_version: master
 papercut_data_dir: /opt/koha-papercut
 papercut_koha_instance: "{{ koha_instance_name }}"
-papercut_cron_enabled: false

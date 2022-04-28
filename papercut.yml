@@ -9,6 +9,8 @@
         path: "{{ papercut_data_dir }}"
         mode: 0755
         state: directory
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
       become: yes
 
     - name: Checkout repo
