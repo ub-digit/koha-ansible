@@ -6,7 +6,7 @@ koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/advance_not
 
 # AVST 2020-11-12 koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/fines.pl --run_everyday -v --maxdays=16" >> /var/tmp/fines.log 2>&1
 # AKTIVERAD IGEN 2021-09-29
-koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/fines.pl -d 2021-09-30 -v --maxdays=16" >> /var/tmp/fines.log 2>&1
+koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/fines.pl -d 2022-05-10 -v --maxdays=16" >> /var/tmp/fines.log 2>&1
 
 # Sätt bara LOST 2 för dessa kategorier, och lägg inte på några LOST-avgifter
 koha-shell {{ koha_instance_name}} -c "{{ koha_home }}/misc/cronjobs/longoverdue.pl --category=BA --category=BE --category=BF --category=BK --category=BL --category=BM --category=BN --category=BU --category=EI --category=TN --category=TJ --category=PE -c 99 --confirm" > /var/tmp/longoverdue-without-lost-fine.log 2>&1
