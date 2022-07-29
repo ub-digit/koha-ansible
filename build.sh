@@ -30,6 +30,7 @@ sleep 30
 docker-compose -f docker-compose.yml -f docker-compose.build.yml up -d $KOHA_SERVICE
 
 docker-compose exec $KOHA_SERVICE koha-shell koha -c "$KOHA_HOME/misc/search_tools/rebuild_elasticsearch.pl -v -b"
+docker-compose exec $KOHA_SERVICE koha-shell koha -c "$KOHA_HOME/misc/search_tools/rebuild_elasticsearch.pl -v -a"
 
 sudo chown -R 1000 $MARIADB_DATADIR
 
