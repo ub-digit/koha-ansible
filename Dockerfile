@@ -8,7 +8,7 @@ RUN apt-get update \
 RUN echo 'deb http://ppa.launchpad.net/ansible/ansible/ubuntu focal main' > /etc/apt/sources.list.d/ansible.list \
  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367 \
  && apt-get update \
- && apt-get install -y sudo ansible build-essential libmariadb-dev libmariadb-dev-compat libyaz-dev libnet-z3950-zoom-perl libfribidi-dev
+ && apt-get install -y sudo ansible build-essential libmariadb-dev libmariadb-dev-compat libyaz-dev libnet-z3950-zoom-perl libfribidi-dev libtext-bidi-perl
 
 RUN useradd -m -d /home/apps apps
 RUN echo 'apps ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/apps
@@ -40,6 +40,7 @@ RUN mkdir /home/apps/img
 USER root
 RUN mv /install/files/background-image-devbox.png /home/apps/img/background-image-devbox.png
 RUN mv /install/files/favicon-devbox.ico /home/apps/img/favicon-devbox.ico
+RUN /install/files/patches/apply_patches.sh /install/files/patches /home/apps/koha-repo
 RUN chown -R koha-koha:koha-koha /home/apps/koha-repo
 USER root
 WORKDIR /home/apps/koha-repo

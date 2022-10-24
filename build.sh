@@ -26,7 +26,7 @@ docker-compose -f docker-compose.yml -f docker-compose.build.yml up -d $MARIADB_
 docker-compose -f docker-compose.yml -f docker-compose.build.yml up -d $ELASTICSEARCH_SERVICE
 docker-compose -f docker-compose.yml -f docker-compose.build.yml up -d $MEMCACHED_SERVICE
 echo "Waiting for containers to initialize..."
-sleep 30
+sleep 50
 docker-compose -f docker-compose.yml -f docker-compose.build.yml up -d $KOHA_SERVICE
 
 docker-compose exec $KOHA_SERVICE koha-shell koha -c "$KOHA_HOME/misc/search_tools/rebuild_elasticsearch.pl -v -b"

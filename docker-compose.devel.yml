@@ -2,8 +2,16 @@ version: '3.5'
 
 services:
   koha-devbox:
+    image: docker.ub.gu.se/koha-devbox:release-2022.09-20221021.1020
     volumes:
       - "$KOHA_REPO:/home/apps/koha-repo"
+#      - "/home/stefan/koha-build/plugins/stats/koha-plugin-stats-other-table:/var/lib/koha/koha/plugins"
+#      - "/home/stefan/koha-build/plugins/facet/koha-plugin-format-facet:/var/lib/koha/koha/plugins"
+#      - "/home/stefan/koha-build/plugins/printdata/koha-plugin-get-print-data:/var/lib/koha/koha/plugins"
     ports:
       - "7300:80"
       - "7301:8080"
+  mariadb:
+    image: docker.ub.gu.se/koha-devbox-mariadb:release-2022.09-20221021.1020
+  elasticsearch:
+    image: docker.ub.gu.se/koha-devbox-elasticsearch:release-2022.09-20221021.1020

@@ -24,24 +24,28 @@
         path: "{{ koha_repo_path }}/cpanfile"
         regexp: '^(requires .Mojolicious., .)[\d\.]+(.;\s*)$'
         replace: "# \\1<= 8.73\\2"
+      when: false
 
     - name: Limit version of Mojolicious::Plugin::OpenAPI
       ansible.builtin.replace:
         path: "{{ koha_repo_path }}/cpanfile"
         regexp: '^(requires .Mojolicious::Plugin::OpenAPI., .)[\d\.]+(.;\s*)$'
         replace: "# \\1<= 3.39\\2"
+      when: false
 
     - name: Limit version of Text::Bidi
       ansible.builtin.replace:
         path: "{{ koha_repo_path }}/cpanfile"
         regexp: '^(requires .Text::Bidi., .)[\d\.]+(.;\s*)$'
         replace: "# \\1<= 2.15\\2"
+      when: false
 
     - name: Limit version of JSON::Validator
       ansible.builtin.replace:
         path: "{{ koha_repo_path }}/cpanfile"
         regexp: '^(requires .JSON::Validator., .)[\d\.]+(.;\s*)$'
         replace: "# \\1<= 4.05\\2"
+      when: false
 
     - name: Set some recommended modules as required
       ansible.builtin.replace:
@@ -56,6 +60,15 @@
         - SMS::Send #??
         # - Test::MockObject #TODO: Devbox only?
 
+    - name: Set some recommended modules as required
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: "^recommends '{{ item }}'"
+        replace: "requires '{{ item }}'"
+      loop:
+        - Test::MockObject
+      when: environment_name == 'devbox'
+
     # TODO: replace shell with command?
     - name: Install troublesome Perl modules (with failing tests)
       community.general.cpanm:
@@ -67,6 +80,7 @@
         - JSON::Validator::OpenAPI::Mojolicious
         - Cache::Memcached::Fast::Safe
         - DBD::mysql
+      when: false
 
     - name: Install dependecies not included in cpanfile
       community.general.cpanm:
@@ -83,3 +97,34 @@
       community.general.cpanm:
         from_path: "{{ koha_repo_path }}"
         installdeps: yes
+
+    - name: Install required QA packages
+      apt:
+        name: ['libfile-chdir-perl',
+               'libgit-repository-perl',
+               'liblist-compare-perl',
+               'libmoo-perl',
+               'libperl-critic-perl',
+               'libsmart-comments-perl',
+               'dh-make-perl',
+               'libtest-perl-critic-progressive-perl'
+               ]
+        state: latest
+        force: no
+        update_cache: yes
+      when: environment_name == 'devbox'
+
+    - name: Checkout QA repo
+      ansible.builtin.git:
+        repo: "{{ qa_repo }}"
+        dest: "{{ qa_home }}"
+        force: yes
+      when: environment_name == 'devbox'
+
+    - name: Create run-script for qa
+      ansible.builtin.template:
+        src: run-qa.j2
+        dest: /usr/local/bin/run-qa
+        mode: 0755
+      when: environment_name == 'devbox'
+      become: true

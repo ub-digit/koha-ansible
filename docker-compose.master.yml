@@ -1,0 +1,24 @@
+version: '3.5'
+
+services:
+  koha-devbox:
+    image: "docker.ub.gu.se/koha-master-koha:2022.07.001"
+    ports:
+      - "127.0.0.1:7100:80"
+      - "127.0.0.1:7101:8080"
+    cap_add:
+     - SYS_NICE
+     - DAC_READ_SEARCH
+  mariadb:
+    image: "docker.ub.gu.se/koha-master-mariadb:2022.07.001"
+    environment:
+      MARIADB_ROOT_PASSWORD: root_password
+      MARIADB_USER: koha_koha
+      MARIADB_PASSWORD: password
+      MARIADB_DATABASE: koha_koha
+  elasticsearch:
+    image: "docker.ub.gu.se/koha-master-elasticsearch:2022.07.001"
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+  memcached:
+    image: "memcached:1.6"
