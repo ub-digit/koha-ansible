@@ -14,9 +14,28 @@
       loop:
         - bulkmarcimport_err
         - bulkmarcimport_in
+        - adjustgobi_in
         - done
         - fetchgobi_done
         - log
+
+    - name: Install Perl dependecies
+      community.general.cpanm:
+        name: "{{ item }}"
+      become: yes
+      loop:
+        - Email::MIME
+        - Email::Sender::Simple
+        - IO::All
+        - Params::ValidationCompiler
+
+    - name: Ensure bulkmarcimport.log exists with correct owner
+      ansible.builtin.file:
+        path: "{{ gobi_data_dir }}/log/bulkmarcimport.log"
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
+        state: touch
+      become: yes
 
     - name: Checkout repo
       ansible.builtin.git:
