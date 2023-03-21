@@ -19,6 +19,13 @@
         regexp: '^(requires .Net::Z3950::ZOOM., .1.16.;\s*)$'
         replace: "# \\1"
 
+    - name: Limit version of Search::Elasticsearch
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .Search::Elasticsearch., .)[\d\.]+(.;\s*)$'
+        replace: "\\1<= 6.80\\2"
+      when: true
+
     - name: Limit version of Mojolicious
       ansible.builtin.replace:
         path: "{{ koha_repo_path }}/cpanfile"
