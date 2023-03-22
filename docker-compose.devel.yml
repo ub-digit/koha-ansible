@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   koha-devbox:
-    image: docker.ub.gu.se/koha-devbox:release-2023.02-20230320.0855
+    image: docker.ub.gu.se/koha-devbox:release-2023.02-20230320.0855-2
     volumes:
       - "$KOHA_REPO:/home/apps/koha-repo"
 #      - "/home/stefan/koha-build/plugins/stats/koha-plugin-stats-other-table:/var/lib/koha/koha/plugins"
@@ -12,6 +12,6 @@ services:
       - "7300:80"
       - "7301:8080"
   mariadb:
-    image: docker.ub.gu.se/koha-devbox-mariadb:release-2023.02-20230320.0855
+    image: docker.ub.gu.se/koha-devbox-mariadb:release-2023.02-20230320.0855-2
   elasticsearch:
-    image: docker.ub.gu.se/koha-devbox-elasticsearch:release-2023.02-20230320.0855
+    image: docker.ub.gu.se/koha-devbox-elasticsearch:release-2023.02-20230320.0855-2
