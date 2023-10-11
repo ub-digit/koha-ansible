@@ -54,6 +54,12 @@
         replace: "# \\1<= 4.05\\2"
       when: false
 
+    - name: Limit version of DBD::mysql
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .DBD::mysql., .)[\d\.]+(.;\s*)$'
+        replace: "\\1< 5.000\\2"
+
     - name: Set some recommended modules as required
       ansible.builtin.replace:
         path: "{{ koha_repo_path }}/cpanfile"

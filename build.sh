@@ -34,6 +34,7 @@ docker-compose exec $KOHA_SERVICE koha-shell koha -c "$KOHA_HOME/misc/search_too
 
 sudo chown -R 1000 $MARIADB_DATADIR
 
+docker-compose down
 docker build -f Dockerfile.elasticsearch.final -t $IMAGE_ELASTICSEARCH_FINAL .
 docker build -f Dockerfile.mariadb.final -t $IMAGE_MARIADB_FINAL .
 docker-compose down
