@@ -210,6 +210,12 @@
         src: koha-plugin-marc-import-log4perl.conf.j2
         dest: "/etc/koha/sites/{{ koha_instance_name }}/koha-plugin-marc-import-log4perl.conf"
 
+    #- name: Ensure koha-perl5-lib directory
+    #  ansible.builtin.file:
+    #    path: "{{ koha_perl5lib_path }}"
+    #    mode: 0755
+    #    state: directory
+
     # Hack to install from git reposity, works but ugly as hell
     # TODO: checkout as ansible_user to be consistent?
     - name: Checkout MimeMailSender repo, required by marc import plugin
@@ -223,6 +229,29 @@
         src: "/home/{{ ansible_user}}/Log-Dispatch-Email-MimeMailSender/lib/Log/Dispatch/Email/MIMEMailSender.pm"
         dest: "/usr/share/perl5/Log/Dispatch/Email/MIMEMailSender.pm"
         state: link
+
+    - name: Checkout SMS-Send-Infobip repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/SMS-Send-Infobip.git
+        dest: "/home/{{ ansible_user}}/SMS-Send-Infobip"
+        version: master
+
+    - name: Inject SMS-Send-Infobip in perl lib path
+      ansible.builtin.file:
+        src: "/home/{{ ansible_user}}/SMS-Send-Infobip/lib/SMS"
+        dest: "/usr/share/perl5/SMS"
+        state: link
+
+    - name: Ensure koha instance sms_send directory
+      ansible.builtin.file:
+        path: "{{ koha_conf_dir }}/sms_send"
+        mode: 0755
+        state: directory
+
+    - name: Write koha SMS::Send::Infobip config file
+      ansible.builtin.template:
+        src: Infobip.yaml.j2
+        dest: "{{ koha_conf_dir }}/sms_send/Infobip.yaml"
 
     - name: Ensure koha background worker init script
       ansible.builtin.template:

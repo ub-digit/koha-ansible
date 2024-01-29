@@ -83,6 +83,12 @@
         regexp: 'koha-zebra --start'
         replace: '#koha-zebra --start'
 
+    - name: Fix PERL5LIB in koha-shell
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-shell'
+        regexp: '\$result:\$result/lib'
+        replace: "{{ perl5lib_paths }}"
+
     # Special care will have to be taken with these files on new Koha realse
     # deployments.  Will have to manually compare and merge with new release templates
     - name: Copy manually managed Koha config template files

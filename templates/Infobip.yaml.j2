@@ -1,0 +1,9 @@
+apikey: {{ infobip_api_key }}
+sender: {{ infobip_sender }}
+baseurl: {{ infobip_baseurl }}
+{% if infobip_to_override is defined %}
+to_override: {{ infobip_to_override }}
+{% endif %}
+{% if infobip_skip_send is defined %}
+skip_send: {{ infobip_skip_send }}
+{% endif %}
