@@ -1,4 +1,5 @@
 # GUB custom koha-conf.xml config
+infobip_api_key: NOT_RELEVANT
 vault_koha_pg_pass: NOT_RELEVANT
 vault_koha_db_password: password
 vault_mariadb_root_password: root_password
