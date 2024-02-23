@@ -1,3 +1,5 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:6.8.23
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.17.18
 RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-icu
 COPY ./data/build/elasticsearch/. /usr/share/elasticsearch/data/.
+RUN rm -f /usr/share/elasticsearch/data/nodes/0/node.lock
+RUN rm -f /usr/share/elasticsearch/data/nodes/0/snapshot_cache/write.lock
