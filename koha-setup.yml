@@ -60,6 +60,12 @@
         regexp: '^(requires .DBD::mysql., .)[\d\.]+(.;\s*)$'
         replace: "\\1< 5.000\\2"
 
+    - name: Limit version of UUID
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .UUID., .)[\d\.]+(.;\s*)$'
+        replace: "\\1< 0.29\\2"
+
     - name: Set some recommended modules as required
       ansible.builtin.replace:
         path: "{{ koha_repo_path }}/cpanfile"
@@ -70,7 +76,7 @@
         - Module::Bundled::Files # Plugins dependency
         - Module::Pluggable
         - Module::Load::Conditional
-        - SMS::Send #??
+        - SMS::Send # ??
         # - Test::MockObject #TODO: Devbox only?
 
     - name: Set some recommended modules as required
