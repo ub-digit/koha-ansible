@@ -1,0 +1,8 @@
+version: '3.5'
+services:
+  koha:
+    ports:
+      - "127.0.0.1:7100:80"
+      - "127.0.0.1:7101:8080"
+    volumes:
+      - "${KOHA_REPO}:/opt/koha"

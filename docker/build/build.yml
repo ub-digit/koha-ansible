@@ -1,7 +1,6 @@
 ---
 all:
   hosts:
-    kohadevbox:
+    build:
       ansible_host: localhost
-      ansible_user: apps
       ansible_connection: local

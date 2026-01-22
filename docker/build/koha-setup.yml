@@ -1,0 +1,260 @@
+---
+# TODO: Cleanup apt
+- hosts: all
+  become: true
+  become_user: root
+  tasks:
+    - name: Disable Net::Z3950::ZOOM from cpan. Installed via packages.
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^requires .Net::Z3950::ZOOM.*'
+        replace: "# \\0"
+
+    - name: Disable Text::Bidi from cpan. Installed via packages.
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^requires .Text::Bidi.*'
+        replace: "# \\0"
+
+    - name: Limit version of Search::Elasticsearch
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .Search::Elasticsearch., .)[\d\.]+(.;\s*)$'
+        replace: "\\1<= 6.80\\2"
+      when: true
+
+    - name: Limit version of Mojolicious
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .Mojolicious., .)[\d\.]+(.;\s*)$'
+        replace: "# \\1<= 8.73\\2"
+      when: false
+
+    - name: Limit version of Mojolicious::Plugin::OpenAPI
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .Mojolicious::Plugin::OpenAPI., .)[\d\.]+(.;\s*)$'
+        replace: "# \\1<= 3.39\\2"
+      when: false
+
+#    - name: Limit version of Text::Bidi
+#      ansible.builtin.replace:
+#        path: "{{ koha_repo_path }}/cpanfile"
+#        regexp: '^(requires .Text::Bidi., .)[\d\.]+(.;\s*)$'
+#        replace: "# \\1<= 2.15\\2"
+#      when: false
+
+    - name: Limit version of JSON::Validator
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .JSON::Validator., .)[\d\.]+(.;\s*)$'
+        replace: "# \\1<= 4.05\\2"
+      when: false
+
+    - name: Limit version of DBD::mysql
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .DBD::mysql., .)[\d\.]+(.;\s*)$'
+        replace: "\\1< 5.000\\2"
+
+    - name: Limit version of UUID
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: '^(requires .UUID., .)[\d\.]+(.;\s*)$'
+        replace: "\\1< 0.29\\2"
+
+    - name: Set some recommended modules as required
+      ansible.builtin.replace:
+        path: "{{ koha_repo_path }}/cpanfile"
+        regexp: "^recommends '{{ item }}'"
+        replace: "requires '{{ item }}'"
+      loop:
+        - UNIVERSAL::require # SIP dependency
+        - Module::Bundled::Files # Plugins dependency
+        - Module::Pluggable
+        - Module::Load::Conditional
+        - SMS::Send # ??
+        - Test::MockObject
+
+    # TODO: replace shell with command?
+    - name: Install troublesome Perl modules (with failing tests)
+      community.general.cpanm:
+        name: "{{ item }}"
+        notest: True
+      loop:
+        - Mojolicious::Plugin::OpenAPI
+        - JSON::Validator
+        - JSON::Validator::OpenAPI::Mojolicious
+        - Cache::Memcached::Fast::Safe
+        - DBD::mysql
+      when: false
+
+    - name: Install dependecies not included in cpanfile
+      community.general.cpanm:
+        name: "{{ item }}"
+      loop:
+        - Switch # koha-plugin-format-facet dependency
+        - LWP::Simple::Post # koha-plugin-get-print-data dependency
+        - DBD::Pg # GUB postgres reports
+        - Crypt::OpenSSL::RSA
+
+#    - name: Install Koha perl dependencies
+#      community.general.cpanm:
+#        from_path: "{{ koha_repo_path }}"
+#        installdeps: yes
+
+    - name: Install required QA packages
+      apt:
+        name: ['libfile-chdir-perl',
+               'libgit-repository-perl',
+               'liblist-compare-perl',
+               'libmoo-perl',
+               'libperl-critic-perl',
+               'libsmart-comments-perl',
+               'dh-make-perl',
+               'libtest-perl-critic-progressive-perl'
+               ]
+        state: latest
+        force: no
+        update_cache: yes
+
+    - name: Checkout QA repo
+      ansible.builtin.git:
+        repo: "{{ qa_repo }}"
+        dest: "{{ qa_home }}"
+        force: yes
+
+    - name: Create run-script for qa
+      ansible.builtin.template:
+        src: run-qa.j2
+        dest: /usr/local/bin/run-qa
+        mode: 0755
+      become: true
+
+    - name: Copy Koha scripts
+      ansible.builtin.copy:
+        src: "{{ koha_repo_path }}/debian/scripts/"
+        dest: "/usr/sbin/"
+        remote_src: yes
+        mode: preserve # Should be fixed here https://github.com/Shrews/ansible/commit/3c1ca809614863aaa6b85d460be9846494cdb802 but still does not retain permissions, so fixing this manually below
+
+    - name: Find all Koha scripts
+      find:
+        paths: "/usr/sbin/"
+        patterns: "koha-*"
+      register: scripts
+
+    - name: Ensure Koha scripts are executable
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: 0755
+      loop: "{{ scripts.files }}"
+
+#    - name: Replace koha-functions.sh path in scripts
+#      replace:
+#        path: "{{ item.path }}"
+#        regexp: '/usr/share/koha/bin/koha-functions.sh'
+#        replace: '/usr/sbin/koha-functions.sh'
+#      with_items: "{{ scripts.files }}"
+
+    # This is way faster
+    - name: Fix koha-functions.sh path in scripts
+      ansible.builtin.shell: ls /usr/sbin | grep '^koha-' | xargs -I{ sed -i 's#/usr/share/koha/bin/koha-functions.sh#/usr/sbin/koha-functions.sh#g' '/usr/sbin/{'
+
+    - name: Comment out check_apache_config (to avoid warning causing crash)
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-create'
+        regexp: 'check_apache_config\s*$'
+        replace: '#check_apache_config'
+
+    - name: Comment out create Zebra config files
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-create'
+        regexp: '((?:generate_config_file zebra)|(?:"/etc/koha/sites/\$name/zebra))'
+        replace: '#\1'
+
+    - name: Comment out start-zebra
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-create'
+        regexp: 'koha-zebra --start'
+        replace: '#koha-zebra --start'
+
+    - name: Fix PERL5LIB in koha-shell
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-shell'
+        regexp: '\$result:\$result/lib'
+        replace: "{{ perl5lib_paths }}"
+
+    - name: Ensure /etc/default/koha-common
+      template:
+        src: koha-common.j2
+        dest: /etc/default/koha-common
+        mode: 0644
+
+    - name: Ensure Koha init script
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ koha_repo_path }}/debian/koha-common.init"
+        dest: "/etc/init.d/koha-common"
+        mode: 0755
+
+
+    # Note: we do not use apache-site.conf.in since have modified
+    # apache-site.conf.in instead (to don't have to deal with koha-create
+    # trying to perform letsencrypt magick etc if run with ssl option)
+    # @TODO: Copy all and add lists of exceptions instead?
+    - name: Copy rest of unmanaged Koha config template files from release
+      ansible.builtin.copy:
+        remote_src: yes
+        src: "{{ koha_repo_path }}/debian/templates/{{ item }}"
+        dest: "/etc/koha/"
+      loop:
+        - log4perl-site.conf.in
+        - SIPconfig.xml # Remove?
+        - plack.psgi
+        - apache-site.conf.in 
+        - apache-shared.conf
+        - apache-shared-disable.conf
+        - apache-shared-intranet.conf
+        - apache-shared-intranet-plack.conf
+        - apache-shared-opac.conf
+        - apache-shared-opac-plack.conf
+        - apache-site-https.conf.in
+
+    - name: Replace koha-functions.sh path in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '/usr/share/koha/bin/koha-functions.sh'
+        replace: "/usr/sbin/koha-functions.sh"
+
+    - name: Comment out package check in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '(\[ -x /usr/sbin/koha-zebra)'
+        replace: '# \1'
+
+    - name: Comment out koha-zebra in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '(\skoha-zebra\s)'
+        replace: '#\1'
+
+    - name: Comment out zebra_status in Koha init script
+      ansible.builtin.replace:
+        path: "/etc/init.d/koha-common"
+        regexp: '(\szebra_status\s)'
+        replace: '#\1'
+
+    # Can't figure out where these are created, at least not in koha-common package, koha-create (or koha-create-dirs)
+    # koha-common.dirs
+    - name: Create /etc/koha/sites directory
+      ansible.builtin.file:
+        path: /etc/koha/sites
+        mode: 0755
+        state: directory
+
+    - name: Create /var/log/koha directory
+      ansible.builtin.file:
+        path: /var/log/koha
+        mode: 0755
+        state: directory

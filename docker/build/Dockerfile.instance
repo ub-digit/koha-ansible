@@ -1,0 +1,20 @@
+FROM docker.ub.gu.se:koha-base:koha
+
+COPY ./koha-instance-setup.yml ./
+COPY ./build.yml ./
+COPY ./host_vars ./host_vars
+COPY ./templates ./templates
+COPY ./requirements.yml ./
+
+RUN ansible-galaxy install -r requirements.yml
+
+RUN ansible-playbook -i build.yml koha-instance-setup.yml
+
+RUN chown -R koha-koha:koha-koha /root/koha
+WORKDIR /root/koha
+
+# RUN /install/files/patches/apply_patches.sh /install/files/patches /home/apps/koha-repo
+
+# ENV SHELL=/bin/bash
+# CMD ["apachectl", "-DFOREGROUND", "-e", "debug"]
+

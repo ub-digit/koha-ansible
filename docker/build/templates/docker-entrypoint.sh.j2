@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -e
+
+envsubst < {{ [envsubst_templates_dir, 'koha-conf.xml'] | path_join }}  > {{ [site_dir, 'koha-conf.xml'] | path_join }}
+envsubst < {{ [envsubst_templates_dir, 'koha-plugin-marc-import-log4perl.conf'] | path_join }}  > {{ [site_dir, 'koha-plugin-marc-import-log4perl.conf'] | path_join }}
+
+envsubst < {{ [envsubst_templates_dir, 'Sendmail.pm'] | path_join }}  > /usr/share/perl5/Mail/Sendmail.pm
+envsubst < {{ [envsubst_templates_dir, 'supervisord.conf'] | path_join }}  > /etc/supervisord.conf
+
+# Needed, or can perhaps make sure templates file has correct owner?
+chown -R {{ koha_user }}:{{ koha_user }} {{ site_dir }}
+
+# If first arg starts with "-" OR no args provided → run supervisord
+if [[ $# -eq 0 || "$1" == -* ]]; then
+    exec supervisord -n -c "/etc/supervisord.conf" "$@" 
+else
+    exec "$@"
+fi

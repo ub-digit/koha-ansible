@@ -1,0 +1,116 @@
+---
+- hosts: all
+  vars:
+    pip_install_packages:
+      - name: PyMySQL
+  roles:
+    - geerlingguy.pip
+  become: true
+  become_user: root
+  tasks:
+    - name: Install gnupg
+      apt:
+        name: gnupg2
+        state: present
+        update_cache: yes
+
+#    - name: Add official Koha repository (key)
+#      ansible.builtin.apt_key:
+#        url: http://debian.koha-community.org/koha/gpg.asc
+#        state: present
+#
+#    - name: Add official Koha repository (repo)
+#      ansible.builtin.apt_repository:
+#        repo: deb [trusted=yes] http://debian.koha-community.org/koha dev main
+#        update_cache: yes
+#        state: present
+
+    - name: Install required packages
+      apt:
+        name: [
+               # Docker
+               'supervisor',
+               #'ntp', # Not found in trixie
+               # Needed?
+               'libstring-similarity-perl', #??
+               'dh-make-perl',
+               # Utilities
+               'emacs-nox',
+               'vim-nox',
+               'byobu',
+               'htop',
+               'curl',
+               'wget',
+               'tree',
+               'netcat-openbsd',
+               'plocate',
+               # Git
+               'git',
+               'git-email',
+               # Koha/perl dependencies
+               'apt-transport-https',
+               'build-essential',
+               'cpanminus',
+               'cpanoutdated',
+               'libmariadb-dev-compat',
+               'libmariadb-dev', # TODO: Required? 
+               'libstrictures-perl',
+               # Koha dev
+               'perltidy',
+               'libdata-printer-perl',
+               'pmtools',
+               # Koha testing docker
+               #'codespell',
+               #'libperl-critic-perl'
+               #'libtest-differences-perl',
+               #'libtest-perl-critic-perl',
+               #'libtest-perl-critic-progressive-perl'
+               #'libfile-chdir-perl'
+               #'locales', # TODO: Save spaces if used?
+               # Koha-common dependencies as listed by `apt-cache depends koha-common`
+               'debconf',
+               'libalgorithm-checkdigits-perl',
+               'libanyevent-http-perl',
+               'libanyevent-perl',
+               'libarchive-extract-perl',
+               'libarchive-zip-perl',
+               'libarray-utils-perl',
+               'libauthen-cas-client-perl',
+               'libbiblio-endnotestyle-perl',
+               'libbusiness-isbn-perl',
+               'libbusiness-issn-perl',
+               'libbytes-random-secure-perl',
+               'python3-apt', # Warning in ansible-role-pip
+               'python3-mysqldb', # Required for ansible mysql collection
+               'libpq-dev', # Required for DBD::Pg
+               'libnet-z3950-zoom-perl',
+               'gettext',
+               'xsltproc',
+               'docbook-xsl',
+               'fonts-dejavu',
+               'libxml2-utils',
+               'bash-completion',
+               'libtest-simple-perl',
+               'libtext-bidi-perl',
+               'apache2',
+               'libapache2-mpm-itk',
+               'at',
+               'daemon', # Needed?
+               'debconf',
+               'perl-doc',
+               'pwgen',
+               'starman',
+               'sudo',
+               'unzip',
+               'xmlstarlet',
+               'yaz', # Probably not needed, zebra dependecy?
+               'libyaz-dev',
+               'pkg-config',
+               'uuid-dev',
+               'libgdome2-dev', #For XML::LibXSLT, might be dependecy of libgdome2 that makes it compile?
+               'libfribidi-dev',
+               'libgd-dev',
+               ]
+        state: latest
+        force: no
+        update_cache: yes

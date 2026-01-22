@@ -1,0 +1,4 @@
+ARG RABBITMQ_VERSION
+FROM rabbitmq:${RABBITMQ_VERSION}
+# Enable the STOMP plugin
+RUN rabbitmq-plugins enable --offline rabbitmq_web_stomp

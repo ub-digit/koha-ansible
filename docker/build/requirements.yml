@@ -1,0 +1,5 @@
+---
+roles:
+  - name: geerlingguy.pip
+collections:
+  - community.general # elasticsearch plugins install

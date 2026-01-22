@@ -1,0 +1,208 @@
+---
+- hosts: all
+  become: true
+  become_user: root
+  tasks:
+
+    - name: Set facts
+      ansible.builtin.set_fact:
+        envsubst_templates_dir: "{{ [playbook_dir, 'env_templates'] | path_join }}" 
+        site_dir: "{{ ['/etc/koha/sites', koha_instance_name] | path_join }}"
+
+    - name: Ensure root .bashrc
+      ansible.builtin.template:
+        src: bashrc.j2
+        dest: /root/.bashrc
+
+    - name: Ensure envsubst templates directory exists
+      ansible.builtin.file:
+        path: "{{ envsubst_templates_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Ensure custom koha-conf-site.xml.in template
+      ansible.builtin.template:
+        src: koha-conf-site.xml.in.j2
+        dest: /etc/koha/koha-conf-site.xml.in
+
+    - name: Ensure database credentials
+      ansible.builtin.template:
+        src: koha_passwd.j2
+        dest: /etc/koha/passwd
+
+    - name: Ensure koha-sites.conf
+      ansible.builtin.template:
+        src: koha-sites.conf.j2
+        dest: /etc/koha/koha-sites.conf
+
+    - name: Create Koha instance
+      ansible.builtin.command: "koha-create --use-db --memcached-servers {{ koha_memcached_server }} --elasticsearch-server {{ koha_elasticsearch_server }} --mb-host {{ koha_rabbitmq_host }} --mb-port {{ koha_rabbitmq_port }} --mb-user {{ koha_rabbitmq_user }} --mb-pass {{ koha_rabbitmq_password }} {{ koha_instance_name }}"
+
+    - name: Copy koha-conf-site.xml.in to template directory
+      ansible.builtin.copy:
+        src: "{{ [site_dir, 'koha-conf.xml'] | path_join }}"
+        dest: "{{ [envsubst_templates_dir, 'koha-conf.xml'] | path_join }}"
+
+    - name: Touch sip.enabled to emulate koha-sip --enable
+      ansible.builtin.file:
+        path: "/var/lib/koha/{{ koha_instance_name }}/sip.enabled"
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
+        state: touch
+
+    # Hack 
+    - name: Copy Sendmail.pm to template directory
+      ansible.builtin.copy:
+        src: /usr/share/perl5/Mail/Sendmail.pm
+        dest: "{{ [envsubst_templates_dir, 'Sendmail.pm'] | path_join }}"
+
+    - name: Set smtp host in system perl Sendmail.pm
+      ansible.builtin.replace:
+        path: "{{ [envsubst_templates_dir, 'Sendmail.pm'] | path_join }}"
+        after: '# \*+ Configuration you may want to change \*+'
+        before: '\);\s+# \*+'
+        regexp: "^(\\s+'smtp'\\s+=>\\s+).*$"
+        replace: '\1[ qw( $SMTP_HOST ) ],'
+
+    - name: Set smtp port in system perl Sendmail.pm
+      ansible.builtin.replace:
+        path: "{{ [envsubst_templates_dir, 'Sendmail.pm'] | path_join }}"
+        after: '# \*+ Configuration you may want to change \*+'
+        before: '\);\s+# \*+'
+        regexp: "^(\\s+'port'\\s+=>).*$"
+        replace: '\1 qw( $SMTP_PORT ) ,' # Weird behavior no space between \1{{ will cause issues
+
+    # Translation files
+    - name: Copy translation files
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/po/"
+        dest: "{{ [koha_repo_path, 'misc/translator/po'] | path_join }}"
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}" # group?
+
+    - name: Write log config for koha-plugin-marc-import
+      ansible.builtin.template:
+        src: koha-plugin-marc-import-log4perl.conf.j2
+        dest: "{{ [envsubst_templates_dir, 'koha-plugin-marc-import-log4perl.conf'] | path_join }}"
+
+
+    - name: Create empty log files with the correct owner
+      ansible.builtin.file:
+        mode: 0644
+        path: "/var/log/koha/{{ koha_instance_name }}/{{ item }}"
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
+        state: touch
+      loop:
+        - intranet-error.log
+        - opac-error.log
+
+    - name: Set localhost server name in apache-site.conf.in
+      ansible.builtin.replace:
+        path: "/etc/koha/apache-site.conf.in"
+        regexp: "__OPACSERVER__|__INTRASERVER__"
+        replace: "localhost"
+
+    - name: Replace DocumentRoot path in apache-shared-intranet.conf and apache-shared-opac.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/{{ item }}"
+        regexp: '^DocumentRoot [^ ]+\s*$'
+        replace: "DocumentRoot {{ koha_repo_path }}/koha-tmpl"
+      loop:
+        - apache-shared-intranet.conf
+        - apache-shared-opac.conf
+
+    - name: Replace ScriptAlias path in apache-shared-intranet.conf and apache-shared-opac.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/{{ item }}"
+        regexp: '^(ScriptAlias [^ ]+) "[^"]+/cgi-bin/([^"]*)"'
+        replace: "\\1 \"{{ koha_repo_path }}/\\2\""
+      loop:
+        - apache-shared-intranet.conf
+        - apache-shared-opac.conf
+
+    - name: Replace API paths in apache-shared-intranet.conf and apache-shared-opac.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/{{ item }}"
+        regexp: '/usr/share/koha/api'
+        replace: "{{ koha_repo_path}}/api"
+      loop:
+        - apache-shared-intranet.conf
+        - apache-shared-opac.conf
+
+    - name: Replace PERL5LIB path in apache-shared.conf
+      ansible.builtin.replace:
+        path: "/etc/koha/apache-shared.conf"
+        regexp: '^SetEnv PERL5LIB "[^"]+"\s*$'
+        replace: "SetEnv PERL5LIB \"{{ perl5lib_paths }}\""
+
+#    - name: Replace __LOG_DIR__ in log4perl.conf
+#      ansible.builtin.replace:
+#        dest: "/etc/koha/sites/{{ koha_instance_name }}/log4perl.conf"
+#        regexp: '__LOG_DIR__'
+#        replace: "/var/log/koha/{{ koha_instance_name }}"
+#
+    #- name: Ensure koha-perl5-lib directory
+    #  ansible.builtin.file:
+    #    path: "{{ koha_perl5lib_path }}"
+    #    mode: 0755
+    #    state: directory
+
+    # Hack to install from git reposity, works but ugly as hell
+    - name: Checkout MimeMailSender repo, required by marc import plugin
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/Log-Dispatch-Email-MimeMailSender.git
+        dest: "/var/lib/koha/Log-Dispatch-Email-MimeMailSender"
+        version: master
+
+    - name: Inject MIMEMailSender in perl lib path
+      ansible.builtin.file:
+        src: "/var/lib/koha/Log-Dispatch-Email-MimeMailSender/lib/Log/Dispatch/Email/MIMEMailSender.pm"
+        dest: "/usr/share/perl5/Log/Dispatch/Email/MIMEMailSender.pm"
+        state: link
+
+    - name: Checkout SMS-Send-Infobip repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/SMS-Send-Infobip.git
+        dest: "/var/lib/koha/SMS-Send-Infobip"
+        version: master
+
+    - name: Inject SMS-Send-Infobip in perl lib path
+      ansible.builtin.file:
+        src: "/var/lib/koha/SMS-Send-Infobip/lib/SMS"
+        dest: "/usr/share/perl5/SMS"
+        state: link
+
+    - name: Ensure koha instance sms_send directory
+      ansible.builtin.file:
+        path: "/var/lib/koha/sms_send"
+        mode: 0755
+        state: directory
+
+    - name: Write koha SMS::Send::Infobip config file
+      ansible.builtin.template:
+        src: Infobip.yaml.j2
+        dest: "/var/lib/koha/sms_send/Infobip.yaml"
+
+    - name: Ensure koha user owns koha directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        recurse: yes
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
+      loop:
+        - "/var/lib/koha"
+        - "/etc/koha"
+        - "{{ koha_repo_path }}"
+
+    - name: Ensure supervisord configuration
+      ansible.builtin.template:
+        src: supervisord.conf.j2
+        dest: "{{ [envsubst_templates_dir, 'supervisord.conf'] | path_join }}"
+
+    - name: Ensure docker entrypoint
+      ansible.builtin.template:
+        src: docker-entrypoint.sh.j2
+        dest: "/usr/local/bin/docker-entrypoint.sh"
+        mode: "0755"

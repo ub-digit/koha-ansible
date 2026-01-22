@@ -1,5 +1,5 @@
 ---
-all:
+deploy:
   hosts:
     kohaproduction:
       ansible_host: 130.241.35.151

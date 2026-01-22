@@ -1,0 +1,40 @@
+---
+koha_instance_name: koha
+koha_user: 'koha-koha'
+
+koha_db_host: mariadb
+koha_db_password: password
+
+koha_elasticsearch_server: elasticsearch:9200
+koha_memcached_server: memcached:11211
+
+koha_rabbitmq_host: rabbitmq
+koha_rabbitmq_port: 61613
+koha_rabbitmq_user: guest
+koha_rabbitmq_password: guest
+
+# koha_data_dir: /mnt
+# mariadb_data_dir: /mnt/mariadb
+# elasticsearch_data_dir: /mnt/elasticsearch
+# Mail settings #TODO: Remove
+# smtp_host: 127.0.0.1
+# smtp_port: 1025
+# smtp_username: ''
+# smtp_password: ''
+# smtp_ssl_mode: disabled
+
+
+# koha_database_backup_cron_enabled: false
+# gub_edifact_cron_enabled: false
+# edifact_cron_enabled: false
+# papercut_cron_enabled: false
+qa_repo: https://gitlab.com/koha-community/qa-test-tools.git
+qa_home: "/opt/qa-test-tools" #TODO: rename to qa_repo_path
+
+# Possible to refer to previous variable?
+perl5lib_paths: "{{ koha_repo_path }}/lib:{{ koha_repo_path }}"
+ 
+intranet_server_name: "localhost"
+intranet_port: 8080
+opac_server_name: "localhost"
+opac_port: 80

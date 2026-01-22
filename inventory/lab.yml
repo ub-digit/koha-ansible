@@ -1,5 +1,5 @@
 ---
-all:
+deploy:
   hosts:
     kohalab:
       ansible_host: 89.45.233.21

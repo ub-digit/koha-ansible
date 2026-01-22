@@ -1,0 +1,27 @@
+version: '3.7'
+services:
+  koha:
+    image: docker.ub.gu.se/koha-base:${GIT_REVISION}
+    build:
+      context: ./
+      dockerfile: Dockerfile.koha
+      args:
+#        - ANSIBLE_GIT_REPO_URL=${ANSIBLE_GIT_REPO_URL}
+#        - ANSIBLE_GIT_REVISION=${ANSIBLE_GIT_REVISION}
+        - GIT_REPO_URL=${GIT_REPO_URL}
+        - GIT_REVISION=${GIT_REVISION}
+        - KOHA_REPO_PATH=${KOHA_REPO_PATH}
+  elasticsearch:
+    image: docker.ub.gu.se/koha-elasticsearch:${ELASTICSEARCH_VERSION}
+    build:
+      context: ./
+      dockerfile: Dockerfile.elasticsearch
+      args:
+        - ELASTICSEARCH_VERSION=${ELASTICSEARCH_VERSION}
+  rabbitmq:
+    image: docker.ub.gu.se/koha-rabbitmq:${RABBITMQ_VERSION}
+    build:
+      context: ./
+      dockerfile: Dockerfile.rabbitmq
+      args:
+        - RABBITMQ_VERSION=${RABBITMQ_VERSION}

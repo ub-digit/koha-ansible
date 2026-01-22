@@ -1,37 +1,7 @@
----
 - hosts: all
-  vars_files:
-    - vars/defaults.yml
-    - vars/vault.yml
   become: true
   become_user: root
   tasks:
-    - name: Set koha_conf_dir
-      set_fact:
-        koha_conf_dir: "/etc/koha/sites/{{ koha_instance_name }}"
-
-    - name: Check for instance existence
-      ansible.builtin.shell: koha-list | grep {{ koha_instance_name }}
-      register: result
-      ignore_errors: yes
-
-    - name: Write apache site config template if creating new instance so koha-create doesn't complain
-      ansible.builtin.template:
-        src: apache-site.conf.in.j2
-        dest: /etc/koha/apache-site.conf.in
-      when: result.stdout == ""
-
-    - name: Write koha configuration template if creating new instance so koha-create doesn't complain
-      ansible.builtin.template:
-        src: koha-conf-site.xml.in.j2
-        dest: "/etc/koha/koha-conf-site.xml.in"
-      notify: restart memcached
-
-    - name: Create Koha instance
-      ansible.builtin.command: koha-create --use-db --memcached-servers {{ koha_memcached_servers }} --dbhost {{ koha_db_host }} --database koha_{{ koha_instance_name }} --elasticsearch-server {{ koha_elasticsearch_server }} {{ koha_instance_name }}
-      when: result.stdout == ""
-      notify: restart apache
-
     - name: Ensure apache site configuration
       ansible.builtin.template:
         src: apache-site.conf.in.j2
@@ -45,13 +15,6 @@
         src: koha-conf-site.xml.in.j2
         dest: "/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml"
       notify: restart memcached
-
-    - name: Touch sip.enabled to emulate koha-sip --enable
-      ansible.builtin.file:
-        path: "/var/lib/koha/{{ koha_instance_name }}/sip.enabled"
-        owner: "{{ koha_user }}"
-        group: "{{ koha_user }}"
-        state: touch
 
     - name: Ensure SIP-server configuration
       ansible.builtin.template:
@@ -118,31 +81,6 @@
         regexp: '__LOG_DIR__'
         replace: "/var/log/koha/{{ koha_instance_name }}"
 
-    - name: Add ansible user to koha instance group
-      ansible.builtin.user:
-        name: "{{ ansible_user }}"
-        append: yes
-        groups: "{{ koha_user }}"
-
-    # Hack
-    - name: Set smtp host in system perl Sendmail.pm
-      ansible.builtin.replace:
-        path: /usr/share/perl5/Mail/Sendmail.pm
-        after: '# \*+ Configuration you may want to change \*+'
-        before: '\);\s+# \*+'
-        regexp: "^(\\s+'smtp'\\s+=>\\s+).*$"
-        replace: '\1[ qw( {{ smtp_host }} ) ],'
-
-    - name: Set smtp port in system perl Sendmail.pm
-      ansible.builtin.replace:
-        path: /usr/share/perl5/Mail/Sendmail.pm
-        after: '# \*+ Configuration you may want to change \*+'
-        before: '\);\s+# \*+'
-        #regexp: "^(\\s+'port'\\s+=>\\s+).*$"
-        #replace: '\1{{ smtp_port }},'
-        regexp: "^(\\s+'port'\\s+=>).*$"
-        replace: '\1 {{ smtp_port }},' # Weird behavior no space between \1{{ will cause issues
-
     - name: Ensure cronjobs (cron.d)
       ansible.builtin.template:
         src: koha-common.cron.d.j2
@@ -157,14 +95,6 @@
         mode: 0755
       tags:
       - cronjobs
-
-    # Translation files
-    - name: Copy translation files
-      ansible.builtin.copy:
-        dest: "{{ koha_po_files_path }}"
-        src: "{{ playbook_dir }}/files/po/"
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}" # group?
 
     # GUB-scripts
     - name: Write /usr/local/sbin/koha-database-backup.sh
@@ -204,74 +134,6 @@
         state: "{{ 'present' if gub_edifact_cron_enabled else 'absent' }}"
       tags:
       - cronjobs
-
-    - name: Write log config for koha-plugin-marc-import
-      ansible.builtin.template:
-        src: koha-plugin-marc-import-log4perl.conf.j2
-        dest: "/etc/koha/sites/{{ koha_instance_name }}/koha-plugin-marc-import-log4perl.conf"
-
-    #- name: Ensure koha-perl5-lib directory
-    #  ansible.builtin.file:
-    #    path: "{{ koha_perl5lib_path }}"
-    #    mode: 0755
-    #    state: directory
-
-    # Hack to install from git reposity, works but ugly as hell
-    # TODO: checkout as ansible_user to be consistent?
-    - name: Checkout MimeMailSender repo, required by marc import plugin
-      ansible.builtin.git:
-        repo: https://github.com/ub-digit/Log-Dispatch-Email-MimeMailSender.git
-        dest: "/home/{{ ansible_user}}/Log-Dispatch-Email-MimeMailSender"
-        version: master
-
-    - name: Inject MIMEMailSender in perl lib path
-      ansible.builtin.file:
-        src: "/home/{{ ansible_user}}/Log-Dispatch-Email-MimeMailSender/lib/Log/Dispatch/Email/MIMEMailSender.pm"
-        dest: "/usr/share/perl5/Log/Dispatch/Email/MIMEMailSender.pm"
-        state: link
-
-    - name: Checkout SMS-Send-Infobip repo
-      ansible.builtin.git:
-        repo: https://github.com/ub-digit/SMS-Send-Infobip.git
-        dest: "/home/{{ ansible_user}}/SMS-Send-Infobip"
-        version: master
-
-    - name: Inject SMS-Send-Infobip in perl lib path
-      ansible.builtin.file:
-        src: "/home/{{ ansible_user}}/SMS-Send-Infobip/lib/SMS"
-        dest: "/usr/share/perl5/SMS"
-        state: link
-
-    - name: Ensure koha instance sms_send directory
-      ansible.builtin.file:
-        path: "{{ koha_conf_dir }}/sms_send"
-        mode: 0755
-        state: directory
-
-    - name: Write koha SMS::Send::Infobip config file
-      ansible.builtin.template:
-        src: Infobip.yaml.j2
-        dest: "{{ koha_conf_dir }}/sms_send/Infobip.yaml"
-
-    - name: Ensure koha background worker init script
-      ansible.builtin.template:
-        src: koha-background-worker.service.j2
-        dest: "/etc/systemd/system/koha-background-worker.service"
-      notify: reload systemd
-      when: environment_name != 'devbox'
-
-    - name: Ensure background worker enabled and started
-      ansible.builtin.systemd:
-        name: koha-background-worker
-        enabled: yes
-        state: started
-      when: environment_name != 'devbox'
-
-    - name: Ensure plack is running
-      ansible.builtin.shell:
-        cmd: ". /usr/sbin/koha-functions.sh && if ! is_plack_running {{ koha_instance_name }}; then koha-plack --start {{ koha_instance_name }}; fi"
-      when: plack
-
   handlers:
     # remove become: yes?
     - name: restart sip
@@ -297,3 +159,19 @@
         name: memcached
         state: restarted
       become: yes
+
+    # Special care will have to be taken with these files on new Koha realse
+    # deployments.  Will have to manually compare and merge with new release templates
+    - name: Copy manually managed Koha config template files
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/etc/{{ item }}"
+        dest: "/etc/koha/"
+      # worker-service???
+      loop:
+        - koha-sites.conf
+
+    - name: Ensure /etc/koha/passwd
+      template:
+        src: koha_passwd.j2
+        dest: /etc/koha/passwd
+        mode: 0644

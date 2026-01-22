@@ -1,5 +1,5 @@
 ---
-all:
+deploy:
   hosts:
     kohastaging:
       ansible_host: koha-staging.ub.gu.se

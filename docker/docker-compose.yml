@@ -1,27 +1,45 @@
 version: '3.5'
-
 services:
-  koha-devbox:
-    image: "devbox:1"
-    ports:
-      - "127.0.0.1:7100:80"
-      - "127.0.0.1:7101:8080"
+  koha:
+    image: docker.ub.gu.se/koha-base:${GIT_REVISION}
+    environment:
+      SMTP_HOST: "${SMTP_HOST}"
+      SMTP_PORT: "${SMTP_PORT}"
+      PLACK_MAX_REQUESTS: "${PLACK_MAX_REQUESTS}"
+      PLACK_WORKERS: "${PLACK_WORKERS}"
+      INFOBIP_API_KEY: "${INFOBIP_API_KEY}"
+      INFOBIP_SENDER: "${INFOBIP_SENDER}"
+      INFOBIP_BASEURL: "${INFOBIP_BASEURL}"
+      TO_OVERRIDE: "${TO_OVERRIDE}"
+      INFOBIP_SKIP_SEND: "${INFOBIP_SKIP_SEND}"
     cap_add:
      - SYS_NICE
      - DAC_READ_SEARCH
+    depends_on:
+      - mariadb
+      - elasticsearch
+      - rabbitmq
   mariadb:
-    image: "mariadb:1"
+    image: mariadb:10.11-jammy
     environment:
       MARIADB_ROOT_PASSWORD: root_password
       MARIADB_USER: koha_koha
       MARIADB_PASSWORD: password
       MARIADB_DATABASE: koha_koha
+    volumes:
+      - ./mariadb-initdb.d:/docker-entrypoint-initdb.d:ro
+      - ./mariadb-data:/var/lib/mysql
   elasticsearch:
-    image: "elasticsearch:1"
+    image: docker.ub.gu.se/koha-elasticsearch:${ELASTICSEARCH_VERSION}
     environment:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g" #TODO: Higher for production
   memcached:
-    image: "memcached:1.6"
+    image: memcached:1.6
+    command:
+      - memcached
+      - -m
+      - 64m
+  rabbitmq:
+    image: docker.ub.gu.se/koha-rabbitmq:${RABBITMQ_VERSION}
