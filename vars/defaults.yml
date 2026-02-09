@@ -1,6 +1,6 @@
 ---
 
-koha_repo_url: https://github.com/ub-digit/Koha-build.git
+koha_repo_url: https://github.com/ub-digit/koha-build-2026.02
 koha_repo_path: "/home/{{ ansible_user }}/koha-repo"
 
 koha_user: "koha-{{ koha_instance_name }}"
