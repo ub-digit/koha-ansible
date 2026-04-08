@@ -3,7 +3,7 @@ services:
   koha:
     image: docker.ub.gu.se/koha-base:${GIT_REVISION}
     build:
-      context: ./
+      context: ./dockerfiles
       dockerfile: Dockerfile.koha
       args:
 #        - ANSIBLE_GIT_REPO_URL=${ANSIBLE_GIT_REPO_URL}
@@ -14,14 +14,14 @@ services:
   elasticsearch:
     image: docker.ub.gu.se/koha-elasticsearch:${ELASTICSEARCH_VERSION}
     build:
-      context: ./
+      context: ./dockerfiles
       dockerfile: Dockerfile.elasticsearch
       args:
         - ELASTICSEARCH_VERSION=${ELASTICSEARCH_VERSION}
   rabbitmq:
     image: docker.ub.gu.se/koha-rabbitmq:${RABBITMQ_VERSION}
     build:
-      context: ./
+      context: ./dockerfiles
       dockerfile: Dockerfile.rabbitmq
       args:
         - RABBITMQ_VERSION=${RABBITMQ_VERSION}

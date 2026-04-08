@@ -1,6 +1,6 @@
 ---
 all:
   hosts:
-    build:
+    koha:
       ansible_host: localhost
       ansible_connection: local

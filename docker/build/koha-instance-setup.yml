@@ -4,10 +4,27 @@
   become_user: root
   tasks:
 
+    - name: Fix PERL5LIB in koha-shell
+      ansible.builtin.replace:
+        path: '/usr/sbin/koha-shell'
+        regexp: '\$result:\$result/lib'
+        replace: "{{ perl5lib_paths }}"
+
+    - name: Ensure /etc/default/koha-common
+      template:
+        src: koha-common.j2
+        dest: /etc/default/koha-common
+        mode: 0644
+
     - name: Set facts
       ansible.builtin.set_fact:
         envsubst_templates_dir: "{{ [playbook_dir, 'env_templates'] | path_join }}" 
         site_dir: "{{ ['/etc/koha/sites', koha_instance_name] | path_join }}"
+
+    - name: Include qa configuration
+      ansible.builtin.include_vars:
+        #dir: vars
+        file: qa.yml
 
     - name: Ensure root .bashrc
       ansible.builtin.template:

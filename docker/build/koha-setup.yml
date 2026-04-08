@@ -4,6 +4,33 @@
   become: true
   become_user: root
   tasks:
+
+    - name: Install required QA packages
+      apt:
+        name: ['libfile-chdir-perl',
+               'libgit-repository-perl',
+               'liblist-compare-perl',
+               'libmoo-perl',
+               'libperl-critic-perl',
+               'libsmart-comments-perl',
+               'dh-make-perl',
+               'libtest-perl-critic-progressive-perl'
+               ]
+        state: latest
+        force: no
+        update_cache: yes
+
+    - name: Include qa configuration
+      ansible.builtin.include_vars:
+        #dir: vars
+        file: qa.yml
+
+    - name: Checkout QA repo
+      ansible.builtin.git:
+        depth: 1
+        repo: "{{ qa_repo }}"
+        dest: "{{ qa_home }}"
+
     - name: Disable Net::Z3950::ZOOM from cpan. Installed via packages.
       ansible.builtin.replace:
         path: "{{ koha_repo_path }}/cpanfile"
@@ -103,27 +130,6 @@
 #        from_path: "{{ koha_repo_path }}"
 #        installdeps: yes
 
-    - name: Install required QA packages
-      apt:
-        name: ['libfile-chdir-perl',
-               'libgit-repository-perl',
-               'liblist-compare-perl',
-               'libmoo-perl',
-               'libperl-critic-perl',
-               'libsmart-comments-perl',
-               'dh-make-perl',
-               'libtest-perl-critic-progressive-perl'
-               ]
-        state: latest
-        force: no
-        update_cache: yes
-
-    - name: Checkout QA repo
-      ansible.builtin.git:
-        repo: "{{ qa_repo }}"
-        dest: "{{ qa_home }}"
-        force: yes
-
     - name: Create run-script for qa
       ansible.builtin.template:
         src: run-qa.j2
@@ -179,26 +185,6 @@
         regexp: 'koha-zebra --start'
         replace: '#koha-zebra --start'
 
-    - name: Fix PERL5LIB in koha-shell
-      ansible.builtin.replace:
-        path: '/usr/sbin/koha-shell'
-        regexp: '\$result:\$result/lib'
-        replace: "{{ perl5lib_paths }}"
-
-    - name: Ensure /etc/default/koha-common
-      template:
-        src: koha-common.j2
-        dest: /etc/default/koha-common
-        mode: 0644
-
-    - name: Ensure Koha init script
-      ansible.builtin.copy:
-        remote_src: yes
-        src: "{{ koha_repo_path }}/debian/koha-common.init"
-        dest: "/etc/init.d/koha-common"
-        mode: 0755
-
-
     # Note: we do not use apache-site.conf.in since have modified
     # apache-site.conf.in instead (to don't have to deal with koha-create
     # trying to perform letsencrypt magick etc if run with ssl option)
@@ -221,29 +207,6 @@
         - apache-shared-opac-plack.conf
         - apache-site-https.conf.in
 
-    - name: Replace koha-functions.sh path in Koha init script
-      ansible.builtin.replace:
-        path: "/etc/init.d/koha-common"
-        regexp: '/usr/share/koha/bin/koha-functions.sh'
-        replace: "/usr/sbin/koha-functions.sh"
-
-    - name: Comment out package check in Koha init script
-      ansible.builtin.replace:
-        path: "/etc/init.d/koha-common"
-        regexp: '(\[ -x /usr/sbin/koha-zebra)'
-        replace: '# \1'
-
-    - name: Comment out koha-zebra in Koha init script
-      ansible.builtin.replace:
-        path: "/etc/init.d/koha-common"
-        regexp: '(\skoha-zebra\s)'
-        replace: '#\1'
-
-    - name: Comment out zebra_status in Koha init script
-      ansible.builtin.replace:
-        path: "/etc/init.d/koha-common"
-        regexp: '(\szebra_status\s)'
-        replace: '#\1'
 
     # Can't figure out where these are created, at least not in koha-common package, koha-create (or koha-create-dirs)
     # koha-common.dirs

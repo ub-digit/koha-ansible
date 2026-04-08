@@ -1,0 +1,41 @@
+---
+all:
+  hosts:
+    instance:
+      ansible_host: localhost
+      ansible_connection: local
+
+      koha_instance_name: koha
+      koha_user: 'koha-koha'
+
+      koha_db_host: mariadb
+      koha_db_password: password
+
+      koha_elasticsearch_server: elasticsearch:9200
+      koha_memcached_server: memcached:11211
+
+      koha_rabbitmq_host: rabbitmq
+      koha_rabbitmq_port: 61613
+      koha_rabbitmq_user: guest
+      koha_rabbitmq_password: guest
+
+      perl5lib_paths: "{{ koha_repo_path }}/lib:{{ koha_repo_path }}"
+
+      intranet_server_name: "localhost"
+      intranet_port: 8080
+      opac_server_name: "localhost"
+      opac_port: 80
+
+      koha_plugins:
+        - url: https://github.com/ub-digit/koha-plugin-libris-marc-import
+          branch: master
+        - url: https://github.com/ub-digit/koha-plugin-edifact
+          branch: master
+        - url: https://github.com/ub-digit/koha-plugin-get-print-data
+          branch: master
+        - url: https://github.com/ub-digit/koha-plugin-format-facet
+          branch: master
+        - url: https://github.com/ub-digit/koha-plugin-stats-other-table
+          branch: master
+        - url: https://github.com/ub-digit/koha-plugin-extract-biblio-data
+          branch: main

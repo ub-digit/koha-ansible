@@ -16,12 +16,13 @@ ARG KOHA_REPO_PATH=/opt/koha
 COPY --from=release /root/release ${KOHA_REPO_PATH}
 
 COPY ./koha-setup.yml ./
-COPY ./build.yml ./
-COPY ./host_vars ./host_vars
+COPY ./inventory/koha.yml ./
+COPY ./host_vars/koha/vars.yml ./host_vars/koha/vars.yml
+COPY ./vars/qa.yml ./vars/qa.yml
 COPY ./requirements.yml ./
 
 RUN ansible-galaxy install -r requirements.yml
-RUN ansible-playbook -i build.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-setup.yml
+RUN ansible-playbook -i koha.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-setup.yml
 
 #RUN cpan-outdated --exclude-core -p | cpanm
 RUN cpanm --skip-installed --installdeps ${KOHA_REPO_PATH}
@@ -30,9 +31,15 @@ RUN cpanm --skip-installed --installdeps ${KOHA_REPO_PATH}
 RUN pip install supervisor
 
 COPY ./koha-instance-setup.yml ./
+COPY ./inventory/instance.yml ./
 COPY ./files ./files
 COPY ./templates ./templates
-RUN ansible-playbook -i build.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-instance-setup.yml
+RUN ansible-playbook -i instance.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-instance-setup.yml
+
+
+COPY ./vars/plugins.yml ./vars/plugins.yml
+COPY ./koha-plugins-setup.yml ./
+RUN ansible-playbook -i instance.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-plugins-setup.yml
 
 WORKDIR ${KOHA_REPO_PATH}
 

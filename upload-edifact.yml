@@ -5,13 +5,6 @@
     - vars/defaults.yml
     - vars/edifact_defaults.yml
   tasks:
-    - name: Install required packages
-      apt:
-        name: ftp
-        state: latest
-        update_cache: yes
-      become: yes
-
     - name: Ensure data directory
       ansible.builtin.file:
         path: "{{ edifact_data_dir }}"
@@ -31,12 +24,7 @@
       loop: "{{ ['Dawson', 'Delbanco', 'Adlibris', 'Bokus']|product(['archive', 'messages'])|list }}"
       become: yes
 
-    - name: Checkout repo
-      ansible.builtin.git:
-        repo: https://github.com/ub-digit/koha-edifact.git
-        dest: "{{ edifact_home }}"
-        version: "{{ edifact_version }}"
-
+    # TODO: Replace edifact_home with bind mount in koha conf/data directory
     - name: Write upload_edi.conf.yml
       template:
         src: upload_edi.conf.yml.j2
