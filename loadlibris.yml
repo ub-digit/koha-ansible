@@ -24,12 +24,6 @@
         group: "{{ koha_user }}"
         state: touch
 
-    - name: Checkout repo
-      ansible.builtin.git:
-        repo: https://github.com/ub-digit/loadlibris.git
-        dest: "{{ loadlibris_home }}"
-        version: "{{ loadlibris_version }}"
-
     - name: Write loadlibris.sh.conf
       template:
         src: loadlibris.sh.conf.j2

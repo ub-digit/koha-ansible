@@ -13,12 +13,6 @@
         group: "{{ koha_user }}"
       become: yes
 
-    - name: Checkout repo
-      ansible.builtin.git:
-        repo: https://github.com/ub-digit/koha-papercut.git
-        dest: "{{ papercut_home }}"
-        version: "{{ papercut_version }}"
-
     - name: Write papercut.sh.conf
       template:
         src: koha-papercut.config.j2

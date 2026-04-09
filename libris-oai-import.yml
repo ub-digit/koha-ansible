@@ -14,12 +14,6 @@
         - "{{ libris_oai_import_data_dir }}/archive"
       become: yes
 
-    - name: Checkout repo
-      ansible.builtin.git:
-        repo: https://github.com/ub-digit/libris-oai-import.git
-        dest: "{{ libris_oai_import_home }}"
-        version: "{{ libris_oai_import_version }}"
-
     - name: Write export_nix.sh.conf
       template:
         src: export_nix.sh.conf.j2

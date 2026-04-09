@@ -1,0 +1,72 @@
+---
+- hosts: all
+  become: true
+  become_user: root
+  vars_files:
+    - ./vars/scripts.yml
+  tasks:
+
+    - name: Install required packages for upload edifact
+      apt:
+        name: ftp
+        state: latest
+        update_cache: yes
+
+    - name: Checkout upload edifact repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/koha-edifact.git
+        depth: 1
+        dest: "{{ edifact_repo_path }}"
+        version: "{{ edifact_git_revision }}"
+
+    - name: Checkout print notice repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/koha-print-notice.git
+        depth: 1
+        dest: "{{ print_notice_repo_path }}"
+        version: "{{ print_notice_git_revision }}"
+
+    - name: Install gobi perl dependecies
+      community.general.cpanm:
+        name: "{{ item }}"
+      become: yes
+      loop:
+        - Email::MIME
+        - Email::Sender::Simple
+        - IO::All
+        - Params::ValidationCompiler
+
+    - name: Checkout gobi repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/koha-gobi-import.git
+        depth: 1
+        dest: "{{ gobi_import_repo_path }}"
+        version: "{{ gobi_import_git_revision }}"
+
+    - name: Checkout loadlibris repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/loadlibris.git
+        depth: 1
+        dest: "{{ loadlibris_repo_path }}"
+        version: "{{ loadlibris_git_revision }}"
+
+    - name: Checkout libris oai import repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/libris-oai-import.git
+        depth: 1
+        dest: "{{ libris_oai_import_repo_path }}"
+        version: "{{ libris_oai_import_git_revision }}"
+
+    - name: Checkout papercut repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/koha-papercut.git
+        depth: 1
+        dest: "{{ papercut_repo_path }}"
+        version: "{{ papercut_git_revision }}"
+
+    - name: Checkout primo export repo
+      ansible.builtin.git:
+        repo:  https://github.com/ub-digit/koha-primo-export.git
+        depth: 1
+        dest: "{{ primo_export_repo_path }}"
+        version: "{{ primo_export_git_revision }}"
