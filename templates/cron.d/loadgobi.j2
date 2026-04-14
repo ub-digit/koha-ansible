@@ -1,0 +1,1 @@
+23 30 * * * (cd "{{ docker_directory_path }}"; {{ docker_command }} exec {{ gobi_repo_path }}/loadgobi.sh {{ loadgobi_conf_file_path }} > /dev/null 2>&1)

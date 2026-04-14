@@ -1,0 +1,7 @@
+---
+koha_instance_name: koha
+koha_user: 'koha-koha'
+koha_uid: 1000
+
+koha_db_host: mariadb
+koha_db_password: password

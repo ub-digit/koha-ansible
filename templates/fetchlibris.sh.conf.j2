@@ -1,9 +1,7 @@
-data_dir="{{ fetchlibris_data_dir }}"
-
 # Arbetskataloger
-done_dir="{{ fetchlibris_data_dir }}/done"
-log_dir="{{ fetchlibris_data_dir }}/log"
-begun_dir="{{ fetchlibris_data_dir }}/begun"
+done_dir="{{ data_dirs['fetchlibris_done'].path }}"
+begun_dir="{{ data_dirs['fetchlibris_begun'].path }}"
+log_dir="{{ data_dirs['fetchlibris_log'].path }}"
 
 # E-postmottagare
-mail_user="gunda@ub.gu.se,isabel.folkesson@ub.gu.se,martin.oxelqvist@ub.gu.se"
+mail_user="{{ fetchlibris_mail_user }}"

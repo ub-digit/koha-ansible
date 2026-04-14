@@ -1,0 +1,24 @@
+---
+edifact_repo_path: /opt/koha-edifact
+edifact_git_revision: master
+
+print_notice_repo_path: /opt/koha-print-notice
+print_notice_git_revision: master
+
+gobi_import_repo_path: /opt/koha-gobi-import
+gobi_import_git_revision: master
+
+fetchlibris_repo_path: /opt/koha-fetchlibris
+fetchlibris_git_revision: master
+
+loadlibris_repo_path: /opt/koha-loadlibris
+loadlibris_git_revision: master
+
+libris_oai_import_repo_path: /opt/koha-libris-oai-import
+libris_oai_import_git_revision: master
+
+papercut_repo_path: /opt/koha-papercut
+papercut_git_revision: master
+
+primo_export_repo_path: /opt/koha-primo-export
+primo_export_git_revision: master

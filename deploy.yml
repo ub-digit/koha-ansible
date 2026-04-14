@@ -1,177 +1,87 @@
 - hosts: all
   become: true
   become_user: root
+  vars_files:
+    - docker/build/vars/shared.yml
+    - vars/vault.yml # TODO: Move to group vars?
+    - vars/gobi_defaults.yml
+    - vars/fetchlibris_defaults.yml
+    - vars/loadlibris_defaults.yml
+    - vars/libris_oai_import_defaults.yml
   tasks:
-    - name: Ensure apache site configuration
-      ansible.builtin.template:
-        src: apache-site.conf.in.j2
-        dest: "/etc/apache2/sites-available/{{ koha_instance_name }}.conf"
-      notify: restart apache
-      tags:
-      - apache
 
-    - name: Ensure koha configuration
-      ansible.builtin.template:
-        src: koha-conf-site.xml.in.j2
-        dest: "/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml"
-      notify: restart memcached
+  - name: Deploy app
+    include_role:
+      name: ub-ansible-deploy
 
-    - name: Ensure SIP-server configuration
-      ansible.builtin.template:
-        src: SIPconfig.xml.j2
-        dest: "/etc/koha/sites/{{ koha_instance_name }}/SIPconfig.xml"
-      tags:
-      - sip
-      notify: restart sip
+  - name: Ensure SIP-server configuration
+    ansible.builtin.template:
+      src: SIPconfig.xml.j2
+      dest: "/etc/koha/sites/{{ koha_instance_name }}/SIPconfig.xml"
 
-    - name: Create empty log files with the correct owner
-      ansible.builtin.file:
-        mode: 0644
-        path: "/var/log/koha/{{ koha_instance_name }}/{{ item }}"
-        owner: "{{ koha_user }}"
-        group: "{{ koha_user }}"
-        state: touch
-      loop:
-        - intranet-error.log
-        - opac-error.log
+  # GUB-scripts
+  - name: Write /usr/local/sbin/koha-database-backup.sh
+    ansible.builtin.template:
+      src: koha-database-backup.sh.j2
+      dest: /usr/local/sbin/koha-database-backup.sh
+      mode: 0544
 
-    - name: Replace DocumentRoot path in apache-shared-intranet.conf and apache-shared-opac.conf
-      ansible.builtin.replace:
-        path: "/etc/koha/{{ item }}"
-        regexp: '^DocumentRoot [^ ]+\s*$'
-        replace: "DocumentRoot {{ koha_home }}/koha-tmpl"
-      loop:
-        - apache-shared-intranet.conf
-        - apache-shared-opac.conf
+  - name: Ensure log directory for koha-database-backup.sh
+    ansible.builtin.file:
+      path: "{{ koha_database_backup_log_dir }}"
+      mode: 0755
+      state: directory
 
-    - name: Replace ScriptAlias path in apache-shared-intranet.conf and apache-shared-opac.conf
-      ansible.builtin.replace:
-        path: "/etc/koha/{{ item }}"
-        regexp: '^(ScriptAlias [^ ]+) "[^"]+/cgi-bin/([^"]*)"'
-        replace: "\\1 \"{{ koha_home }}/\\2\""
-      loop:
-        - apache-shared-intranet.conf
-        - apache-shared-opac.conf
+  - name: Ensure data directory for koha-database-backup.sh
+    ansible.builtin.file:
+      path: "{{ koha_database_backup_data_dir }}"
+      mode: 0755
+      state: directory
 
-    - name: Replace API paths in apache-shared-intranet.conf and apache-shared-opac.conf
-      ansible.builtin.replace:
-        path: "/etc/koha/{{ item }}"
-        regexp: '/usr/share/koha/api'
-        replace: "{{ koha_home}}/api"
-      loop:
-        - apache-shared-intranet.conf
-        - apache-shared-opac.conf
+  # Fetchlibris
+  - name: Write fetchlibris.sh.conf
+    template:
+      src: fetchlibris.sh.conf.j2
+      dest: "{{ fetchlibris_conf_file_path }}"
 
-    - name: Replace PERL5LIB path in apache-shared.conf
-      ansible.builtin.replace:
-        path: "/etc/koha/apache-shared.conf"
-        regexp: '^SetEnv PERL5LIB "[^"]+"\s*$'
-        replace: "SetEnv PERL5LIB \"{{ perl5lib_paths }}\""
+  # Loadlibris
+  - name: Ensure bulkmarcimport.log exists with correct owner
+    ansible.builtin.file:
+      path: "{{ data_dirs['loadlibris_log'].path }}/bulkmarcimport.log"
+      owner: "{{ koha_uid }}"
+      group: "{{ koha_uid }}"
+      state: touch
 
-    - name: Update unmanaged Koha instance config files from current release
-      ansible.builtin.copy:
-        remote_src: yes
-        src: "{{ koha_repo_path }}/debian/templates/{{ item.0 }}"
-        dest: "/etc/koha/sites/{{ koha_instance_name }}/{{ item.1 }}"
-      loop: "{{ ['log4perl-site.conf.in']|zip(['log4perl.conf'])|list }}"
+  - name: Write loadlibris.sh.conf
+    template:
+      src: loadlibris.sh.conf.j2
+      dest: "{{ loadlibris_conf_file_path }}"
 
-    - name: Replace __LOG_DIR__ in log4perl.conf
-      ansible.builtin.replace:
-        dest: "/etc/koha/sites/{{ koha_instance_name }}/log4perl.conf"
-        regexp: '__LOG_DIR__'
-        replace: "/var/log/koha/{{ koha_instance_name }}"
+  # Libris oai import
+  - name: Write export_nix.sh.conf
+    template:
+      src: export_nix.sh.conf.j2
+      dest: "{{ libris_oai_import_conf_file_path }}"
 
-    - name: Ensure cronjobs (cron.d)
-      ansible.builtin.template:
-        src: koha-common.cron.d.j2
-        dest: /etc/cron.d/koha-common
-      tags:
-      - cronjobs
+  # Gobi
+  - name: Ensure bulkmarcimport.log exists with correct owner
+    ansible.builtin.file:
+      path: "{{ data_dirs['gobi_log'].path }}/bulkmarcimport.log"
+      owner: "{{ koha_uid }}"
+      group: "{{ koha_uid }}"
+      state: touch
+    become: yes
 
-    - name: Ensure cronjobs (cron.daily)
-      ansible.builtin.template:
-        src: koha-common.cron.daily.j2
-        dest: /etc/cron.daily/koha-common
-        mode: 0755
-      tags:
-      - cronjobs
+  - name: Set log4perl conf file path
+    ansible.builtin.set_fact:
+      gobi_log4perl_conf_file_path: "{{ data_dirs['gobi'].path }}/log4perl.conf"
 
-    # GUB-scripts
-    - name: Write /usr/local/sbin/koha-database-backup.sh
-      ansible.builtin.template:
-        src: koha-database-backup.sh.j2
-        dest: /usr/local/sbin/koha-database-backup.sh
-        mode: 0544
+  - name: Write loadgobi.sh.conf
+    template:
+      src: loadgobi.sh.conf.j2
+      dest: "{{ loadgobi_conf_file_path }}"
 
-    - name: Ensure log directory for koha-database-backup.sh
-      ansible.builtin.file:
-        path: "{{ koha_database_backup_log_dir }}"
-        mode: 0755
-        state: directory
-
-    - name: Ensure data directory for koha-database-backup.sh
-      ansible.builtin.file:
-        path: "{{ koha_database_backup_data_dir }}"
-        mode: 0755
-        state: directory
-
-    - name: Schedule cron job for koha-database-backup.sh
-      ansible.builtin.cron:
-        name: "koha-database-backup"
-        minute: "00"
-        hour: "23"
-        job: "/usr/local/sbin/koha-database-backup.sh >> {{ koha_database_backup_log_dir }}/backup.log 2>&1"
-        state: "{{ 'present' if koha_database_backup_cron_enabled else 'absent' }}"
-      tags:
-      - cronjobs
-
-    - name: Schedule cron job for gub_edifact.pl
-      ansible.builtin.cron:
-        name: koha-gub-edifact
-        minute: "00"
-        hour: "22"
-        job: "/usr/sbin/koha-shell -c {{ koha_home }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} >> {{ edifact_data_dir }}/gub_edifact_cron.log 2>&1"
-        state: "{{ 'present' if gub_edifact_cron_enabled else 'absent' }}"
-      tags:
-      - cronjobs
-  handlers:
-    # remove become: yes?
-    - name: restart sip
-      ansible.builtin.shell:
-        cmd: ". /usr/sbin/koha-functions.sh && if is_sip_running {{ koha_instance_name }}; then koha-sip --restart {{ koha_instance_name }}; else koha-sip --start {{ koha_instance_name }}; fi"
-      become: yes
-      when: sip
-    - name: restart plack # Currently unused and untested
-      ansible.builtin.shell:
-        cmd: ". /usr/sbin/koha-functions.sh && if is_plack_running {{ koha_instance_name }}; then koha-plack --restart {{ koha_instance_name }}; else koha-plack --start {{ koha_instance_name }}; fi"
-      become: yes
-      when: plack
-    - name: reload systemd
-      ansible.builtin.systemd:
-        daemon_reload: yes
-    - name: restart apache
-      ansible.builtin.service:
-        name: apache2
-        state: restarted
-      become: yes
-    - name: restart memcached
-      ansible.builtin.service:
-        name: memcached
-        state: restarted
-      become: yes
-
-    # Special care will have to be taken with these files on new Koha realse
-    # deployments.  Will have to manually compare and merge with new release templates
-    - name: Copy manually managed Koha config template files
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/etc/{{ item }}"
-        dest: "/etc/koha/"
-      # worker-service???
-      loop:
-        - koha-sites.conf
-
-    - name: Ensure /etc/koha/passwd
-      template:
-        src: koha_passwd.j2
-        dest: /etc/koha/passwd
-        mode: 0644
+  - name: Write log4perl.conf
+    template:
+      src: log4perl.conf.j2
+      dest: "{{ gobi_log4perl_conf_file_path }}"

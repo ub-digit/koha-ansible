@@ -17,7 +17,6 @@ COPY --from=release /root/release ${KOHA_REPO_PATH}
 
 COPY ./koha-setup.yml ./
 COPY ./inventory/koha.yml ./
-COPY ./host_vars/koha/vars.yml ./host_vars/koha/vars.yml
 COPY ./vars/qa.yml ./vars/qa.yml
 COPY ./requirements.yml ./
 

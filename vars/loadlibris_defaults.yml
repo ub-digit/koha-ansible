@@ -1,4 +1,2 @@
 ---
-loadlibris_home: "/home/{{ ansible_user }}/loadlibris"
-loadlibris_version: master
-loadlibris_data_dir: /opt/loadlibris
+loadlibris_conf_file_path: "{{ data_dirs['loadlibris'].path }}/loadlibris.sh.conf"

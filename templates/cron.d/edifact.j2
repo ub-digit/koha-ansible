@@ -1,0 +1,1 @@
+{{ '# ' if gub_edifact_cron_enabled  }} 22 00 * * * (cd "{{ docker_directory_path }}"; {{ docker_command }} exec koha /usr/sbin/koha-shell -c {{ koha_repo_path }}/misc/cronjobs/gub_edifact.pl {{ koha_instance_name }} >> {{ data_dirs['edifact'].path }}/gub_edifact_cron.log 2>&1')

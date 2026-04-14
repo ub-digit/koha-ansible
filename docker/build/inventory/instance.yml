@@ -5,12 +5,6 @@ all:
       ansible_host: localhost
       ansible_connection: local
 
-      koha_instance_name: koha
-      koha_user: 'koha-koha'
-
-      koha_db_host: mariadb
-      koha_db_password: password
-
       koha_elasticsearch_server: elasticsearch:9200
       koha_memcached_server: memcached:11211
 

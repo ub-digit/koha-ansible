@@ -13,7 +13,8 @@ TIMESTAMP=`/bin/date '+%Y%m%d-%H%M'`
 FILENAME=${BASENAME}-${TIMESTAMP}
 
 echo "Backing up the koha_koha database..."
-mysqldump --defaults-extra-file=/etc/mysql/koha-common.cnf --single-transaction=TRUE -u root koha_{{ koha_instance_name }} > ${BACKUPDIR}/${FILENAME}.sql
+cd "{{ docker_directory_path }}" && {{ docker_command }} exec mariadb mysqldump --defaults-extra-file=/etc/mysql/koha-common.cnf --single-transaction=TRUE -u root koha_{{ koha_instance_name }} > ${BACKUPDIR}/${FILENAME}.sql
+
 gzip -9 ${BACKUPDIR}/${FILENAME}.sql
 echo "Done!"
 echo "Database saved in ${BACKUPDIR}/${FILENAME}.sql.gz"

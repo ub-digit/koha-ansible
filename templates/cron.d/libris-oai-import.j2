@@ -1,0 +1,1 @@
+* * * * * (cd "{{ docker_directory_path }}"; {{ docker_command }} exec {{ libris_oai_import_repo_path }}/export_nix.sh {{ libris_oai_config_file_path }} >> {{ data_dirs['libris_oai_import_log'].path }}/libris_oai.log 2>&1)"

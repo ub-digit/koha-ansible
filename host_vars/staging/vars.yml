@@ -1,37 +1,11 @@
 ---
 environment_name: staging
 intranet_server_name: "koha-staging-intra.ub.gu.se"
-intranet_port: 443
 opac_server_name: "koha-staging.ub.gu.se"
-opac_port: 443
-https: true
-plack: true
-sip: true
-koha_home: "/home/{{ ansible_user }}/koha-staging/current"
-koha_repo_version: release-2022.02-20220412.1527
-koha_instance_name: koha
-koha_elasticsearch_server: "localhost:9200"
-koha_memcached_servers: "localhost:11211"
-koha_db_host: "localhost"
-koha_db_password: "{{ vault_koha_db_password }}"
-mariadb_root_password: "{{ vault_mariadb_root_password }}"
 koha_ipac_api_key: "{{ vault_koha_ipac_api_key }}"
 get_print_data_api_key: "{{ vault_get_print_data_api_key }}"
 koha_mojilicious_secret_passphrase: "{{ vault_koha_mojilicious_secret_passphrase }}"
-gobi_report_mail_to: david.gustafsson@ub.gu.se,g.katalog@ub.gu.se
-gobi_error_mail_to: david.gustafsson@ub.gu.se,g.katalog@ub.gu.se,stefan.berndtsson@ub.gu.se
 koha_online_payment_portal_url: https://betala-staging.ub.gu.se/Koha/Payment
+
 # Data dirs
-koha_data_dir: /mnt
-mariadb_data_dir: /mnt/mariadb
-elasticsearch_data_dir: /mnt/elasticsearch
-# Mail settings
-smtp_host: 127.0.0.1
-smtp_port: 1025
-smtp_username: ''
-smtp_password: ''
-smtp_ssl_mode: disabled
-koha_database_backup_cron_enabled: false
-gub_edifact_cron_enabled: false
-edifact_cron_enabled: false
-papercut_cron_enabled: true
+data_dir: /mnt

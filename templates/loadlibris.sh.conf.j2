@@ -1,17 +1,15 @@
 koha_instance="{{ koha_instance_name }}"
-koha_path="{{ koha_home }}"
+koha_path="{{ koha_repo_path }}"
 
-data_dir="/opt/loadlibris"
+fetchlibris_done_dir="{{ data_dirs['fetchlibris_done'].path }}"
 
-fetchlibris_done_dir="{{ fetchlibris_data_dir }}/done"
-
-bulkmarcimport_in_dir="$data_dir/in"
-bulkmarcimport_in_archive_dir="$data_dir/in_archive"
-bulkmarcimport_err_dir="$data_dir/err"
+bulkmarcimport_in_dir="{{ data_dirs['loadlibris_in'].path }}"
+bulkmarcimport_in_archive_dir="{{ data_dirs['loadlibris_in_archive'].path }}"
+bulkmarcimport_err_dir="{{ data_dirs['loadlibris_err'].path }}"
 
 bulkmarcimport_to_marc_plugin="Koha::Plugin::Se::Ub::Gu::MarcImport"
 bulkmarcimport_match="System-control-number,035a"
 
-loadlibris_log_dir="$data_dir/log"
+loadlibris_log_dir="{{ data_dirs['loadlibris_log'].path }}"
 
-bulkmarcimport_done_dir="$data_dir/done"
+bulkmarcimport_done_dir="{{ data_dirs['loadlibris_done'].path }}"

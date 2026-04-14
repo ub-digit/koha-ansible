@@ -50,6 +50,21 @@
         dest: "{{ loadlibris_repo_path }}"
         version: "{{ loadlibris_git_revision }}"
 
+    - name: Install required packages for fetchlibris
+      apt:
+        name: ncftp
+        state: latest
+        update_cache: yes
+      become: yes
+
+    - name: Checkout fetchlibris repo
+      ansible.builtin.git:
+        repo: https://github.com/ub-digit/fetchlibris.git
+        dest: "{{ fetchlibris_repo_path }}"
+        version: "{{ fetchlibris_git_revision }}"
+
+
+
     - name: Checkout libris oai import repo
       ansible.builtin.git:
         repo: https://github.com/ub-digit/libris-oai-import.git

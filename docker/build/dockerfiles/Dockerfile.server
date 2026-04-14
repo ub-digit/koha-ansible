@@ -12,13 +12,12 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY ./server-setup.yml ./
-COPY ./build.yml ./
-COPY ./host_vars ./host_vars
+COPY ./inventory/koha.yml ./
 COPY ./templates ./templates
 COPY ./requirements.yml ./
 
 RUN ansible-galaxy install -r requirements.yml
-RUN ansible-playbook -i build.yml server-setup.yml
+RUN ansible-playbook -i koha.yml server-setup.yml
 
 # Set locales (could move to playbook)
 # ENV LANG=en_US.UTF-8 # wtf, angular crash invalid locale

@@ -1,40 +1,153 @@
 ---
+docker_git_repo_url: https://github.com/ub-digit/ub-koha-deploy.git
+docker_directory: './docker' # Default is './docker'
+app_name: koha # TODO: Needed?
+ansible_python_interpreter: /usr/bin/python3
 
-koha_repo_url: https://github.com/ub-digit/Koha-build.git
-koha_repo_path: "/home/{{ ansible_user }}/koha-repo"
-
-koha_user: "koha-{{ koha_instance_name }}"
-koha_po_files_path: "/home/{{ ansible_user }}/koha-{{ environment_name }}/shared/misc/translator/po"
-
-docker_install_compose: true
-#docker_compose_version: "1.29.2"
-docker_users: ["{{ ansible_user }}"]
+# Koha/apache
+intranet_port: 443
+opac_port: 443
+https: true
+plack: true
+sip: true
 
 koha_database_backup_data_dir: "{{ koha_data_dir }}/backup/koha-database-backup"
 koha_database_backup_log_dir: /opt/koha-database-backup/log
-
-ansible_python_interpreter: /usr/bin/python3
-
 koha_bcrypt_settings: "vault TODO"
 
 # GUB custom koha-conf.xml options
-
-koha_pg_database: marcdb
-koha_pg_hostname: 89.45.233.127
-koha_pg_port: 5432
-koha_pg_user: man_tuesday
-koha_pg_pass: "{{ vault_koha_pg_pass }}"
 koha_online_payments: 1
 koha_online_payment_exclude_patron_categories: BA|BE|BF|BK|BL|BM|BN|BU|EI|TN|TJ|PE
 koha_online_payment_info_url_en: https://www.ub.gu.se/en/borrow-and-log-in/borrowing-from-the-library
 koha_online_payment_info_url_sv: https://www.ub.gu.se/sv/lana-och-logga-in/lana-pa-biblioteket
 
-koha_readonly_db_user_password: "{{ vault_koha_readonly_db_user_password }}"
+koha_ipac_api_key: "{{ vault_koha_ipac_api_key }}"
+get_print_data_api_key: "{{ vault_get_print_data_api_key }}"
+koha_mojilicious_secret_passphrase: "{{ vault_koha_mojilicious_secret_passphrase }}"
 
-# Used by koha-instance-setup
-edifact_data_dir: /opt/koha-edifact
+# koha_readonly_db_user_password: "{{ vault_koha_readonly_db_user_password }}"
 
 # Infobip
 infobip_baseurl: 9rpjdv.api.infobip.com
 infobip_sender: InfoSMS
 infobip_skip_send: 1
+
+# Fetchlibris
+fetchlibris_mail_user: gunda@ub.gu.se,isabel.folkesson@ub.gu.se,martin.oxelqvist@ub.gu.se
+
+# Mail settings
+smtp_host: 127.0.0.1
+smtp_port: 1025
+smtp_username: ''
+smtp_password: ''
+smtp_ssl_mode: disabled
+
+# Cron
+koha_database_backup_cron_enabled: false
+gub_edifact_cron_enabled: false
+edifact_cron_enabled: false
+papercut_cron_enabled: true
+
+script_dir_defaults: &script_dir_defaults
+  mode: '0755'
+  owner: "{{ koha_uid }}"
+  group: "{{ koha_uid }}"
+  pull: false
+  push: false
+
+data_dirs:
+  mariadb:
+    path: "{{ data_dir }}/mariadb-data"
+    owner: 999
+    group: 999
+    mode: '0750'
+    pull: false
+    push: false
+  postgres:
+    path: "{{ data_dir }}/postgres-data"
+    owner: 999
+    group: 999
+    mode: '0750'
+    pull: false
+    push: false
+  elasticsearch:
+    path: "{{ data_dir }}/elasticsearch-data"
+    owner: 1000
+    group: 1000
+    mode: '0750'
+    pull: true
+    push: true
+  database_backup:
+    path: "{{ data_dir }}/database-backup"
+    owner: root
+    group: root
+    mode: '0750'
+    pull: false
+    push: false
+  edifact:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/edifact"
+  fetchlibris:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/fetchlibris"
+  fetchlibris_begun:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/fetchlibris/begun"
+  fetchlibris_done:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/fetchlibris/done"
+  fetchlibris_log:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/fetchlibris/log"
+  loadlibris:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/loadlibris"
+  loadlibris_in:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/loadlibris/in"
+  loadlibris_in_archive:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/loadlibris/in_archive"
+  loadlibris_done:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/loadlibris/done"
+  loadlibris_err:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/loadlibris/err"
+  loadlibris_log:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/loadlibris/log"
+  loadlibris_oai_import:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/libris_oai_import"
+  loadlibris_oai_import_download:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/libris_oai_import/download"
+  loadlibris_oai_import_archive:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/libris_oai_import/archive"
+  loadlibris_oai_import_log:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/libris_oai_import/log"
+  gobi:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/gobi"
+  gobi_bulkmarc_in:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/bulkmarcimport_in"
+  gobi_bulkmarc_err:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/bulkmarcimport_err"
+  gobi_adjustgobi_in:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/adjustgobi_in"
+  gobi_fetchgobi_done:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/fetchgobi_done"
+  gobi_done:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/done"
+  gobi_log:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/log"
+

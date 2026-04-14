@@ -8,3 +8,6 @@ koha_user="{{ gobi_koha_user }}"
 koha_path="{{ gobi_koha_path }}"
 koha_instance="{{ gobi_koha_instance }}"
 bulkmarcimport_options="-insert -c=MARC21 -match_record_id -tomarcplugin \"Koha::Plugin::Se::Ub::Gu::MarcImport\""
+
+fetchgobi_data_dir="{{ data_dirs['gobi'].path }}"
+log4perl_conf="{{ gobi_log4perl_conf_file_path }}"
