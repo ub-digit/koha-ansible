@@ -55,6 +55,8 @@ script_dir_defaults: &script_dir_defaults
   pull: false
   push: false
 
+data_dir: /data
+
 data_dirs:
   mariadb:
     path: "{{ data_dir }}/mariadb-data"
@@ -122,35 +124,37 @@ data_dirs:
     path: "{{ data_dir }}/loadlibris/log"
   loadlibris_oai_import:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/libris_oai_import"
+    path: "{{ data_dir }}/libris-oai-import"
   loadlibris_oai_import_download:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/libris_oai_import/download"
+    path: "{{ data_dir }}/libris-oai-import/download"
   loadlibris_oai_import_archive:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/libris_oai_import/archive"
+    path: "{{ data_dir }}/libris-oai-import/archive"
   loadlibris_oai_import_log:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/libris_oai_import/log"
+    path: "{{ data_dir }}/libris-oai-import/log"
   gobi:
     <<: *script_dir_defaults
     path: "{{ data_dir }}/gobi"
   gobi_bulkmarc_in:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/bulkmarcimport_in"
+    path: "{{ data_dir }}/gobi/bulkmarcimport_in"
   gobi_bulkmarc_err:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/bulkmarcimport_err"
+    path: "{{ data_dir }}/gobi/bulkmarcimport_err"
   gobi_adjustgobi_in:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/adjustgobi_in"
+    path: "{{ data_dir }}/gobi/adjustgobi_in"
   gobi_fetchgobi_done:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/fetchgobi_done"
+    path: "{{ data_dir }}/gobifetchgobi_done"
   gobi_done:
     <<: *script_dir_defaults
     path: "{{ data_dir }}/done"
   gobi_log:
     <<: *script_dir_defaults
     path: "{{ data_dir }}/log"
-
+  primo_export:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/primo-export"

@@ -9,7 +9,20 @@
     - vars/loadlibris_defaults.yml
     - vars/libris_oai_import_defaults.yml
     - vars/edifact_defaults.yml
+    - vars/primo_export_defaults.yml
   tasks:
+    # TODO: Bit of a hack
+  - name: Set primo export data dir
+    ansible.builtin.set_facts:
+      primo_export_export_dir: "/var/lib/koha/primo/{{ koha_instance_name }}" # Referenced in env vars, needed for volume mount
+
+  - name: Ensure export directories
+    ansible.builtin.file:
+      path: "{{ primo_export_export_dir }}"
+      mode: 0755
+      #owner: "{{ primo_export_user }}"
+      #group: "{{ primo_export_user }}"
+      state: directory
 
   - name: Deploy app
     include_role:
@@ -109,4 +122,47 @@
       cron_file: 'edifact'
       user: root
     loop: "{{ ['dawson', 'delbanco', 'adlibris', 'bokus']|zip(['30', '32', '34', '36'])|list }}"
+    become: yes
+
+  # Primo export
+
+  # TODO: This still needed?
+#  - name: Create primo export user
+#    ansible.builtin.user:
+#      name: "{{ primo_export_user }}"
+#    become: yes
+#
+#  - name: Add public key of drupal-deploy user to authorized_keys
+#    ansible.builtin.authorized_key:
+#      user: "{{ primo_export_user }}"
+#      state: present
+#      key: "{{ lookup('file', '{{ playbook_dir }}/files/primo_export_user_authorized_keys') }}"
+#    become: yes
+
+  - name: Ensure primo export directories
+    ansible.builtin.file:
+      path: "{{ primo_export_export_dir }}/{{ item }}"
+      mode: 0755
+      #owner: "{{ primo_export_user }}"
+      #group: "{{ primo_export_user }}"
+      state: directory
+    loop:
+      - full
+      - updates
+      - databases # Drupal databases primo export directory
+    become: yes
+
+  - name: Write config
+    template:
+      src: primo-export.config.j2
+      dest: "{{ primo_export_config_file_path }}"
+
+  - name: Schedule primo export cron job
+    ansible.builtin.cron:
+      name: "koha-primo-export"
+      minute: "30"
+      hour: "04,16"
+      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ primo_export_repo_path }}/sync_records.sh \"{{ primo_export_config_file_path }}\"  > /dev/null 2>&1"
+      state: present
+      user: root
     become: yes

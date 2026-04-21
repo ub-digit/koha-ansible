@@ -1,0 +1,2 @@
+---
+primo_export_config_file_path: "{{ data_dirs['primo_export'].path }}"

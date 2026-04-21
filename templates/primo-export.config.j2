@@ -1,0 +1,21 @@
+export_dir="{{ primo_export_export_dir }}"
+
+tar_ext=".tar.gz"
+tar_opts="czf"
+
+file_prefix="46GUB-delta-"
+file_ext=".marc"
+
+primo_user="{{ primo_export_user }}"
+primo_group="{{ primo_export_user }}"
+
+exp_tmp="$$"
+exp_root="/var/tmp"
+exp_dir="$exp_root/$exp_tmp"
+
+koha_path="{{ koha_repo_path }}"
+koha_instance="{{ koha_instance_name }}"
+koha_shell="/usr/sbin/koha-shell"
+export_records_opts="--dont_export_items --deleted_marc_conditions=942n=1"
+
+data_dir="{{ data_dirs['primo].path }}"
