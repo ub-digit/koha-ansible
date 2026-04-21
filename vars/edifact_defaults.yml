@@ -1,7 +1,6 @@
 ---
-edifact_home: "/home/{{ ansible_user }}/koha-edifact"
-edifact_version: master
-edifact_base_dir: /opt/koha-edifact/vendors
+upload_edifact_conf_file_path: "{{ data_dirs['edifact'] }}/upload_edi.conf.yml"
+
 edifact_email: gunda@ub.gu.se
 
 edifact_dawson_user: "{{ vault_edifact_dawson_user }}"

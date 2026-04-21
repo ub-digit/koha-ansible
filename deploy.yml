@@ -8,6 +8,7 @@
     - vars/fetchlibris_defaults.yml
     - vars/loadlibris_defaults.yml
     - vars/libris_oai_import_defaults.yml
+    - vars/edifact_defaults.yml
   tasks:
 
   - name: Deploy app
@@ -72,10 +73,6 @@
       state: touch
     become: yes
 
-  - name: Set log4perl conf file path
-    ansible.builtin.set_fact:
-      gobi_log4perl_conf_file_path: "{{ data_dirs['gobi'].path }}/log4perl.conf"
-
   - name: Write loadgobi.sh.conf
     template:
       src: loadgobi.sh.conf.j2
@@ -85,3 +82,31 @@
     template:
       src: log4perl.conf.j2
       dest: "{{ gobi_log4perl_conf_file_path }}"
+
+  # Edifact
+  - name: Ensure vendor directories
+    ansible.builtin.file:
+      path: "{{ data_dirs['edifact_vendors'] }}/{{ item.0 }}/{{ item.1 }}"
+      mode: 0755
+      state: directory
+      owner: "{{ koha_uid }}"
+      group: "{{ koha_uid }}"
+    loop: "{{ ['dawson', 'delbanco', 'adlibris', 'bokus'] | product(['archive', 'messages']) | list }}"
+    become: yes
+
+  - name: Write upload_edi.conf.yml
+    template:
+      src: upload_edi.conf.yml.j2
+      dest: "{{ upload_edifact_conf_file_path }}"
+
+  - name: Schedule edifact cron jobs
+    ansible.builtin.cron:
+      name: "upload-edifact-{{ item.0 }}"
+      minute: "{{ item.1 }}"
+      hour: "22"
+      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ edifact_repo_path }}/upload_edi.pl \"{{ upload_edifact_conf_file_path }}\" {{ item.0 }} >> {{ data_dirs['edifact'] }}/upload_edi.log 2>&1"
+      state: "{{ 'present' if edifact_cron_enabled else 'absent' }}"
+      cron_file: 'edifact'
+      user: root
+    loop: "{{ ['dawson', 'delbanco', 'adlibris', 'bokus']|zip(['30', '32', '34', '36'])|list }}"
+    become: yes

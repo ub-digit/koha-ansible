@@ -8,6 +8,7 @@ gobi_smtp_host: "{{ smtp_host }}"
 gobi_smtp_port: "{{ smtp_port }}"
 
 loadgobi_conf_file_path: "{{ data_dirs['gobi'].path }}/loadgobi.sh.conf"
+gobi_log4perl_conf_file_path: "{{ data_dirs['gobi'].path }}/log4perl.conf"
 
 gobi_report_mail_to: david.gustafsson@ub.gu.se,g.katalog@ub.gu.se
 gobi_error_mail_to: david.gustafsson@ub.gu.se,g.katalog@ub.gu.se,stefan.berndtsson@ub.gu.se

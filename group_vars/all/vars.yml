@@ -87,6 +87,9 @@ data_dirs:
   edifact:
     <<: *script_dir_defaults
     path: "{{ data_dir }}/edifact"
+  edifact_vendors:
+    <<: *script_dir_defaults
+    path: "{{ data_dir }}/edifact/vendors"
   fetchlibris:
     <<: *script_dir_defaults
     path: "{{ data_dir }}/fetchlibris"
