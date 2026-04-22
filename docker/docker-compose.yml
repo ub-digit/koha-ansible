@@ -28,13 +28,15 @@ services:
       MARIADB_DATABASE: koha_koha
     volumes:
       - ./mariadb-initdb.d:/docker-entrypoint-initdb.d:ro
-      - ./mariadb-data:/var/lib/mysql
+      - "${MARIADB_DATA_HOST_DIR}:/var/lib/mysql"
   elasticsearch:
     image: docker.ub.gu.se/koha-elasticsearch:${ELASTICSEARCH_VERSION}
     environment:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g" #TODO: Higher for production
+    volumes:
+      - "${ELASTICSEARCH_DATA_HOST_DIR}:/usr/share/elasticsearch/data"
   memcached:
     image: memcached:1.6
     command:

@@ -148,13 +148,13 @@ data_dirs:
     path: "{{ data_dir }}/gobi/adjustgobi_in"
   gobi_fetchgobi_done:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/gobifetchgobi_done"
+    path: "{{ data_dir }}/gobi/gobifetchgobi_done"
   gobi_done:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/done"
+    path: "{{ data_dir }}/gobi/done"
   gobi_log:
     <<: *script_dir_defaults
-    path: "{{ data_dir }}/log"
+    path: "{{ data_dir }}/gobi/log"
   primo_export:
     <<: *script_dir_defaults
     path: "{{ data_dir }}/primo-export"
