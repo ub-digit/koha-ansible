@@ -3,9 +3,22 @@ set -e
 
 envsubst < {{ [envsubst_templates_dir, 'koha-conf.xml'] | path_join }}  > {{ [site_dir, 'koha-conf.xml'] | path_join }}
 envsubst < {{ [envsubst_templates_dir, 'koha-plugin-marc-import-log4perl.conf'] | path_join }}  > {{ [site_dir, 'koha-plugin-marc-import-log4perl.conf'] | path_join }}
+envsubst < {{ [envsubst_templates_dir, 'Infobip.yml'] | path_join }}  > /var/lib/koha/sms_send/Infobip.yaml # chown?
 
 envsubst < {{ [envsubst_templates_dir, 'Sendmail.pm'] | path_join }}  > /usr/share/perl5/Mail/Sendmail.pm
 envsubst < {{ [envsubst_templates_dir, 'supervisord.conf'] | path_join }}  > /etc/supervisord.conf
+
+# Koha scripts
+envsubst < {{ [edifact_repo_path, 'upload_edi.conf.yml.tpl'] | path_join }}  >  {{ [edifact_repo_path, 'upload_edi.conf.yml'] | path_join }} 
+envsubst < {{ [print_notice_repo_path, 'print-notice.conf.tpl'] | path_join }}  >  {{ [print_notice_repo_path, 'print-notice.conf'] | path_join }}
+envsubst < {{ [gobi_import_repo_path, 'loadgobi.sh.conf.tpl'] | path_join }}  >  {{ [gobi_import_repo_path, 'loadgobi.sh.conf'] | path_join }} 
+envsubst < {{ [gobi_import_repo_path, 'gobi.log4perl.conf.tpl'] | path_join }}  >  {{ [gobi_import_repo_path, 'log4perl.conf'] | path_join }} 
+envsubst < {{ [loadlibris_repo_path, 'loadlibris.sh.conf.tpl'] | path_join }}  >  {{ [loadlibris_repo_path, 'loadlibris.sh.conf'] | path_join }} 
+envsubst < {{ [fetchlibris_repo_path, 'fetchlibris.sh.conf.tpl'] | path_join }}  >  {{ [fetchlibris_repo_path, 'fetchlibris.sh.conf'] | path_join }}
+envsubst < {{ [libris_oai_import_repo_path, 'export_nix.sh.conf.tpl'] | path_join }}  >  {{ [libris_oai_import_repo_path, 'export_nix.sh.conf'] | path_join }} 
+envsubst < {{ [papercut_repo_path, 'config.tpl'] | path_join }}  >  {{ [papercut_repo_path, 'config'] | path_join }} 
+
+#envsubst < {{ [x_repo_path, 'x.sh.conf.tpl'] | path_join }}  >  {{ [x_repo_path, 'x.sh.conf'] | path_join }} 
 
 # Needed, or can perhaps make sure templates file has correct owner?
 chown -R {{ koha_user }}:{{ koha_user }} {{ site_dir }}

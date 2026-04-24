@@ -1,4 +1,4 @@
-export_dir="{{ primo_export_export_dir }}"
+export_dir="${PRIMO_EXPORT_EXPORT_DIR}"
 
 tar_ext=".tar.gz"
 tar_opts="czf"
@@ -6,16 +6,16 @@ tar_opts="czf"
 file_prefix="46GUB-delta-"
 file_ext=".marc"
 
-primo_user="{{ primo_export_user }}"
-primo_group="{{ primo_export_user }}"
+primo_user="${PRIMO_EXPORT_USER}" # TODO: replace with uid
+primo_group="${PRIMO_EXPORT_USER}"
 
 exp_tmp="$$"
 exp_root="/var/tmp"
 exp_dir="$exp_root/$exp_tmp"
 
-koha_path="{{ koha_repo_path }}"
-koha_instance="{{ koha_instance_name }}"
-koha_shell="/usr/sbin/koha-shell"
+koha_path="${KOHA_REPO_PATH}"
+koha_instance="${KOHA_INSTANCE_NAME}"
+koha_shell="/usr/sbin/koha-shell" # TODO: Change to cusom koha-shell with correct exit signal handling?
 export_records_opts="--dont_export_items --deleted_marc_conditions=942n=1"
 
-data_dir="{{ data_dirs['primo].path }}"
+data_dir="${PRIMO_EXPORT_DATA_DIR}"

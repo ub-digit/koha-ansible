@@ -1,28 +1,28 @@
-base_dir: {{ data_dirs['edifact_vendors'] }}
-email: {{ edifact_email }}
+base_dir: "${EDIFACT_BASE_DIR}"
+email: ${EDIFACT_EMAIL}
 
 vendors:
   Dawson:
     host: ftp.dawsonbooks.co.uk
-    port: '21'
+    port: 21
     server_dir: '.'
-    user: '{{ edifact_dawson_user }}'
-    pass: '{{ edifact_dawson_password }}'
+    user: "${EDIFACT_DAWSON_USER}"
+    pass: "${EDIFACT_DAWSON_PASSWORD}"
   Delbanco:
     host: ftp.delbanco.de
-    port: '21'
+    port: 21
     server_dir: '.'
-    user: '{{ edifact_delbanco_user }}'
-    pass: '{{ edifact_delbanco_password }}'
+    user: "${EDIFACT_DELBANCO_USER}"
+    pass: "${EDIFACT_DELBANCO_PASSWORD}"
   Adlibris:
     host: dataftp.adlibris.com
-    port: '21'
+    port: 21
     server_dir: '.'
-    user: '{{ edifact_adlibris_user }}'
-    pass: '{{ edifact_adlibris_password }}'
+    user: "${EDIFACT_ADLIBRIS_USER}"
+    pass: "${EDIFACT_ADLIBRIS_PASSWORD}"
   Bokus:
     host: 213.187.205.201
     port: 21
     server_dir: '.'
-    user: '{{ edifact_bokus_user }}'
-    pass: '{{ edifact_bokus_password }}'
+    user: "${EDIFACT_BOKUS_USER}"
+    pass: "${EDIFACT_BOKUS_PASSWORD}"

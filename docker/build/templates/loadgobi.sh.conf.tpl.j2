@@ -1,13 +1,13 @@
 ftp_marc_file_pattern='^2[012]\w+\.mrc$'
 ftp_user="goteborgsu"
-ftp_password="{{ gobi_ftp_password }}"
+ftp_password="${GOBI_IMPORT_FTP_PASSWORD}"
 ftp_host="ftp.ybp.com"
 ftp_remote_directory="ecat"
 
-koha_user="{{ gobi_koha_user }}"
-koha_path="{{ gobi_koha_path }}"
-koha_instance="{{ gobi_koha_instance }}"
+koha_user="{$KOHA_USER}"
+koha_path="${KOHA_REPO_PATH}"
+koha_instance="${KOHA_INSTANCE_NAME}"
 bulkmarcimport_options="-insert -c=MARC21 -match_record_id -tomarcplugin \"Koha::Plugin::Se::Ub::Gu::MarcImport\""
 
-fetchgobi_data_dir="{{ data_dirs['gobi'].path }}"
-log4perl_conf="{{ gobi_log4perl_conf_file_path }}"
+fetchgobi_data_dir="${FETCHGOBI_DATA_DIR}"
+log4perl_conf="${GOBI_IMPORT_LOG4PERL_CONF_FILE_PATH}"

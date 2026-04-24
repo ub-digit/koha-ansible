@@ -32,9 +32,6 @@ infobip_baseurl: 9rpjdv.api.infobip.com
 infobip_sender: InfoSMS
 infobip_skip_send: 1
 
-# Fetchlibris
-fetchlibris_mail_user: gunda@ub.gu.se,isabel.folkesson@ub.gu.se,martin.oxelqvist@ub.gu.se
-
 # Mail settings
 smtp_host: 127.0.0.1
 smtp_port: 1025
@@ -43,17 +40,22 @@ smtp_password: ''
 smtp_ssl_mode: disabled
 
 # Cron
-koha_database_backup_cron_enabled: false
+database_backup_cron_enabled: false
+loadlibris_cron_enabled: false
+libris_oai_import_cron_enabled: false 
+gobi_import_cron_enabled: false
 gub_edifact_cron_enabled: false
 edifact_cron_enabled: false
 papercut_cron_enabled: true
 
-script_dir_defaults: &script_dir_defaults
+koha_dir_defaults: &koha_dir_defaults
   mode: '0755'
   owner: "{{ koha_uid }}"
   group: "{{ koha_uid }}"
   pull: false
   push: false
+
+# TODO: Data dirs for mounting of uploads (and more?)
 
 data_dir: /data
 
@@ -86,75 +88,87 @@ data_dirs:
     mode: '0750'
     pull: false
     push: false
+  koha:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/koha"
   edifact:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/edifact"
+  papercut:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/papercut"
   edifact_vendors:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/edifact/vendors"
   fetchlibris:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/fetchlibris"
   fetchlibris_begun:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/fetchlibris/begun"
   fetchlibris_done:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/fetchlibris/done"
   fetchlibris_log:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/fetchlibris/log"
   loadlibris:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/loadlibris"
   loadlibris_in:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/loadlibris/in"
   loadlibris_in_archive:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/loadlibris/in_archive"
   loadlibris_done:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/loadlibris/done"
   loadlibris_err:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/loadlibris/err"
   loadlibris_log:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/loadlibris/log"
-  loadlibris_oai_import:
-    <<: *script_dir_defaults
+  libris_oai_import:
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/libris-oai-import"
-  loadlibris_oai_import_download:
-    <<: *script_dir_defaults
+  libris_oai_import_download:
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/libris-oai-import/download"
-  loadlibris_oai_import_archive:
-    <<: *script_dir_defaults
+  libris_oai_import_archive:
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/libris-oai-import/archive"
-  loadlibris_oai_import_log:
-    <<: *script_dir_defaults
+  libris_oai_import_log:
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/libris-oai-import/log"
+  print_notice:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/print-notice"
+  print_notice_log:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/print-notice/log"
   gobi:
-    <<: *script_dir_defaults
-    path: "{{ data_dir }}/gobi"
-  gobi_bulkmarc_in:
-    <<: *script_dir_defaults
-    path: "{{ data_dir }}/gobi/bulkmarcimport_in"
-  gobi_bulkmarc_err:
-    <<: *script_dir_defaults
-    path: "{{ data_dir }}/gobi/bulkmarcimport_err"
-  gobi_adjustgobi_in:
-    <<: *script_dir_defaults
-    path: "{{ data_dir }}/gobi/adjustgobi_in"
-  gobi_fetchgobi_done:
-    <<: *script_dir_defaults
-    path: "{{ data_dir }}/gobi/gobifetchgobi_done"
-  gobi_done:
-    <<: *script_dir_defaults
-    path: "{{ data_dir }}/gobi/done"
-  gobi_log:
-    <<: *script_dir_defaults
-    path: "{{ data_dir }}/gobi/log"
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/gobi-import"
+  gobi_import_bulkmarc_in:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/gobi-import/bulkmarcimport_in"
+  gobi_import_bulkmarc_err:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/gobi-import/bulkmarcimport_err"
+  gobi_import_adjustgobi_import_in:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/gobi-import/adjustgobi_import_in"
+  gobi_import_fetchgobi_import_done:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/gobi-import/gobifetchgobi_import_done"
+  gobi_import_done:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/gobi-import/done"
+  gobi_import_log:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/gobi-import/log"
   primo_export:
-    <<: *script_dir_defaults
+    <<: *koha_dir_defaults
     path: "{{ data_dir }}/primo-export"

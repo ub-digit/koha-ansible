@@ -104,7 +104,6 @@
         src: koha-plugin-marc-import-log4perl.conf.j2
         dest: "{{ [envsubst_templates_dir, 'koha-plugin-marc-import-log4perl.conf'] | path_join }}"
 
-
     - name: Create empty log files with the correct owner
       ansible.builtin.file:
         mode: 0644
@@ -201,7 +200,7 @@
     - name: Write koha SMS::Send::Infobip config file
       ansible.builtin.template:
         src: Infobip.yaml.j2
-        dest: "/var/lib/koha/sms_send/Infobip.yaml"
+        dest: "{{ [envsubst_templates_dir, 'Infobip.conf'] | path_join }}"
 
     - name: Ensure koha user owns koha directories
       ansible.builtin.file:

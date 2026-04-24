@@ -19,3 +19,18 @@ koha_database_backup_cron_enabled: true
 gub_edifact_cron_enabled: true
 edifact_cron_enabled: true
 papercut_cron_enabled: true
+
+# Edifact
+edifact_email: gunda@ub.gu.se
+
+edifact_dawson_user: "{{ vault_edifact_dawson_user }}"
+edifact_dawson_password: "{{ vault_edifact_dawson_password }}"
+
+edifact_delbanco_user: "{{ vault_edifact_delbanco_user }}"
+edifact_delbanco_password: "{{ vault_edifact_delbanco_password }}"
+
+edifact_adlibris_user: "{{ vault_edifact_adlibris_user }}"
+edifact_adlibris_password: "{{ vault_edifact_adlibris_password }}"
+
+edifact_bokus_user: "{{ vault_edifact_bokus_user }}"
+edifact_bokus_password: "{{ vault_edifact_bokus_password }}"

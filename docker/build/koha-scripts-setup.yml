@@ -6,6 +6,7 @@
     - ./vars/scripts.yml
   tasks:
 
+    # Edifact
     - name: Install required packages for upload edifact
       apt:
         name: ftp
@@ -19,6 +20,12 @@
         dest: "{{ edifact_repo_path }}"
         version: "{{ edifact_git_revision }}"
 
+    - name: Ensure upload_edi.conf.yml.tpl
+      template:
+        src: upload_edi.conf.yml.tpl.j2
+        dest: "{{ [edifact_repo_path, 'upload_edi.conf.yml.tpl'] | path_join }}"
+
+    # Print notice
     - name: Checkout print notice repo
       ansible.builtin.git:
         repo: https://github.com/ub-digit/koha-print-notice.git
@@ -26,7 +33,13 @@
         dest: "{{ print_notice_repo_path }}"
         version: "{{ print_notice_git_revision }}"
 
-    - name: Install gobi perl dependecies
+    - name: Ensure print_notice.conf
+      template:
+        src: print-notice.conf.tpl.j2
+        dest: "{{ [print_notice_repo_path, 'print-notice.conf.tpl'] | path_join }}"
+
+    # Gobi
+    - name: Install gobi import perl dependecies
       community.general.cpanm:
         name: "{{ item }}"
       become: yes
@@ -43,6 +56,17 @@
         dest: "{{ gobi_import_repo_path }}"
         version: "{{ gobi_import_git_revision }}"
 
+    - name: Ensure loadgobi.sh.conf
+      template:
+        src: loadgobi.sh.conf.tpl.j2
+        dest: "{{ [gobi_import_repo_path, 'loadgobi.sh.conf.tpl'] | path_join }}"
+
+    - name: Ensure log4perl.conf
+      template:
+        src: gobi.log4perl.conf.tpl.j2
+        dest: "{{ [gobi_import_repo_path, 'log4perl.conf.tpl'] }}"
+
+    # Loadlibris
     - name: Checkout loadlibris repo
       ansible.builtin.git:
         repo: https://github.com/ub-digit/loadlibris.git
@@ -50,6 +74,12 @@
         dest: "{{ loadlibris_repo_path }}"
         version: "{{ loadlibris_git_revision }}"
 
+    - name: Ensure loadlibris.sh.conf
+      template:
+        src: loadlibris.sh.conf.j2
+        dest: "{{ [loadlibris_repo_path, 'loadlibris.sh.conf.tpl'] | path_join }}"
+
+    # Fetchlibris
     - name: Install required packages for fetchlibris
       apt:
         name: ncftp
@@ -63,14 +93,31 @@
         dest: "{{ fetchlibris_repo_path }}"
         version: "{{ fetchlibris_git_revision }}"
 
+    - name: Ensure fetchlibris.sh.conf
+      template:
+        src: fetchlibris.sh.conf.tpl.j2
+        dest: "{{ [fetchlibris_repo_path, 'fetchlibris.sh.conf.tpl'] }}"
 
-
+    # Libris oai import
     - name: Checkout libris oai import repo
       ansible.builtin.git:
         repo: https://github.com/ub-digit/libris-oai-import.git
         depth: 1
         dest: "{{ libris_oai_import_repo_path }}"
         version: "{{ libris_oai_import_git_revision }}"
+
+    - name: Ensure export_nix.sh.conf
+      template:
+        src: export_nix.sh.conf.tpl.j2
+        dest: "{{ [libris_oai_import_repo_path, 'export_nix.sh.conf.tpl'] }}"
+
+    # Papercut
+    - name: Install required packages for papercut
+      apt:
+        name: mutt
+        state: latest
+        update_cache: yes
+      become: yes
 
     - name: Checkout papercut repo
       ansible.builtin.git:
@@ -79,6 +126,12 @@
         dest: "{{ papercut_repo_path }}"
         version: "{{ papercut_git_revision }}"
 
+    - name: Ensure papercut config
+      template:
+        src: papercut.config.tpl.j2
+        dest: "{{ [papercut_repo_path, 'config.tpl'] }}"
+
+    # Primo export
     - name: Checkout primo export repo
       ansible.builtin.git:
         repo:  https://github.com/ub-digit/koha-primo-export.git

@@ -6,7 +6,7 @@
 # It produces an uncompressed dump in the $BACKUPDIR
 #
 
-BACKUPDIR="{{ koha_database_backup_data_dir }}"
+BACKUPDIR="{{ data_dirs['database_backup'].path }}"
 BASENAME=koha-database-backup
 
 TIMESTAMP=`/bin/date '+%Y%m%d-%H%M'`

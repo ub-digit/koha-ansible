@@ -4,12 +4,6 @@
   vars_files:
     - docker/build/vars/shared.yml
     - vars/vault.yml # TODO: Move to group vars?
-    - vars/gobi_defaults.yml
-    - vars/fetchlibris_defaults.yml
-    - vars/loadlibris_defaults.yml
-    - vars/libris_oai_import_defaults.yml
-    - vars/edifact_defaults.yml
-    - vars/primo_export_defaults.yml
   tasks:
     # TODO: Bit of a hack
   - name: Set primo export data dir
@@ -24,39 +18,32 @@
       #group: "{{ primo_export_user }}"
       state: directory
 
+  - name: Ensure SIP-server configuration
+    ansible.builtin.template:
+      src: SIPconfig.xml.j2
+      dest: "{{ data_dirs['koha'].path }}/SIPconfig.xml"
+
   - name: Deploy app
     include_role:
       name: ub-ansible-deploy
 
-  - name: Ensure SIP-server configuration
-    ansible.builtin.template:
-      src: SIPconfig.xml.j2
-      dest: "/etc/koha/sites/{{ koha_instance_name }}/SIPconfig.xml"
-
-  # GUB-scripts
+  # Database export
   - name: Write /usr/local/sbin/koha-database-backup.sh
     ansible.builtin.template:
       src: koha-database-backup.sh.j2
       dest: /usr/local/sbin/koha-database-backup.sh
       mode: 0544
 
-  - name: Ensure log directory for koha-database-backup.sh
-    ansible.builtin.file:
-      path: "{{ koha_database_backup_log_dir }}"
-      mode: 0755
-      state: directory
-
-  - name: Ensure data directory for koha-database-backup.sh
-    ansible.builtin.file:
-      path: "{{ koha_database_backup_data_dir }}"
-      mode: 0755
-      state: directory
-
-  # Fetchlibris
-  - name: Write fetchlibris.sh.conf
-    template:
-      src: fetchlibris.sh.conf.j2
-      dest: "{{ fetchlibris_conf_file_path }}"
+  - name: Schedule database backup cron job
+    ansible.builtin.cron:
+      name: "database-export"
+      hour: "23"
+      minute: "00"
+      job: "/usr/local/sbin/koha-database-backup.sh >> {{ data_dirs['database_backup_log'].path }}/backup.log 2>&1"
+      state: "{{ 'present' if database_export_cron_enabled else 'absent' }}"
+      cron_file: "database-export"
+      user: root
+    become: yes
 
   # Loadlibris
   - name: Ensure bulkmarcimport.log exists with correct owner
@@ -66,35 +53,59 @@
       group: "{{ koha_uid }}"
       state: touch
 
-  - name: Write loadlibris.sh.conf
-    template:
-      src: loadlibris.sh.conf.j2
-      dest: "{{ loadlibris_conf_file_path }}"
+  - name: Schedule loadlibris cron job
+    ansible.builtin.cron:
+      name: "loadlibris"
+      hour: "05"
+      minute: "00"
+      job: 'cd "{{ docker_directory_path }}"; {{ docker_command }} exec {{ loadlibris_repo_path }}/loadlibris.sh'
+      state: "{{ 'present' if loadlibris_cron_enabled else 'absent' }}"
+      cron_file: "loadlibris"
+      user: root
+    become: yes
 
   # Libris oai import
-  - name: Write export_nix.sh.conf
-    template:
-      src: export_nix.sh.conf.j2
-      dest: "{{ libris_oai_import_conf_file_path }}"
+  - name: Schedule libris oai import cron job
+    ansible.builtin.cron:
+      name: "libris-oai-import"
+      hour: "*"
+      minute: "*"
+      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ libris_oai_import_repo_path }}/export_nix.sh >> {{ data_dirs['libris_oai_import_log'].path }}/libris_oai.log 2>&1)" 
+      state: "{{ 'present' if libris_oai_import_cron_enabled else 'absent' }}"
+      cron_file: "libris-oai-import"
+      user: root
+    become: yes
+
+  # Papercut
+  - name: Schedule cron job
+    ansible.builtin.cron:
+      name: "papercut"
+      minute: "*/5"
+      job: "{{ cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec papercut_repo_path }}/run_updated_borrowers.sh >> {{ data_dirs['papercut'].path }}/run_updated_borrowers.log 2>&1"
+      state: "{{ 'present' if papercut_cron_enabled else 'absent' }}"
+      cron_file: "papercut"
+      user: root
+    become: yes
 
   # Gobi
   - name: Ensure bulkmarcimport.log exists with correct owner
     ansible.builtin.file:
-      path: "{{ data_dirs['gobi_log'].path }}/bulkmarcimport.log"
+      path: "{{ data_dirs['gobi_import_log'].path }}/bulkmarcimport.log"
       owner: "{{ koha_uid }}"
       group: "{{ koha_uid }}"
       state: touch
     become: yes
 
-  - name: Write loadgobi.sh.conf
-    template:
-      src: loadgobi.sh.conf.j2
-      dest: "{{ loadgobi_conf_file_path }}"
-
-  - name: Write log4perl.conf
-    template:
-      src: log4perl.conf.j2
-      dest: "{{ gobi_log4perl_conf_file_path }}"
+  - name: Schedule gobi cron job
+    ansible.builtin.cron:
+      name: "gobi-import"
+      hour: "23"
+      minute: "30"
+      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ gobi_import_repo_path }}/loadgobi.sh > /dev/null 2>&1"
+      state: "{{ 'present' if gobi_import_cron_enabled else 'absent' }}"
+      cron_file: "gobi-import"
+      user: root
+    become: yes
 
   # Edifact
   - name: Ensure vendor directories
@@ -106,11 +117,6 @@
       group: "{{ koha_uid }}"
     loop: "{{ ['dawson', 'delbanco', 'adlibris', 'bokus'] | product(['archive', 'messages']) | list }}"
     become: yes
-
-  - name: Write upload_edi.conf.yml
-    template:
-      src: upload_edi.conf.yml.j2
-      dest: "{{ upload_edifact_conf_file_path }}"
 
   - name: Schedule edifact cron jobs
     ansible.builtin.cron:
@@ -124,8 +130,20 @@
     loop: "{{ ['dawson', 'delbanco', 'adlibris', 'bokus']|zip(['30', '32', '34', '36'])|list }}"
     become: yes
 
-  # Primo export
 
+  # Print notice
+  - name: Schedule print notice cron job
+    ansible.builtin.cron:
+      name: "print-notice"
+      minute: "00"
+      hour: "08"
+      job: "{{ cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec print_notice_repo_path }}/send_all.sh >> {{ data_dirs['print_notice_log'].path }}/log/sendall.log 2>&1"
+      state: present
+      cron_file: "print-notice"
+      user: root
+    become: yes
+
+  # Primo export
   # TODO: This still needed?
 #  - name: Create primo export user
 #    ansible.builtin.user:
@@ -152,7 +170,7 @@
       - databases # Drupal databases primo export directory
     become: yes
 
-  - name: Write config
+  - name: Write primo export config
     template:
       src: primo-export.config.j2
       dest: "{{ primo_export_config_file_path }}"

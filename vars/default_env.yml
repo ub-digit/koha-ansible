@@ -1,0 +1,79 @@
+---
+GIT_REVISION: release-2026.02-20260316.1555
+
+SMTP_HOST: mailchimp
+SMTP_PORT: 1000
+PLACK_MAX_REQUESTS: 10
+PLACK_WORKERS: 1
+
+INFOBIP_API_KEY:
+INFOBIP_SENDER: 
+INFOBIP_BASEURL:
+TO_OVERRIDE: 
+INFOBIP_SKIP_SEND: 1
+
+KOHA_INSTANCE_NAME: "{{ koha_instance_name }}"
+KOHA_USER: "{{ koha_user }}"
+
+SIPCONFIG_HOST_FILE: "{{ data_dirs['koha'].path }}/SIPconfig.xml }}"
+
+MARIADB_DATA_HOST_DIR: "{{ data_dirs['mariadb'].path }}"
+POSTGRES_DATA_HOST_DIR: "{{ data_dirs['postgres'].path }}"
+ELASTICSEARCH_DATA_HOST_DIR: "{{ data_dirs['elasticsearch'].path }}"
+
+DATABASE_BACKUP_HOST_DIR: "{{ data_dirs['database_backup'].path }}"
+DATABASE_BACKUP_DIR:  "{{ data_dirs['database_backup'].path }}"
+
+# Edifact
+EDIFACT_DATA_HOST_DIR: "{{ data_dirs['edifact'].path }}"
+EDIFACT_DATA_DIR: "{{ data_dirs['edifact_data'].path }}"
+
+EDIFACT_BASE_DIR: "{{ data_dirs['edifact'].path }}"
+EDIFACT_EMAIL: "gunda@ub.gu.se"
+
+# Print notice
+PRINT_NOTICE_DATA_HOST_DIR: "{{ data_dirs['print_notice'].path }}"
+PRINT_NOTICE_DATA_DIR: "{{ data_dirs['print_notice'].path }}"
+
+# Fetchlibris
+FETCHLIBRIS_DATA_HOST_DIR: "{{ data_dirs['fetchlibris'].path }}"
+FETCHLIBRIS_DATA_DIR: "{{ data_dirs['fetchlibris'].path }}"
+
+FETCHLIBRIS_DONE_DIR: "{{ data_dirs['fetchlibris_done'].path }}"
+FETCHLIBRIS_BEGUN_DIR: "{{ data_dirs['fetchlibris_begun'].path }}"
+FETCHLIBRIS_LOG_DIR: "{{ data_dirs['fetchlibris_log'] }}"
+FETCHLIBRIS_EMAIL: gunda@ub.gu.se,isabel.folkesson@ub.gu.se,martin.oxelqvist@ub.gu.se
+
+# Loadlibris
+LOADLIBRIS_DATA_HOST_DIR: "{{ data_dirs['loadlibris'].path }}"
+LOADLIBRIS_DATA_DIR: "{{ data_dirs['loadlibris'].path }}"
+
+LOADLIBRIS_IN_DIR: "{{ data_dirs['loadlibris_in'].path }}"
+LOADLIBRIS_IN_ARCHIVE_DIR: "{{ data_dirs['loadlibris_in_archive'].path }}"
+LOADLIBRIS_ERR_DIR: "{{ data_dirs['loadlibris_err'].path }}"
+LOADLIBRIS_LOG_DIR: "{{ data_dirs['loadlibris_log'].path }}"
+LOADLIBRIS_DONE_DIR: "{{ data_dirs['loadlibris_done'].path }}"
+
+# Libris oai import
+LIBRIS_OAI_IMPORT_DATA_HOST_DIR: "{{ data_dirs['libris_oai_import'].path }}"
+LIBRIS_OAI_IMPORT_DATA_DIR: "{{ data_dirs['libris_oai_import'].path }}"
+
+# Papercut
+PAPERCUT_DATA_HOST_DIR: "{{ data_dirs['papercut'].path }}"
+PAPERCUT_DATA_DIR: "{{ data_dirs['papercut'].path }}"
+
+# Gobi import
+GOBI_IMPORT_DATA_HOST_DIR: "{{ data_dirs['gobi_import'].path }}"
+GOBI_IMPORT_DATA_DIR: "{{ data_dirs['gobi_import'].path }}"
+
+GOBI_IMPORT_REPORT_MAIL_TO: "david.gustafsson@ub.gu.se,g.katalog@ub.gu.se"
+GOBI_IMPORT_ERROR_MAIL_TO: david.gustafsson@ub.gu.se,g.katalog@ub.gu.se,stefan.berndtsson@ub.gu.se
+GOBI_IMPORT_LOG_DIR: "{{ data_dirs['gobi_import_log'].path }}"
+
+# Primo export
+PRIMO_EXPORT_DATA_HOST_DIR: "{{ data_dirs['primo_export'].path }}"
+PRIMO_EXPORT_DATA_DIR: "{{ data_dirs['primo_export'].path }}"
+PRIMO_EXPORT_EXPORT_HOST_DIR: "{{ primo_export_export_dir }}"
+PRIMO_EXPORT_EXPORT_DIR: "{{ primo_export_export_dir }}"
+
+

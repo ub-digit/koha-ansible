@@ -1,7 +1,7 @@
 ---
 gobi_ftp_password: "{{ vault_gobi_ftp_password }}"
-gobi_koha_user: "{{ koha_instance_name }}"
-gobi_koha_path: "{{ koha_home }}"
+gobi_koha_user: "{{ koha_user }}"
+gobi_koha_path: "{{ koha_repo_path }}"
 gobi_koha_instance: "{{ koha_instance_name }}"
 
 gobi_smtp_host: "{{ smtp_host }}"

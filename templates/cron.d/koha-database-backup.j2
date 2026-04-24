@@ -1,1 +1,0 @@
-{{ '#' if not koha_database_backup_cron_enabled }} 23 00 * * * /usr/local/sbin/koha-database-backup.sh >> {{ koha_database_backup_log_dir }}/backup.log 2>&1
