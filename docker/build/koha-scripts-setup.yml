@@ -64,7 +64,7 @@
     - name: Ensure log4perl.conf
       template:
         src: gobi.log4perl.conf.tpl.j2
-        dest: "{{ [gobi_import_repo_path, 'log4perl.conf.tpl'] }}"
+        dest: "{{ [gobi_import_repo_path, 'log4perl.conf.tpl'] | path_join }}"
 
     # Loadlibris
     - name: Checkout loadlibris repo
@@ -76,7 +76,7 @@
 
     - name: Ensure loadlibris.sh.conf
       template:
-        src: loadlibris.sh.conf.j2
+        src: loadlibris.sh.conf.tpl.j2
         dest: "{{ [loadlibris_repo_path, 'loadlibris.sh.conf.tpl'] | path_join }}"
 
     # Fetchlibris
@@ -96,7 +96,7 @@
     - name: Ensure fetchlibris.sh.conf
       template:
         src: fetchlibris.sh.conf.tpl.j2
-        dest: "{{ [fetchlibris_repo_path, 'fetchlibris.sh.conf.tpl'] }}"
+        dest: "{{ [fetchlibris_repo_path, 'fetchlibris.sh.conf.tpl'] | path_join }}"
 
     # Libris oai import
     - name: Checkout libris oai import repo
@@ -109,7 +109,7 @@
     - name: Ensure export_nix.sh.conf
       template:
         src: export_nix.sh.conf.tpl.j2
-        dest: "{{ [libris_oai_import_repo_path, 'export_nix.sh.conf.tpl'] }}"
+        dest: "{{ [libris_oai_import_repo_path, 'export_nix.sh.conf.tpl'] | path_join }}"
 
     # Papercut
     - name: Install required packages for papercut
@@ -129,7 +129,7 @@
     - name: Ensure papercut config
       template:
         src: papercut.config.tpl.j2
-        dest: "{{ [papercut_repo_path, 'config.tpl'] }}"
+        dest: "{{ [papercut_repo_path, 'config.tpl'] | path_join }}"
 
     # Primo export
     - name: Checkout primo export repo

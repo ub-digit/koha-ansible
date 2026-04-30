@@ -130,7 +130,6 @@
     loop: "{{ ['dawson', 'delbanco', 'adlibris', 'bokus']|zip(['30', '32', '34', '36'])|list }}"
     become: yes
 
-
   # Print notice
   - name: Schedule print notice cron job
     ansible.builtin.cron:

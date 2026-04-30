@@ -18,8 +18,6 @@ envsubst < {{ [fetchlibris_repo_path, 'fetchlibris.sh.conf.tpl'] | path_join }} 
 envsubst < {{ [libris_oai_import_repo_path, 'export_nix.sh.conf.tpl'] | path_join }}  >  {{ [libris_oai_import_repo_path, 'export_nix.sh.conf'] | path_join }} 
 envsubst < {{ [papercut_repo_path, 'config.tpl'] | path_join }}  >  {{ [papercut_repo_path, 'config'] | path_join }} 
 
-#envsubst < {{ [x_repo_path, 'x.sh.conf.tpl'] | path_join }}  >  {{ [x_repo_path, 'x.sh.conf'] | path_join }} 
-
 # Needed, or can perhaps make sure templates file has correct owner?
 chown -R {{ koha_user }}:{{ koha_user }} {{ site_dir }}
 

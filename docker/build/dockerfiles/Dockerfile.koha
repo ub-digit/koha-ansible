@@ -30,6 +30,8 @@ RUN cpanm --skip-installed --installdeps ${KOHA_REPO_PATH}
 RUN pip install supervisor
 
 COPY ./koha-instance-setup.yml ./
+COPY ./vars/shared.yml ./vars/shared.yml
+COPY ./vars/scripts.yml ./vars/scripts.yml
 COPY ./inventory/instance.yml ./
 COPY ./files ./files
 COPY ./templates ./templates
@@ -40,7 +42,6 @@ COPY ./vars/plugins.yml ./vars/plugins.yml
 COPY ./koha-plugins-setup.yml ./
 RUN ansible-playbook -i instance.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-plugins-setup.yml
 
-COPY ./vars/scripts.yml ./vars/scripts.yml
 COPY ./koha-scripts-setup.yml ./
 RUN ansible-playbook -i instance.yml koha-scripts-setup.yml
 

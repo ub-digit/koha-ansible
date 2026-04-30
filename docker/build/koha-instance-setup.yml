@@ -3,9 +3,9 @@
   become: true
   become_user: root
   vars_files:
-    - ./vars/shared.yml
+    - vars/shared.yml
+    - vars/scripts.yml
   tasks:
-
     - name: Fix PERL5LIB in koha-shell
       ansible.builtin.replace:
         path: '/usr/sbin/koha-shell'

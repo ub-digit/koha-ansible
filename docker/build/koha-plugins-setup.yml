@@ -2,6 +2,8 @@
 - hosts: all
   become: true
   become_user: root
+  vars_files:
+    - vars/shared.yml
   tasks:
     - name: Set facts
       ansible.builtin.set_fact:
