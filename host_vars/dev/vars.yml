@@ -1,0 +1,8 @@
+---
+environment_name: dev
+intranet_server_name: "koha-dev-intra.ub.gu.se"
+opac_server_name: "koha-dev.ub.gu.se"
+koha_ipac_api_key: "{{ vault_koha_ipac_api_key }}"
+get_print_data_api_key: "{{ vault_get_print_data_api_key }}"
+koha_mojilicious_secret_passphrase: "{{ vault_koha_mojilicious_secret_passphrase }}"
+koha_online_payment_portal_url: https://betala-dev.ub.gu.se/Koha/Payment
