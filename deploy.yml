@@ -2,12 +2,12 @@
   become: true
   become_user: root
   vars_files:
-    - docker/build/vars/shared.yml
-    - vars/vault.yml # TODO: Move to group vars?
+  - docker/build/vars/shared.yml
+  - vars/vault.yml # TODO: Move to group vars?
   tasks:
     # TODO: Bit of a hack
   - name: Set primo export data dir
-    ansible.builtin.set_facts:
+    ansible.builtin.set_fact:
       primo_export_export_dir: "/var/lib/koha/primo/{{ koha_instance_name }}" # Referenced in env vars, needed for volume mount
 
   - name: Ensure export directories
