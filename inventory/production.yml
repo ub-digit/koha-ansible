@@ -1,6 +1,6 @@
 ---
 deploy:
   hosts:
-    kohaproduction:
+    production:
       ansible_host: 130.241.35.151
       ansible_user: apps

@@ -1,6 +1,6 @@
 ---
 deploy:
   hosts:
-    kohalab:
+    lab:
       ansible_host: 89.45.233.21
       ansible_user: apps
