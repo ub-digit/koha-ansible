@@ -1,5 +1,6 @@
 ---
-docker_git_repo_url: https://github.com/ub-digit/ub-koha-deploy.git
+docker_git_repo_url: https://github.com/ub-digit/koha-ansible.git
+docker_git_revision: ub-ansible-deploy
 docker_directory: './docker' # Default is './docker'
 app_name: koha # TODO: Needed?
 ansible_python_interpreter: /usr/bin/python3
@@ -11,8 +12,6 @@ https: true
 plack: true
 sip: true
 
-koha_database_backup_data_dir: "{{ koha_data_dir }}/backup/koha-database-backup"
-koha_database_backup_log_dir: /opt/koha-database-backup/log
 koha_bcrypt_settings: "vault TODO"
 
 # GUB custom koha-conf.xml options
@@ -26,11 +25,6 @@ get_print_data_api_key: "{{ vault_get_print_data_api_key }}"
 koha_mojilicious_secret_passphrase: "{{ vault_koha_mojilicious_secret_passphrase }}"
 
 # koha_readonly_db_user_password: "{{ vault_koha_readonly_db_user_password }}"
-
-# Infobip
-infobip_baseurl: 9rpjdv.api.infobip.com
-infobip_sender: InfoSMS
-infobip_skip_send: 1
 
 # Mail settings
 smtp_host: 127.0.0.1
@@ -148,7 +142,7 @@ data_dirs:
   print_notice_log:
     <<: *koha_dir_defaults
     path: "{{ data_dir }}/print-notice/log"
-  gobi:
+  gobi_import:
     <<: *koha_dir_defaults
     path: "{{ data_dir }}/gobi-import"
   gobi_import_bulkmarc_in:

@@ -1,19 +1,18 @@
 ---
-GIT_REVISION: release-2026.02-20260316.1555
+GIT_REVISION: "{{ git_revision }}"
 
 SMTP_HOST: mailchimp
 SMTP_PORT: 1000
 PLACK_MAX_REQUESTS: 10
 PLACK_WORKERS: 1
 
-INFOBIP_API_KEY:
-INFOBIP_SENDER: 
-INFOBIP_BASEURL:
-TO_OVERRIDE: 
+INFOBIP_SENDER:  InfoSMS
+INFOBIP_BASEURL: 9rpjdv.api.infobip.com
+TO_OVERRIDE: 0720042842
 INFOBIP_SKIP_SEND: 1
 
 KOHA_INSTANCE_NAME: "{{ koha_instance_name }}"
-KOHA_USER: "{{ koha_user }}"
+KOHA_USER: "{{ koha_user }}" # TODO + KOHA_UID ??
 
 SIPCONFIG_HOST_FILE: "{{ data_dirs['koha'].path }}/SIPconfig.xml }}"
 
@@ -22,11 +21,11 @@ POSTGRES_DATA_HOST_DIR: "{{ data_dirs['postgres'].path }}"
 ELASTICSEARCH_DATA_HOST_DIR: "{{ data_dirs['elasticsearch'].path }}"
 
 DATABASE_BACKUP_HOST_DIR: "{{ data_dirs['database_backup'].path }}"
-DATABASE_BACKUP_DIR:  "{{ data_dirs['database_backup'].path }}"
+DATABASE_BACKUP_DIR: "{{ data_dirs['database_backup'].path }}"
 
 # Edifact
 EDIFACT_DATA_HOST_DIR: "{{ data_dirs['edifact'].path }}"
-EDIFACT_DATA_DIR: "{{ data_dirs['edifact_data'].path }}"
+EDIFACT_DATA_DIR: "{{ data_dirs['edifact'].path }}"
 
 EDIFACT_BASE_DIR: "{{ data_dirs['edifact'].path }}"
 EDIFACT_EMAIL: "gunda@ub.gu.se"
@@ -39,9 +38,9 @@ PRINT_NOTICE_DATA_DIR: "{{ data_dirs['print_notice'].path }}"
 FETCHLIBRIS_DATA_HOST_DIR: "{{ data_dirs['fetchlibris'].path }}"
 FETCHLIBRIS_DATA_DIR: "{{ data_dirs['fetchlibris'].path }}"
 
-FETCHLIBRIS_DONE_DIR: "{{ data_dirs['fetchlibris_done'].path }}"
 FETCHLIBRIS_BEGUN_DIR: "{{ data_dirs['fetchlibris_begun'].path }}"
-FETCHLIBRIS_LOG_DIR: "{{ data_dirs['fetchlibris_log'] }}"
+FETCHLIBRIS_DONE_DIR: "{{ data_dirs['fetchlibris_done'].path }}"
+FETCHLIBRIS_LOG_DIR: "{{ data_dirs['fetchlibris_log'].path }}"
 FETCHLIBRIS_EMAIL: gunda@ub.gu.se,isabel.folkesson@ub.gu.se,martin.oxelqvist@ub.gu.se
 
 # Loadlibris
@@ -66,7 +65,7 @@ PAPERCUT_DATA_DIR: "{{ data_dirs['papercut'].path }}"
 GOBI_IMPORT_DATA_HOST_DIR: "{{ data_dirs['gobi_import'].path }}"
 GOBI_IMPORT_DATA_DIR: "{{ data_dirs['gobi_import'].path }}"
 
-GOBI_IMPORT_REPORT_MAIL_TO: "david.gustafsson@ub.gu.se,g.katalog@ub.gu.se"
+GOBI_IMPORT_REPORT_MAIL_TO: david.gustafsson@ub.gu.se,g.katalog@ub.gu.se
 GOBI_IMPORT_ERROR_MAIL_TO: david.gustafsson@ub.gu.se,g.katalog@ub.gu.se,stefan.berndtsson@ub.gu.se
 GOBI_IMPORT_LOG_DIR: "{{ data_dirs['gobi_import_log'].path }}"
 
@@ -75,5 +74,3 @@ PRIMO_EXPORT_DATA_HOST_DIR: "{{ data_dirs['primo_export'].path }}"
 PRIMO_EXPORT_DATA_DIR: "{{ data_dirs['primo_export'].path }}"
 PRIMO_EXPORT_EXPORT_HOST_DIR: "{{ primo_export_export_dir }}"
 PRIMO_EXPORT_EXPORT_DIR: "{{ primo_export_export_dir }}"
-
-

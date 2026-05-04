@@ -1,4 +1,5 @@
 ---
+git_revision: release-2026.02-20260316.1555
 environment_name: dev
 intranet_server_name: "koha-dev-intra.ub.gu.se"
 opac_server_name: "koha-dev.ub.gu.se"

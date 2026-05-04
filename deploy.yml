@@ -18,6 +18,13 @@
       #group: "{{ primo_export_user }}"
       state: directory
 
+  # Temporary hack to ensure koha derecory, fix (by breaking out directory creation task from ansible deploY?
+  - name: Ensure koha-directory
+    ansible.builtin.file:
+      path: "{{ data_dirs['koha'].path }}"
+      state: directory
+
+  # TODO: Owner koha_uid?
   - name: Ensure SIP-server configuration
     ansible.builtin.template:
       src: SIPconfig.xml.j2
