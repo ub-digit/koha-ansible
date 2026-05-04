@@ -3,7 +3,7 @@ set -e
 
 envsubst < {{ [envsubst_templates_dir, 'koha-conf.xml'] | path_join }}  > {{ [site_dir, 'koha-conf.xml'] | path_join }}
 envsubst < {{ [envsubst_templates_dir, 'koha-plugin-marc-import-log4perl.conf'] | path_join }}  > {{ [site_dir, 'koha-plugin-marc-import-log4perl.conf'] | path_join }}
-envsubst < {{ [envsubst_templates_dir, 'Infobip.yml'] | path_join }}  > /var/lib/koha/sms_send/Infobip.yaml # chown?
+envsubst < {{ [envsubst_templates_dir, 'Infobip.yaml'] | path_join }}  > /var/lib/koha/sms_send/Infobip.yaml # chown?
 
 envsubst < {{ [envsubst_templates_dir, 'Sendmail.pm'] | path_join }}  > /usr/share/perl5/Mail/Sendmail.pm
 envsubst < {{ [envsubst_templates_dir, 'supervisord.conf'] | path_join }}  > /etc/supervisord.conf

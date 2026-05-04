@@ -200,7 +200,7 @@
     - name: Write koha SMS::Send::Infobip config file
       ansible.builtin.template:
         src: Infobip.yaml.j2
-        dest: "{{ [envsubst_templates_dir, 'Infobip.conf'] | path_join }}"
+        dest: "{{ [envsubst_templates_dir, 'Infobip.yaml'] | path_join }}"
 
     - name: Ensure koha user owns koha directories
       ansible.builtin.file:
