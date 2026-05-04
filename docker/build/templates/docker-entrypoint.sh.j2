@@ -12,7 +12,7 @@ envsubst < {{ [envsubst_templates_dir, 'supervisord.conf'] | path_join }}  > /et
 envsubst < {{ [edifact_repo_path, 'upload_edi.conf.yml.tpl'] | path_join }}  >  {{ [edifact_repo_path, 'upload_edi.conf.yml'] | path_join }} 
 envsubst < {{ [print_notice_repo_path, 'print-notice.conf.tpl'] | path_join }}  >  {{ [print_notice_repo_path, 'print-notice.conf'] | path_join }}
 envsubst < {{ [gobi_import_repo_path, 'loadgobi.sh.conf.tpl'] | path_join }}  >  {{ [gobi_import_repo_path, 'loadgobi.sh.conf'] | path_join }} 
-envsubst < {{ [gobi_import_repo_path, 'gobi.log4perl.conf.tpl'] | path_join }}  >  {{ [gobi_import_repo_path, 'log4perl.conf'] | path_join }} 
+envsubst < {{ [gobi_import_repo_path, 'log4perl.conf.tpl'] | path_join }}  >  {{ [gobi_import_repo_path, 'log4perl.conf'] | path_join }} 
 envsubst < {{ [loadlibris_repo_path, 'loadlibris.sh.conf.tpl'] | path_join }}  >  {{ [loadlibris_repo_path, 'loadlibris.sh.conf'] | path_join }} 
 envsubst < {{ [fetchlibris_repo_path, 'fetchlibris.sh.conf.tpl'] | path_join }}  >  {{ [fetchlibris_repo_path, 'fetchlibris.sh.conf'] | path_join }}
 envsubst < {{ [libris_oai_import_repo_path, 'export_nix.sh.conf.tpl'] | path_join }}  >  {{ [libris_oai_import_repo_path, 'export_nix.sh.conf'] | path_join }} 
