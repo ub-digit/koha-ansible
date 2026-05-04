@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   koha:
-    image: docker.ub.gu.se/koha-base:${GIT_REVISION}
+    image: docker.ub.gu.se/koha:${GIT_REVISION}
     build:
       context: ./
       dockerfile: ./dockerfiles/Dockerfile.koha
