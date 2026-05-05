@@ -42,6 +42,13 @@ services:
       - mariadb
       - elasticsearch
       - rabbitmq
+    volumes:
+      koha-plack-run:/run/koha-plack
+  apache:
+    image: docker.ub.gu.se/koha:${GIT_REVISION}
+    entrypoint: docker-entrypoint-apache.sh
+   volumes:
+      koha-plack-run:/run/koha-plack
   mariadb:
     image: mariadb:10.11-jammy
     environment:
@@ -68,3 +75,6 @@ services:
       - 64m
   rabbitmq:
     image: docker.ub.gu.se/koha-rabbitmq:${RABBITMQ_VERSION}
+
+volumes:
+  - khoa-plack-run:

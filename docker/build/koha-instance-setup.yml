@@ -12,11 +12,12 @@
         regexp: '\$result:\$result/lib'
         replace: "{{ perl5lib_paths }}"
 
-    - name: Ensure /etc/default/koha-common
-      template:
-        src: koha-common.j2
-        dest: /etc/default/koha-common
-        mode: 0644
+# TODO: Don't think this is used anymore
+#    - name: Ensure /etc/default/koha-common
+#      template:
+#        src: koha-common.j2
+#        dest: /etc/default/koha-common
+#        mode: 0644
 
     - name: Set facts
       ansible.builtin.set_fact:
@@ -114,12 +115,6 @@
       loop:
         - intranet-error.log
         - opac-error.log
-
-    - name: Set localhost server name in apache-site.conf.in
-      ansible.builtin.replace:
-        path: "/etc/koha/apache-site.conf.in"
-        regexp: "__OPACSERVER__|__INTRASERVER__"
-        replace: "localhost"
 
     - name: Replace DocumentRoot path in apache-shared-intranet.conf and apache-shared-opac.conf
       ansible.builtin.replace:

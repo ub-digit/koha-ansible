@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars:
-    pip_install_packages:
+    pip_install_packages: #TODO: Why is this needed again?
       - name: PyMySQL
   roles:
     - geerlingguy.pip
@@ -30,6 +30,7 @@
         name: [
                # Docker
                'supervisor',
+               'jq', # ecs log transformation for scripts etc
                #'ntp', # Not found in trixie
                # Needed?
                'libstring-similarity-perl', #??
