@@ -35,6 +35,8 @@ services:
       GOBI_IMPORT_ERROR_MAIL_TO: "${GOBI_IMPORT_ERROR_MAIL_TO}"
       GOBI_IMPORT_LOG_DIR: "${GOBI_IMPORT_LOG_DIR}"
       GOBI_IMPORT_LOG4PERL_CONF_FILE_PATH: "/opt/koha-gobi-import/log4perl.conf" # TODO: Relative path works?
+      # Koha environment variables
+      KOHA_CONF: "/etc/koha/sites/${KOHA_INSTANCE_NAME}/koha-conf.xml" #TODO: Move to dockerfile? Already have duplication of KOHA_USER, and KOHA_INSTANCE_NAME, would have to duplicate KOHA_INSTANCE_NAME in build .env
     cap_add:
      - SYS_NICE
      - DAC_READ_SEARCH

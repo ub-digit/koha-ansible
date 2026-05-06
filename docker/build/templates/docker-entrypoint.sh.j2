@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-envsubst < {{ [envsubst_templates_dir, 'koha-conf.xml'] | path_join }}  > {{ [site_dir, 'koha-conf.xml'] | path_join }}
-envsubst < {{ [envsubst_templates_dir, 'koha-plugin-marc-import-log4perl.conf'] | path_join }}  > {{ [site_dir, 'koha-plugin-marc-import-log4perl.conf'] | path_join }}
-envsubst < {{ [envsubst_templates_dir, 'Infobip.yaml'] | path_join }}  > /var/lib/koha/sms_send/Infobip.yaml # chown?
+koha-envsubst.sh
 
-envsubst < {{ [envsubst_templates_dir, 'Sendmail.pm'] | path_join }}  > /usr/share/perl5/Mail/Sendmail.pm
 envsubst < {{ [envsubst_templates_dir, 'supervisord.conf'] | path_join }}  > /etc/supervisord.conf
 
 # Koha scripts
@@ -17,9 +14,6 @@ envsubst < {{ [loadlibris_repo_path, 'loadlibris.sh.conf.tpl'] | path_join }}  >
 envsubst < {{ [fetchlibris_repo_path, 'fetchlibris.sh.conf.tpl'] | path_join }}  >  {{ [fetchlibris_repo_path, 'fetchlibris.sh.conf'] | path_join }}
 envsubst < {{ [libris_oai_import_repo_path, 'export_nix.sh.conf.tpl'] | path_join }}  >  {{ [libris_oai_import_repo_path, 'export_nix.sh.conf'] | path_join }} 
 envsubst < {{ [papercut_repo_path, 'config.tpl'] | path_join }}  >  {{ [papercut_repo_path, 'config'] | path_join }} 
-
-# Needed, or can perhaps make sure templates file has correct owner?
-chown -R {{ koha_user }}:{{ koha_user }} {{ site_dir }}
 
 # If first arg starts with "-" OR no args provided → run supervisord
 if [[ $# -eq 0 || "$1" == -* ]]; then
