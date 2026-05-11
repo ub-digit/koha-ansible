@@ -216,7 +216,7 @@
     - name: Change plack socket path
       ansible.builtin.replace:
         path: "/etc/koha/{{ item }}"
-        regexp: "/var/run/koha/\${instance}"
+        regexp: "/var/run/koha/\\${instance}"
         replace: "/run/koha-plack"
       loop:
         - apache-shared-intranet-plack.conf
