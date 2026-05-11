@@ -233,3 +233,9 @@
         src: docker-entrypoint.sh.j2
         dest: "/usr/local/bin/docker-entrypoint.sh"
         mode: "0755"
+
+    - name: Ensure apache docker entrypoint
+      ansible.builtin.template:
+        src: docker-entrypoint.sh.j2
+        dest: "/usr/local/bin/docker-entrypoint-apache.sh"
+        mode: "0755"

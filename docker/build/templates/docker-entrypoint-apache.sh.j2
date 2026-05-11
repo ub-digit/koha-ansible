@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+
+# If first arg starts with "-" OR no args provided → run apache
+if [[ $# -eq 0 || "$1" == -* ]]; then
+    exec apachectl -D FOREGROUND
+else
+    exec "$@"
+fi
