@@ -8,7 +8,7 @@ pidfile=/tmp/supervisord.pid
 serverurl=unix:///tmp/supervisor.sock
 
 [program:plack]
-command=/usr/local/bin/run_with_ecs_logging.py plack /usr/bin/starman -M FindBin --max-requests ${PLACK_MAX_REQUESTS} --workers ${PLACK_WORKERS} --pid /var/run/koha/{{ koha_instance_name }}/plack.pid --access-log /var/log/koha/{{ koha_instance_name }}/plack.log --error-log /var/log/koha/{{ koha_instance_name }}/plack-error.log -E ${PLACK_ENVIRONMENT} --socket /var/run/koha/{{ koha_instance_name }}/plack.sock /etc/koha/sites/${instancename}/plack.psgi
+command=/usr/local/bin/run_with_ecs_logging.py plack /usr/bin/starman -M FindBin --max-requests ${PLACK_MAX_REQUESTS} --workers ${PLACK_WORKERS} --pid /run/koha-plack/plack.pid --access-log /var/log/koha/{{ koha_instance_name }}/plack.log --error-log /var/log/koha/{{ koha_instance_name }}/plack-error.log -E ${PLACK_ENVIRONMENT} --socket /run/koha-plack/plack.sock /etc/koha/sites/${instancename}/plack.psgi
 environment=KOHA_HOME="{{ koha_repo_path }}",KOHA_CONF="/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml",GIT_INSTALL=1,PERL5LIB="{{ perl5lib_paths }}"
 user={{ koha_user }}
 stdout_logfile=/dev/stdout

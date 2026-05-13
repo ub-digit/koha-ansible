@@ -8,3 +8,4 @@ envsubst < {{ [envsubst_templates_dir, 'Sendmail.pm'] | path_join }}  > /usr/sha
 
 # Needed, or can perhaps make sure templates file has correct owner?
 chown -R {{ koha_user }}:{{ koha_user }} {{ site_dir }}
+chown -R {{ koha_user }}:{{ koha_user }} /run/koha-plack
