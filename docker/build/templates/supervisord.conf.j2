@@ -7,55 +7,51 @@ pidfile=/tmp/supervisord.pid
 [supervisorctl]
 serverurl=unix:///tmp/supervisor.sock
 
-[program:apache]
-command=/usr/sbin/apachectl -D FOREGROUND
-autostart=true
-autorestart=true
-stdout_logfile=/var/log/apachectl-stdout.log
-stderr_logfile=/var/log/apachectl-stderr.log
-
 [program:plack]
-command=/usr/local/bin/run_with_logging.py plack /usr/bin/starman -M FindBin --max-requests ${PLACK_MAX_REQUESTS} --workers ${PLACK_WORKERS} --pid /var/run/koha/{{ koha_instance_name }}/plack.pid --access-log /var/log/koha/{{ koha_instance_name }}/plack.log --error-log /var/log/koha/{{ koha_instance_name }}/plack-error.log -E ${PLACK_ENVIRONMENT} --socket /var/run/koha/{{ koha_instance_name }}/plack.sock /etc/koha/sites/${instancename}/plack.psgi
+command=/usr/local/bin/run_with_ecs_logging.py plack /usr/bin/starman -M FindBin --max-requests ${PLACK_MAX_REQUESTS} --workers ${PLACK_WORKERS} --pid /var/run/koha/{{ koha_instance_name }}/plack.pid --access-log /var/log/koha/{{ koha_instance_name }}/plack.log --error-log /var/log/koha/{{ koha_instance_name }}/plack-error.log -E ${PLACK_ENVIRONMENT} --socket /var/run/koha/{{ koha_instance_name }}/plack.sock /etc/koha/sites/${instancename}/plack.psgi
 environment=KOHA_HOME="{{ koha_repo_path }}",KOHA_CONF="/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml",GIT_INSTALL=1,PERL5LIB="{{ perl5lib_paths }}"
 user={{ koha_user }}
-stdout_logfile=/var/log/starman-stdout.log
-stderr_logfile=var/log/starman-stderr.log
-# stdout_logfile=/dev/fd/1
-# stdout_logfile_maxbytes=0
-# redirect_stderr=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+redirect_stderr=true
 
 [program:background-job-worker-default]
-command=/usr/local/bin/run_with_logging.py background-job-worker-default {{ koha_repo_path }}/misc/workers/background_jobs_worker.pl --queue default
+command=/usr/local/bin/run_with_ecs_logging.py background-job-worker-default {{ koha_repo_path }}/misc/workers/background_jobs_worker.pl --queue default
 environment=KOHA_HOME="{{ koha_repo_path }}",KOHA_CONF="/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml",PERL5LIB="{{ perl5lib_paths }}"
 user={{ koha_user }}
 autostart=true
 autorestart=true
-stdout_logfile=/var/log/background-job-worker-default-stdout.log
-stderr_logfile=/var/log/background-job-worker-default-stderr.log
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+redirect_stderr=true
 
 [program:background-job-worker-long-tasks]
-command=/usr/local/bin/run_with_logging.py background-job-worker-longs-tasks {{ koha_repo_path }}/misc/workers/background_jobs_worker.pl --queue long_tasks
+command=/usr/local/bin/run_with_ecs_logging.py background-job-worker-longs-tasks {{ koha_repo_path }}/misc/workers/background_jobs_worker.pl --queue long_tasks
 environment=KOHA_HOME="{{ koha_repo_path }}",KOHA_CONF="/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml",PERL5LIB="{{ perl5lib_paths }}"
 user={{ koha_user }}
 autostart=true
 autorestart=true
-stdout_logfile=/var/log/background-job-worker-long-tasks-stdout.log
-stderr_logfile=/var/log/background-job-worker-long-tasks-stderr.log
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+redirect_stderr=true
 
 [program:sip-server]
-command=/usr/local/bin/run_with_logging.py sip-server /usr/bin/perl {{ koha_repo_path }}/C4/SIP/SIPServer.pm /etc/koha/sites/{{ koha_instance_name }}/SIPconfig.xml
-environment=KOHA_HOME="{{ koha_repo_path }}",KOHA_CONF="/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml"PERL5LIB="{{ perl5lib_paths }}"
-user={{ koha_user }}
-autostart=true
-autorestart=true
-stdout_logfile=/var/log/elasticsearch-indexer-stdout.log
-stderr_logfile=/var/log/elasticsearch-indexer-stderr.log
-
-[program:elasticsearch-indexer]
-command={{ koha_repo_path }}/misc/workers/es_indexer_daemon.pl --batch_size 10
+command=/usr/local/bin/run_with_ecs_logging.py sip-server /usr/bin/perl {{ koha_repo_path }}/C4/SIP/SIPServer.pm /etc/koha/sites/{{ koha_instance_name }}/SIPconfig.xml
 environment=KOHA_HOME="{{ koha_repo_path }}",KOHA_CONF="/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml",PERL5LIB="{{ perl5lib_paths }}"
 user={{ koha_user }}
 autostart=true
 autorestart=true
-stdout_logfile=/var/log/elasticsearch-indexer-stdout.log
-stderr_logfile=var/log/elasticsearch-indexer-stderr.log
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+redirect_stderr=true
+
+[program:elasticsearch-indexer]
+command=/usr/local/bin/run_with_ecs_logging.py elasticsearch-indexer {{ koha_repo_path }}/misc/workers/es_indexer_daemon.pl --batch_size 10
+environment=KOHA_HOME="{{ koha_repo_path }}",KOHA_CONF="/etc/koha/sites/{{ koha_instance_name }}/koha-conf.xml",PERL5LIB="{{ perl5lib_paths }}"
+user={{ koha_user }}
+autostart=true
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+redirect_stderr=true
+
