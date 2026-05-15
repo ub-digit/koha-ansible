@@ -58,6 +58,13 @@
     - name: Create Koha instance
       ansible.builtin.command: "koha-create --use-db --memcached-servers {{ koha_memcached_server }} --elasticsearch-server {{ koha_elasticsearch_server }} --mb-host {{ koha_rabbitmq_host }} --mb-port {{ koha_rabbitmq_port }} --mb-user {{ koha_rabbitmq_user }} --mb-pass {{ koha_rabbitmq_password }} {{ koha_instance_name }}"
 
+    - name: Ensure default SIPconfig.xml
+      ansible.builtin.copy:
+        src: "{{ koha_repo_path }}/debian/templates/SIPconfig.xml"
+        dest: "/etc/koha/sites/{{ koha_instance_name }}/SIPconfig.xml"
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
+
     - name: Copy koha-conf-site.xml.in to template directory
       ansible.builtin.copy:
         src: "{{ [site_dir, 'koha-conf.xml'] | path_join }}"

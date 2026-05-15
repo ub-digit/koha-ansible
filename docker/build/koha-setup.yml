@@ -196,7 +196,6 @@
         dest: "/etc/koha/"
       loop:
         - log4perl-site.conf.in
-        - SIPconfig.xml # Remove?
         - plack.psgi
         - apache-site.conf.in 
         - apache-shared.conf
