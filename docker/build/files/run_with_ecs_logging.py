@@ -16,7 +16,8 @@ p = subprocess.Popen(
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
     text=True,
-    bufsize=1
+    bufsize=1,
+    start_new_session=True
 )
 
 def emit(stream, line):
@@ -46,7 +47,7 @@ def reader(pipe, stream_name):
 
 def forward_signal(sig, frame):
     try:
-        os.killpg(os.getpgid(p.pid), sig)
+        os.killpg(p.pid, sig)
     except ProcessLookupError:
         pass
 
