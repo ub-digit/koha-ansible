@@ -221,6 +221,12 @@
         - apache-shared-intranet-plack.conf
         - apache-shared-opac-plack.conf
 
+    - name: Remove opac antibot configuration
+      ansible.builtin.lineinfile:
+        path: "/etc/koha/apache-shared-opac-plack.conf"
+        regexp: '^\s*Include "/etc/koha/apache-shared-opac-antibot\.conf"\s*$'
+        state: absent
+
     # Can't figure out where these are created, at least not in koha-common package, koha-create (or koha-create-dirs)
     # koha-common.dirs
     - name: Create /etc/koha/sites directory
