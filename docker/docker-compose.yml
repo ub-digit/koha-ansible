@@ -54,7 +54,7 @@ services:
       - koha-plack-run:/run/koha-plack
   apache:
     image: docker.ub.gu.se/koha:${GIT_REVISION}
-    entrypoint: docker-entrypoint-apache.sh
+    entrypoint: ["/usr/local/bin/docker-entrypoint-apache.sh"]
     volumes:
       - koha-plack-run:/run/koha-plack
     ports:
