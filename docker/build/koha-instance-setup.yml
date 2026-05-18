@@ -56,7 +56,7 @@
         dest: /etc/koha/koha-sites.conf
 
     - name: Create Koha instance
-      ansible.builtin.command: "koha-create --use-db --memcached-servers {{ koha_memcached_server }} --elasticsearch-server {{ koha_elasticsearch_server }} --mb-host {{ koha_rabbitmq_host }} --mb-port {{ koha_rabbitmq_port }} --mb-user {{ koha_rabbitmq_user }} --mb-pass {{ koha_rabbitmq_password }} {{ koha_instance_name }}"
+      ansible.builtin.command: "koha-create --use-db --memcached-servers {{ koha_memcached_server }} --elasticsearch-server {{ koha_elasticsearch_server }} --mb-host {{ koha_rabbitmq_host }} --mb-port {{ koha_rabbitmq_port }} --mb-user {{ koha_rabbitmq_user }} --mb-pass {{ koha_rabbitmq_password }} {{ koha_instance_name }} --koha-user-uid {{ koha_uid }}"
 
     - name: Ensure default SIPconfig.xml
       ansible.builtin.copy:

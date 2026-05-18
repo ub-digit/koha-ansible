@@ -141,8 +141,13 @@
       ansible.builtin.copy:
         src: "{{ koha_repo_path }}/debian/scripts/"
         dest: "/usr/sbin/"
-        remote_src: yes
         mode: preserve # Should be fixed here https://github.com/Shrews/ansible/commit/3c1ca809614863aaa6b85d460be9846494cdb802 but still does not retain permissions, so fixing this manually below
+
+    - name: Copy modified version of koha-create (for setting koha user uid/gid)
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/koha-create"
+        dest: "/usr/sbin/koha-create"
+        mode: preserve # ?
 
     - name: Find all Koha scripts
       find:
@@ -191,7 +196,6 @@
     # @TODO: Copy all and add lists of exceptions instead?
     - name: Copy rest of unmanaged Koha config template files from release
       ansible.builtin.copy:
-        remote_src: yes
         src: "{{ koha_repo_path }}/debian/templates/{{ item }}"
         dest: "/etc/koha/"
       loop:

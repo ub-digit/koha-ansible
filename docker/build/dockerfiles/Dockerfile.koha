@@ -19,6 +19,7 @@ COPY ./koha-setup.yml ./
 COPY ./inventory/koha.yml ./
 COPY ./vars/qa.yml ./vars/qa.yml
 COPY ./requirements.yml ./
+COPY ./files/koha-create ./files/koha-create
 
 RUN ansible-galaxy install -r requirements.yml
 RUN ansible-playbook -i koha.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-setup.yml
