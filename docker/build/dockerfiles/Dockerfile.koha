@@ -45,6 +45,9 @@ RUN ansible-playbook -i instance.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-pl
 COPY ./koha-scripts-setup.yml ./
 RUN ansible-playbook -i instance.yml koha-scripts-setup.yml
 
+COPY ./koha-apache-setup.yml ./
+RUN ansible-playbook -i koha.yml koha-apache-setup.yml
+
 ENV KOHA_HOME=${KOHA_REPO_PATH}
 ENV GIT_INSTALL=1
 ENV PERL5LIB="${KOHA_REPO_PATH}/lib:${KOHA_REPO_PATH}"

@@ -227,9 +227,24 @@
 
     - name: Remove opac antibot configuration
       ansible.builtin.lineinfile:
-        path: "/etc/koha/apache-shared-opac-plack.conf"
+        path: /etc/koha/apache-shared-opac-plack.conf
         regexp: '^\s*Include "/etc/koha/apache-shared-opac-antibot\.conf"\s*$'
         state: absent
+
+    - name: Remove mpm_itk configuration
+      ansible.builtin.lineinfile:
+        path: /etc/koha/apache-site.conf.in
+        regexp: 'AssignUserID'
+        state: absent
+
+    - name: Replace with User/Group configuration
+      ansible.builtin.blockinfile:
+        path: /etc/koha/apache-site.conf.in
+        insertbefore: BOF
+        block: |
+          # Apache runtime user
+          User __UNIXUSER__
+          Group __UNIXGROUP__
 
     # Can't figure out where these are created, at least not in koha-common package, koha-create (or koha-create-dirs)
     # koha-common.dirs

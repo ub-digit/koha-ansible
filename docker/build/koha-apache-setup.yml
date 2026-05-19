@@ -3,11 +3,32 @@
   become: true
   become_user: root
   tasks:
-    # This needs to be done before trying to enable the cgi module
-    - name: Apache | MPM fix
+    # This needs to be done before trying to enable the cgi and npm_event modules(?)
+    - name: Apache | Disable conflicting modules
+      apache2_module:
+        name: "{{ item }}"
+        state: absent
+        warn_mpm_absent: false
+        ignore_configcheck: true
+      loop:
+        - mpm_itk
+        - mpm_prefork
+
+    - name: Apache | Enable mpm_event module
       apache2_module:
         name: mpm_event
-        state: absent
+        state: present
+        ignore_configcheck: true
+
+    - name: Apache | Enable required modules
+      apache2_module:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - rewrite
+        - headers
+        - proxy_http
+        - cgid
 
     - name: Apache | Disable default vhost
       ansible.builtin.shell: a2dissite 000-default
@@ -17,13 +38,3 @@
         src: ports.conf.j2
         dest: /etc/apache2/ports.conf
         mode: 0644
-
-    - name: Apache | Enable needed modules
-      apache2_module:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - rewrite
-        - headers
-        - proxy_http
-        - cgi
