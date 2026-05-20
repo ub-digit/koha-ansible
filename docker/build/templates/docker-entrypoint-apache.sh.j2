@@ -5,6 +5,7 @@ koha-plack --enable {{ koha_instance_name }}
 
 # If first arg starts with "-" OR no args provided → run apache
 if [[ $# -eq 0 || "$1" == -* ]]; then
+    rm -f /var/run/apache2/apache2.pid
     exec apachectl -D FOREGROUND
 else
     exec "$@"
