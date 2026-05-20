@@ -246,6 +246,15 @@
           User __UNIXUSER__
           Group __UNIXGROUP__
 
+    - name: Fix X-FORWARDED-PROTO in apache plack configuration
+      ansible.builtin.replace:
+        path: "/etc/koha/{{ item }}"
+        regexp: '"https" env=HTTPS'
+        replace: '"http"'
+      loop:
+        - apache-shared-opac-plack.conf
+        - apache-shared-intranet-plack.conf
+
     # Can't figure out where these are created, at least not in koha-common package, koha-create (or koha-create-dirs)
     # koha-common.dirs
     - name: Create /etc/koha/sites directory
