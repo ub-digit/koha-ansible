@@ -107,6 +107,9 @@
         owner: "{{ koha_user }}"
         group: "{{ koha_user }}" # group?
 
+    - name: Run koha-translate script
+      ansible.builtin.command: "koha-translate --install sv-SE -d {{ koha_instance_name }}"
+
     - name: Copy ecs logging wrapper script
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/run_with_ecs_logging.py"
