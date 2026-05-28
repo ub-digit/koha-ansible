@@ -67,7 +67,7 @@
                #'libtest-perl-critic-perl',
                #'libtest-perl-critic-progressive-perl'
                #'libfile-chdir-perl'
-               #'locales', # TODO: Save spaces if used?
+               'locales',
                # Koha-common dependencies as listed by `apt-cache depends koha-common`
                'debconf',
                'libalgorithm-checkdigits-perl',
