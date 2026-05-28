@@ -237,7 +237,7 @@
         regexp: 'AssignUserID'
         state: absent
 
-    - name: Replace with User/Group configuration
+    - name: Replace with User/Group configuration and add Directory entry for koha root
       ansible.builtin.blockinfile:
         path: /etc/koha/apache-site.conf.in
         insertbefore: BOF
@@ -245,6 +245,10 @@
           # Apache runtime user
           User __UNIXUSER__
           Group __UNIXGROUP__
+          # Grant access to koha repo path
+          <Directory {{ koha_repo_path }}>
+            Require all granted
+          </Directory>
 
     - name: Fix X-FORWARDED-PROTO in apache plack configuration
       ansible.builtin.replace:
