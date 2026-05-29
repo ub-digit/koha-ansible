@@ -3,3 +3,6 @@ services:
   koha:
     volumes:
       - "${KOHA_REPO}:/opt/koha"
+  elasticsearch:
+    ports:
+    - "127.0.0.1:7192:9200"
