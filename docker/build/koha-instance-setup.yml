@@ -24,11 +24,6 @@
         envsubst_templates_dir: "{{ [playbook_dir, 'env_templates'] | path_join }}" 
         site_dir: "{{ ['/etc/koha/sites', koha_instance_name] | path_join }}"
 
-    - name: Include qa configuration
-      ansible.builtin.include_vars:
-        #dir: vars
-        file: qa.yml
-
     - name: Ensure root .bashrc
       ansible.builtin.template:
         src: bashrc.j2

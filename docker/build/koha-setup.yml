@@ -20,11 +20,6 @@
         force: no
         update_cache: yes
 
-    - name: Include qa configuration
-      ansible.builtin.include_vars:
-        #dir: vars
-        file: qa.yml
-
     - name: Checkout QA repo
       ansible.builtin.git:
         depth: 1

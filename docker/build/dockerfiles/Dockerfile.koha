@@ -17,7 +17,6 @@ COPY --from=release /root/release ${KOHA_REPO_PATH}
 
 COPY ./koha-setup.yml ./
 COPY ./inventory/koha.yml ./
-COPY ./vars/qa.yml ./vars/qa.yml
 COPY ./requirements.yml ./
 COPY ./files/koha-create ./files/koha-create
 
@@ -38,7 +37,6 @@ COPY ./files ./files
 COPY ./templates ./templates
 RUN ansible-playbook -i instance.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-instance-setup.yml
 
-COPY ./vars/plugins.yml ./vars/plugins.yml
 COPY ./koha-plugins-setup.yml ./
 RUN ansible-playbook -i instance.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-plugins-setup.yml
 

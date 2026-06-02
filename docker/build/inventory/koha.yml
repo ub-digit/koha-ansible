@@ -4,3 +4,6 @@ all:
     koha:
       ansible_host: localhost
       ansible_connection: local
+
+      qa_repo: https://gitlab.com/koha-community/qa-test-tools.git
+      qa_home: "/opt/qa-test-tools" #TODO: rename to qa_repo_path

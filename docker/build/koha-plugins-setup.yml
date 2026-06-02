@@ -9,12 +9,6 @@
       ansible.builtin.set_fact:
         koha_plugins_dir: "{{ ['/var/lib/koha', koha_instance_name, 'plugins'] | path_join }}" 
 
-#    - name: Include plugins list
-#      ansible.builtin.include_vars:
-#        file: plugins.yml
-#        file: "{{ [koha_repo_path, 'koha_deploy/plugins.yaml'] | path_join }}"
-#        name: koha_plugins
-
     - name: Ensure koha plugins
       ansible.builtin.shell: |
         set -exo pipefail

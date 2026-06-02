@@ -18,9 +18,6 @@ if [ -f ~/.bash_aliases ]; then
 fi
 
 export PATH="${PATH}:{{ [koha_repo_path, 'node_modules/.bin'] | path_join }}"
-export KOHA_CONF="{{ [site_dir, 'koha-conf.xml'] | path_join }}"
-export KOHA_HOME="{{ koha_repo_path }}"
-export PERL5LIB="{{ perl5lib_paths }}:{{ qa_home }}"
 
 PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\W\[\033[00m\]$(__git_ps1 "\[\e[1;33m\](%s)\[\e[0m\]")$ '
 
