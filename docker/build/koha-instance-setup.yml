@@ -172,37 +172,23 @@
 #        dest: "/etc/koha/sites/{{ koha_instance_name }}/log4perl.conf"
 #        regexp: '__LOG_DIR__'
 #        replace: "/var/log/koha/{{ koha_instance_name }}"
-#
-    #- name: Ensure koha-perl5-lib directory
-    #  ansible.builtin.file:
-    #    path: "{{ koha_perl5lib_path }}"
-    #    mode: 0755
-    #    state: directory
 
-    # Hack to install from git reposity, works but ugly as hell
-    - name: Checkout MimeMailSender repo, required by marc import plugin
-      ansible.builtin.git:
-        repo: https://github.com/ub-digit/Log-Dispatch-Email-MimeMailSender.git
-        dest: "/var/lib/koha/Log-Dispatch-Email-MimeMailSender"
-        version: master
-
-    - name: Inject MIMEMailSender in perl lib path
-      ansible.builtin.file:
-        src: "/var/lib/koha/Log-Dispatch-Email-MimeMailSender/lib/Log/Dispatch/Email/MIMEMailSender.pm"
-        dest: "/usr/share/perl5/Log/Dispatch/Email/MIMEMailSender.pm"
-        state: link
-
-    - name: Checkout SMS-Send-Infobip repo
-      ansible.builtin.git:
-        repo: https://github.com/ub-digit/SMS-Send-Infobip.git
-        dest: "/var/lib/koha/SMS-Send-Infobip"
-        version: master
-
-    - name: Inject SMS-Send-Infobip in perl lib path
-      ansible.builtin.file:
-        src: "/var/lib/koha/SMS-Send-Infobip/lib/SMS"
-        dest: "/usr/share/perl5/SMS"
-        state: link
+    - name: Install perl librares from git
+      ansible.builtin.shell: |
+        set -exo pipefail
+        mkdir -p "{{ clone_dir }}"
+        git clone --depth 1 --branch "{{ item.branch }}" "{{ item.url }}" "{{ clone_dir }}"
+        cp -R "{{ clone_dir }}/lib/." "/usr/share/perl5/"
+        rm -Rf {{ clone_dir }}
+      loop:
+        - url: https://github.com/ub-digit/Log-Dispatch-Email-MimeMailSender.git
+          branch: master
+        - url: https://github.com/ub-digit/Log-Log4perl-Layout-JSON.git
+          branch: nested-fields
+        - url: https://github.com/ub-digit/SMS-Send-Infobip.git
+          branch: master
+      vars:
+        clone_dir: "/tmp/perllibs"
 
     - name: Ensure koha instance sms_send directory
       ansible.builtin.file:
