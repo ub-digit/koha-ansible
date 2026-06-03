@@ -119,6 +119,7 @@
         - LWP::Simple::Post # koha-plugin-get-print-data dependency
         - DBD::Pg # GUB postgres reports
         - Crypt::OpenSSL::RSA
+        - Log::Log4perl::Layout::JSON # For ECS logging, we later overwrite this with own fork, but install for dependencies
 
 #    - name: Install Koha perl dependencies
 #      community.general.cpanm:
