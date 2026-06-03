@@ -44,12 +44,12 @@
 
   - name: Schedule database backup cron job
     ansible.builtin.cron:
-      name: "database-export"
+      name: "database-backup"
       hour: "23"
       minute: "00"
       job: "/usr/local/sbin/koha-database-backup.sh >> {{ data_dirs['database_backup_log'].path }}/backup.log 2>&1"
-      state: "{{ 'present' if database_export_cron_enabled else 'absent' }}"
-      cron_file: "database-export"
+      state: "{{ 'present' if database_backup_cron_enabled else 'absent' }}"
+      cron_file: "database-backup"
       user: root
     become: yes
 
@@ -89,7 +89,7 @@
     ansible.builtin.cron:
       name: "papercut"
       minute: "*/5"
-      job: "{{ cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec papercut_repo_path }}/run_updated_borrowers.sh >> {{ data_dirs['papercut'].path }}/run_updated_borrowers.log 2>&1"
+      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ papercut_repo_path }}/run_updated_borrowers.sh >> {{ data_dirs['papercut'].path }}/run_updated_borrowers.log 2>&1"
       state: "{{ 'present' if papercut_cron_enabled else 'absent' }}"
       cron_file: "papercut"
       user: root
@@ -131,7 +131,7 @@
       name: "upload-edifact-{{ item.0 }}"
       minute: "{{ item.1 }}"
       hour: "22"
-      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ edifact_repo_path }}/upload_edi.pl \"{{ upload_edifact_conf_file_path }}\" {{ item.0 }} >> {{ data_dirs['edifact'] }}/upload_edi.log 2>&1"
+      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ edifact_repo_path }}/upload_edi.pl {{ item.0 }} >> {{ data_dirs['edifact'] }}/upload_edi.log 2>&1"
       state: "{{ 'present' if edifact_cron_enabled else 'absent' }}"
       cron_file: 'edifact'
       user: root
@@ -144,7 +144,7 @@
       name: "print-notice"
       minute: "00"
       hour: "08"
-      job: "{{ cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec print_notice_repo_path }}/send_all.sh >> {{ data_dirs['print_notice_log'].path }}/log/sendall.log 2>&1"
+      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ print_notice_repo_path }}/send_all.sh >> {{ data_dirs['print_notice_log'].path }}/log/sendall.log 2>&1"
       state: "{{ 'present' if print_notice_cron_enabled else 'absent' }}"
       cron_file: "print-notice"
       user: root
@@ -177,17 +177,12 @@
       - databases # Drupal databases primo export directory
     become: yes
 
-  - name: Write primo export config
-    template:
-      src: primo-export.config.j2
-      dest: "{{ primo_export_config_file_path }}"
-
   - name: Schedule primo export cron job
     ansible.builtin.cron:
       name: "koha-primo-export"
       minute: "30"
       hour: "04,16"
-      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ primo_export_repo_path }}/sync_records.sh \"{{ primo_export_config_file_path }}\"  > /dev/null 2>&1"
+      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ primo_export_repo_path }}/sync_records.sh > /dev/null 2>&1"
       state: "{{ 'present' if primo_export_cron_enabled else 'absent' }}"
       user: root
     become: yes

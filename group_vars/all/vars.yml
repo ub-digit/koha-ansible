@@ -40,9 +40,9 @@ libris_oai_import_cron_enabled: false
 gobi_import_cron_enabled: false
 gub_edifact_cron_enabled: false
 edifact_cron_enabled: false
-papercut_cron_enabled: true
-print_notice_cron_enabled: true
-primo_export_cron_enabled: true
+papercut_cron_enabled: false
+print_notice_cron_enabled: false
+primo_export_cron_enabled: false
 
 koha_dir_defaults: &koha_dir_defaults
   mode: '0755'
@@ -80,6 +80,13 @@ data_dirs:
     push: true
   database_backup:
     path: "{{ data_dir }}/database-backup"
+    owner: root
+    group: root
+    mode: '0750'
+    pull: false
+    push: false
+  database_backup_log:
+    path: "{{ data_dir }}/database-backup/log"
     owner: root
     group: root
     mode: '0750'
