@@ -4,6 +4,7 @@ services:
     image: docker.ub.gu.se/koha:${GIT_REVISION}
     environment:
       KOHA_INSTANCE_NAME: "${KOHA_INSTANCE_NAME}"
+      KOHA_ENVIRONMENT: "${KOHA_ENVIRONMENT}"
       KOHA_USER: "${KOHA_USER}"
       KOHA_REPO_PATH: "${KOHA_REPO_PATH}"
       KOHA_PG_DATABASE: ${KOHA_PG_DATABASE}

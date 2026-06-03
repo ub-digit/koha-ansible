@@ -1,5 +1,5 @@
 ---
-environment_name: lab
+koha_environment: lab
 intranet_server_name: "koha-lab-intra.ub.gu.se"
 opac_server_name: "koha-lab.ub.gu.se"
 koha_online_payment_portal_url: https://betala-staging.ub.gu.se/Koha/Payment

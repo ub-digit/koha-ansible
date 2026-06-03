@@ -6,13 +6,13 @@
         name: exim4-daemon-light
         state: present
         update_cache: yes
-      when: environment_name == 'production'
+      when: koha_environment == 'production'
 
     - name: Copy configuration
       ansible.builtin.copy:
         src: "{{ playbook_dir }}/files/etc/exim4/update-exim4.conf.conf"
         dest: "/etc/exim4/update-exim4.conf.conf"
-      when: environment_name == 'production'
+      when: koha_environment == 'production'
       notify: restart exim4
 
   handlers:

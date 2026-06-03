@@ -1,5 +1,5 @@
 ---
-environment_name: staging
+koha_environment: staging
 intranet_server_name: "koha-staging-intra.ub.gu.se"
 opac_server_name: "koha-staging.ub.gu.se"
 koha_ipac_api_key: "{{ vault_koha_ipac_api_key }}"

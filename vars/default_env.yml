@@ -12,6 +12,7 @@ TO_OVERRIDE: 0720042842
 INFOBIP_SKIP_SEND: 1
 
 KOHA_INSTANCE_NAME: "{{ koha_instance_name }}"
+KOHA_ENVIRONMENT: "{{ koha_environment }}"
 KOHA_USER: "{{ koha_user }}" # TODO + KOHA_UID ??
 
 SIPCONFIG_HOST_FILE: "{{ data_dirs['koha'].path }}/SIPconfig.xml }}"

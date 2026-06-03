@@ -1,5 +1,5 @@
 ---
-environment_name: devbox
+koha_environment: devbox
 intranet_server_name: "localhost"
 intranet_port: 8080
 opac_server_name: "localhost"

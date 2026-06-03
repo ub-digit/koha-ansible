@@ -40,6 +40,11 @@
         src: koha-conf-site.xml.in.j2
         dest: /etc/koha/koha-conf-site.xml.in
 
+    - name: Ensure custom log4perl-site.conf.in template
+      ansible.builtin.template:
+        src: log4perl-site.conf.in.j2
+        dest: /etc/koha/log4perl-site.conf.in
+
     - name: Ensure database credentials
       ansible.builtin.template:
         src: koha_passwd.j2
@@ -53,17 +58,22 @@
     - name: Create Koha instance
       ansible.builtin.command: "koha-create --use-db --memcached-servers {{ koha_memcached_server }} --elasticsearch-server {{ koha_elasticsearch_server }} --mb-host {{ koha_rabbitmq_host }} --mb-port {{ koha_rabbitmq_port }} --mb-user {{ koha_rabbitmq_user }} --mb-pass {{ koha_rabbitmq_password }} --koha-user-uid {{ koha_uid }} {{ koha_instance_name }}"
 
+    - name: Copy koha-conf.xml to template directory
+      ansible.builtin.copy:
+        src: "{{ [site_dir, 'koha-conf.xml'] | path_join }}"
+        dest: "{{ [envsubst_templates_dir, 'koha-conf.xml'] | path_join }}"
+
+    - name: Copy log4perl.conf to template directory
+      ansible.builtin.copy:
+        src: "{{ [site_dir, 'log4perl.conf'] | path_join }}"
+        dest: "{{ [envsubst_templates_dir, 'log4perl.conf'] | path_join }}"
+
     - name: Ensure default SIPconfig.xml
       ansible.builtin.copy:
         src: "{{ koha_repo_path }}/debian/templates/SIPconfig.xml"
         dest: "/etc/koha/sites/{{ koha_instance_name }}/SIPconfig.xml"
         owner: "{{ koha_user }}"
         group: "{{ koha_user }}"
-
-    - name: Copy koha-conf-site.xml.in to template directory
-      ansible.builtin.copy:
-        src: "{{ [site_dir, 'koha-conf.xml'] | path_join }}"
-        dest: "{{ [envsubst_templates_dir, 'koha-conf.xml'] | path_join }}"
 
     - name: Touch sip.enabled to emulate koha-sip --enable
       ansible.builtin.file:
