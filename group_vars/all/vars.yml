@@ -41,6 +41,8 @@ gobi_import_cron_enabled: false
 gub_edifact_cron_enabled: false
 edifact_cron_enabled: false
 papercut_cron_enabled: true
+print_notice_cron_enabled: true
+primo_export_cron_enabled: true
 
 koha_dir_defaults: &koha_dir_defaults
   mode: '0755'

@@ -144,7 +144,7 @@
       minute: "00"
       hour: "08"
       job: "{{ cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec print_notice_repo_path }}/send_all.sh >> {{ data_dirs['print_notice_log'].path }}/log/sendall.log 2>&1"
-      state: present
+      state: "{{ 'present' if print_notice_cron_enabled else 'absent' }}"
       cron_file: "print-notice"
       user: root
     become: yes
@@ -187,6 +187,6 @@
       minute: "30"
       hour: "04,16"
       job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ primo_export_repo_path }}/sync_records.sh \"{{ primo_export_config_file_path }}\"  > /dev/null 2>&1"
-      state: present
+      state: "{{ 'present' if primo_export_cron_enabled else 'absent' }}"
       user: root
     become: yes
