@@ -3,6 +3,7 @@
   become_user: root
   vars_files:
   - docker/build/vars/shared.yml
+  - docker/build/vars/scripts.yml
   - vars/vault.yml # TODO: Move to group vars?
   tasks:
     # TODO: Bit of a hack
