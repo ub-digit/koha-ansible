@@ -15,7 +15,7 @@ KOHA_INSTANCE_NAME: "{{ koha_instance_name }}"
 KOHA_ENVIRONMENT: "{{ koha_environment }}"
 KOHA_USER: "{{ koha_user }}" # TODO + KOHA_UID ??
 
-SIPCONFIG_HOST_FILE: "{{ data_dirs['koha'].path }}/SIPconfig.xml }}"
+SIPCONFIG_HOST_FILE: "{{ data_dirs['koha'].path }}/SIPconfig.xml"
 
 MARIADB_DATA_HOST_DIR: "{{ data_dirs['mariadb'].path }}"
 POSTGRES_DATA_HOST_DIR: "{{ data_dirs['postgres'].path }}"
