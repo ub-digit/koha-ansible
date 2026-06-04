@@ -3,6 +3,10 @@ git_revision: release-2026.02-20260316.1555
 koha_environment: dev
 intranet_server_name: "koha-dev-intra.ub.gu.se"
 opac_server_name: "koha-dev.ub.gu.se"
+
+intranet_host_port: 40600
+opac_host_port: 40601
+
 koha_ipac_api_key: "{{ vault_koha_ipac_api_key }}"
 get_print_data_api_key: "{{ vault_get_print_data_api_key }}"
 koha_mojilicious_secret_passphrase: "{{ vault_koha_mojilicious_secret_passphrase }}"

@@ -5,12 +5,16 @@ docker_directory: './docker' # Default is './docker'
 app_name: koha # TODO: Needed?
 ansible_python_interpreter: /usr/bin/python3
 
+mailpit_host_port: 12345 # TODO
+
 # Koha/apache
 intranet_port: 443
 opac_port: 443
 https: true
 plack: true
 sip: true
+
+koha_repo_path: /opt/koha # Duplication but unlikely to change
 
 koha_bcrypt_settings: "vault TODO"
 
