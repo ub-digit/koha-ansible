@@ -118,7 +118,7 @@
   # Edifact
   - name: Ensure vendor directories
     ansible.builtin.file:
-      path: "{{ data_dirs['edifact_vendors'] }}/{{ item.0 }}/{{ item.1 }}"
+      path: "{{ data_dirs['edifact_vendors'].path }}/{{ item.0 }}/{{ item.1 }}"
       mode: 0755
       state: directory
       owner: "{{ koha_uid }}"
