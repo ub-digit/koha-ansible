@@ -57,7 +57,7 @@ koha_dir_defaults: &koha_dir_defaults
 
 # TODO: Data dirs for mounting of uploads (and more?)
 
-data_dir: /data
+data_dir: /data/koha
 koha_uid: 1000
 
 data_dirs:
