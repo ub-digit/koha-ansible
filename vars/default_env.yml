@@ -79,3 +79,5 @@ PRIMO_EXPORT_DATA_HOST_DIR: "{{ data_dirs['primo_export'].path }}"
 PRIMO_EXPORT_DATA_DIR: "{{ data_dirs['primo_export'].path }}"
 PRIMO_EXPORT_EXPORT_HOST_DIR: "{{ primo_export_export_dir }}"
 PRIMO_EXPORT_EXPORT_DIR: "{{ primo_export_export_dir }}"
+
+KOHA_LOG_HOST_DIR: "{{ data_dirs['koha_log'].path }}"

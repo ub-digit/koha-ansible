@@ -99,6 +99,9 @@ data_dirs:
   koha:
     <<: *koha_dir_defaults
     path: "{{ data_dir }}/koha"
+  koha_log:
+    <<: *koha_dir_defaults
+    path: "{{ data_dir }}/koha/log"
   edifact:
     <<: *koha_dir_defaults
     path: "{{ data_dir }}/edifact"
