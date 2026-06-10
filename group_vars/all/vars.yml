@@ -2,10 +2,9 @@
 docker_git_repo_url: https://github.com/ub-digit/koha-ansible.git
 docker_git_revision: ub-ansible-deploy
 docker_directory: './docker' # Default is './docker'
+docker_command: './docker-compose-release-mailpit.sh'
 app_name: koha # TODO: Needed?
 ansible_python_interpreter: /usr/bin/python3
-
-mailpit_host_port: 12345 # TODO
 
 # Koha/apache
 intranet_port: 443

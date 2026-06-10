@@ -1,4 +1,5 @@
 ---
+docker_command: './docker-compose-release.sh'
 koha_environment: production
 intranet_server_name: "koha-intra.ub.gu.se"
 opac_server_name: "koha.ub.gu.se"

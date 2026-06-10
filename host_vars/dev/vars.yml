@@ -6,6 +6,7 @@ opac_server_name: "koha-dev.ub.gu.se"
 
 intranet_host_port: 40600
 opac_host_port: 40601
+mailpit_host_port: 40602
 
 koha_ipac_api_key: "{{ vault_koha_ipac_api_key }}"
 get_print_data_api_key: "{{ vault_get_print_data_api_key }}"
