@@ -186,3 +186,10 @@
       state: "{{ 'present' if primo_export_cron_enabled else 'absent' }}"
       user: root
     become: yes
+
+  - name: Ensure koha logrotate configuration
+    ansible.builtin.template:
+      src: koha-logrotate.j2
+      dest: /etc/logrotate.d/koha
+      owner: root
+      group: root

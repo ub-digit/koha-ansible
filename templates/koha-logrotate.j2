@@ -1,0 +1,9 @@
+{{ data_dirs['koha_log'].path }}/*.log {
+    daily
+    missingok
+    rotate 7
+    compress
+    delaycompress
+    notifempty
+    copytruncate
+}
