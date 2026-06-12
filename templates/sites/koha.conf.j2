@@ -42,6 +42,7 @@
     FallbackResource /index.html
 
     Include /etc/apache2/conf-shared/koha-apache-shared.conf
+    RequestHeader add X-Koha-IPAC-API-KEY {{ vault_koha_ipac_api_key }}
 
     ProxyPreserveHost Off
 
