@@ -1,0 +1,10 @@
+base_dir: /opt/koha-edifact/vendors
+email: gunda@ub.gu.se
+
+vendors:
+  test:
+    host: sftp
+    port: '21'
+    server_dir: '.'
+    user: edifact
+    pass: edifact

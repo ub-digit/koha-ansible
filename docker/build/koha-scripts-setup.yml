@@ -13,17 +13,19 @@
         state: latest
         update_cache: yes
 
-    - name: Checkout upload edifact repo
+    - name: Checkout koha edifact repo
       ansible.builtin.git:
         repo: https://github.com/ub-digit/koha-edifact.git
         depth: 1
         dest: "{{ edifact_repo_path }}"
         version: "{{ edifact_git_revision }}"
 
-    - name: Ensure upload_edi.conf.yml.tpl
-      template:
-        src: upload_edi.conf.yml.tpl.j2
-        dest: "{{ [edifact_repo_path, 'upload_edi.conf.yml.tpl'] | path_join }}"
+    - name: Ensure default upload_edi.conf.yml
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/upload_edi.conf.yml"
+        dest: "{{ [edifact_repo_path, 'upload_edi.conf.yml'] | path_join "
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
 
     # Print notice
     - name: Checkout print notice repo

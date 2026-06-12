@@ -24,14 +24,24 @@ papercut_cron_enabled: true
 # Edifact
 edifact_email: gunda@ub.gu.se
 
-edifact_dawson_user: "{{ vault_edifact_dawson_user }}"
-edifact_dawson_password: "{{ vault_edifact_dawson_password }}"
-
-edifact_delbanco_user: "{{ vault_edifact_delbanco_user }}"
-edifact_delbanco_password: "{{ vault_edifact_delbanco_password }}"
-
-edifact_adlibris_user: "{{ vault_edifact_adlibris_user }}"
-edifact_adlibris_password: "{{ vault_edifact_adlibris_password }}"
-
-edifact_bokus_user: "{{ vault_edifact_bokus_user }}"
-edifact_bokus_password: "{{ vault_edifact_bokus_password }}"
+edifact_vendors:
+  dawson:
+    host: ftp.dawsonbooks.co.uk
+    user:"{{ vault_edifact_dawson_user }}"
+    pass:"{{ vault_edifact_dawson_password }}"
+    cron_minute: 30
+  delbanco:
+    host: ftp.delbanco.de
+    user:"{{ vault_edifact_delbanco_user }}"
+    pass:"{{ vault_edifact_delbanco_password }}"
+    cron_minute: 32
+  adlibris:
+    host: dataftp.adlibris.com
+    user:"{{ vault_edifact_adlibris_user }}"
+    pass:"{{ vault_edifact_adlibris_password }}"
+    cron_minute: 34
+  bokus:
+    host:213.187.205.201
+    user:"{{ vault_edifact_bokus_user }}"
+    pass:"{{ vault_edifact_bokus_password }}"
+    cron_minute: 36

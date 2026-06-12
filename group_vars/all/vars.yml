@@ -47,6 +47,13 @@ papercut_cron_enabled: false
 print_notice_cron_enabled: false
 primo_export_cron_enabled: false
 
+edifact_vendors:
+  test:
+    host: sftp
+    user: "test"
+    pass: "test"
+    cron_minute: 30
+
 koha_dir_defaults: &koha_dir_defaults
   mode: '0755'
   owner: "{{ koha_uid }}"

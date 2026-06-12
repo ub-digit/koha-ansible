@@ -116,26 +116,31 @@
     become: yes
 
   # Edifact
-  - name: Ensure vendor directories
+  - name: Ensure upload_edi.conf.yml
+    template:
+      src: upload_edi.conf.yml.tpl.j2
+      dest: "{{ [data_dirs['edifact'].path, 'upload_edi.conf.yml'] | path_join }}"
+
+  - name: Ensure edifact vendor directories
     ansible.builtin.file:
       path: "{{ data_dirs['edifact_vendors'].path }}/{{ item.0 }}/{{ item.1 }}"
       mode: 0755
       state: directory
       owner: "{{ koha_uid }}"
       group: "{{ koha_uid }}"
-    loop: "{{ ['dawson', 'delbanco', 'adlibris', 'bokus'] | product(['archive', 'messages']) | list }}"
+    loop: "{{ edifact_vendors | dict2items | map(attribute='key') | product(['archive', 'messages']) | list }}"
     become: yes
 
   - name: Schedule edifact cron jobs
     ansible.builtin.cron:
       name: "upload-edifact-{{ item.0 }}"
-      minute: "{{ item.1 }}"
+      minute: "{{ item.value['cron_minute'] }}"
       hour: "22"
-      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ edifact_repo_path }}/upload_edi.pl {{ item.0 }} >> {{ data_dirs['edifact'] }}/upload_edi.log 2>&1"
+      job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ edifact_repo_path }}/upload_edi.pl {{ item.key }} >> {{ data_dirs['edifact'].path }}/upload_edi.log 2>&1"
       state: "{{ 'present' if edifact_cron_enabled else 'absent' }}"
       cron_file: 'edifact'
       user: root
-    loop: "{{ ['dawson', 'delbanco', 'adlibris', 'bokus']|zip(['30', '32', '34', '36'])|list }}"
+    loop: "{{ edifact_vendors | dict2items | list }}" #TODO: list needed?
     become: yes
 
   # Print notice

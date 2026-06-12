@@ -6,7 +6,6 @@ koha-envsubst.sh
 envsubst < {{ [envsubst_templates_dir, 'supervisord.conf'] | path_join }}  > /etc/supervisord.conf
 
 # Koha scripts
-envsubst < {{ [edifact_repo_path, 'upload_edi.conf.yml.tpl'] | path_join }}  >  {{ [edifact_repo_path, 'upload_edi.conf.yml'] | path_join }} 
 envsubst < {{ [print_notice_repo_path, 'print-notice.conf.tpl'] | path_join }}  >  {{ [print_notice_repo_path, 'print-notice.conf'] | path_join }}
 envsubst < {{ [gobi_import_repo_path, 'loadgobi.sh.conf.tpl'] | path_join }}  >  {{ [gobi_import_repo_path, 'loadgobi.sh.conf'] | path_join }} 
 envsubst < {{ [gobi_import_repo_path, 'log4perl.conf.tpl'] | path_join }}  >  {{ [gobi_import_repo_path, 'log4perl.conf'] | path_join }} 
