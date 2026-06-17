@@ -6,3 +6,20 @@ services:
   elasticsearch:
     ports:
     - "127.0.0.1:7192:9200"
+  sftp:
+    image: atmoz/sftp:alpine
+    environment:
+      - SFTP_USERS="edifact:edifact:::edifact-uploads"
+    volumes:
+      - ./edifact-uploads:/home/edifact/edifact-uploads
+      - ./sftp/id_rsa.pub:/home/edifact/.ssh/keys/id_rsa.pub:ro
+      - ./sftp/ssh_host_ed25519_key:/etc/ssh/ssh_host_ed25519_key
+      - ./sftp/ssh_host_rsa_key:/etc/ssh/ssh_host_rsa_key
+  mailpit:
+    env_file:
+      - secrets.env
+    image: axllent/mailpit
+    environment:
+      - MP_WEBROOT=/mail/
+    ports:
+      - ${MAILPIT_HOST_PORT}:8025
