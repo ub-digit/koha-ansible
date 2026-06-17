@@ -3,7 +3,7 @@ services:
   koha:
     volumes:
       - "${SIPCONFIG_HOST_FILE}:/etc/koha/sites/${KOHA_INSTANCE_NAME}/SIPconfig.xml"
-      - "${EDIFACT_HOST_CONF_FILE}:/opt/koha-edifact/upload_edi.conf.yml" # Hard coded for now
+      - "${EDIFACT_CONF_HOST_FILE}:/opt/koha-edifact/upload_edi.conf.yml" # Hard coded for now
       - "${DATABASE_BACKUP_HOST_DIR}:${DATABASE_BACKUP_DIR}"
       - "${EDIFACT_DATA_HOST_DIR}:${EDIFACT_DATA_DIR}"
       - "${PRINT_NOTICE_DATA_HOST_DIR}:${PRINT_NOTICE_DATA_DIR}"
