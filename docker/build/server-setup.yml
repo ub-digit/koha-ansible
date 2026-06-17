@@ -111,6 +111,7 @@
                'libgdome2-dev', #For XML::LibXSLT, might be dependecy of libgdome2 that makes it compile?
                'libfribidi-dev',
                'libgd-dev',
+               'libjson-validator-perl' # Has broken and unmaintained cpan dependency
                ]
         state: latest
         force: no
