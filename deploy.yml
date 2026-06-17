@@ -133,7 +133,7 @@
 
   - name: Schedule edifact cron jobs
     ansible.builtin.cron:
-      name: "upload-edifact-{{ item.0 }}"
+      name: "upload-edifact-{{ item.key }}"
       minute: "{{ item.value['cron_minute'] }}"
       hour: "22"
       job: "cd \"{{ docker_directory_path }}\"; {{ docker_command }} exec {{ edifact_repo_path }}/upload_edi.pl {{ item.key }} >> {{ data_dirs['edifact'].path }}/upload_edi.log 2>&1"

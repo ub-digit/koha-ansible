@@ -2,11 +2,11 @@ base_dir: "{{ data_dirs['edifact_vendors'].path }}"
 email: "{{ edifact_email }}"
 
 vendors:
-{% for vendor_name, vendor in edifact_vendors %}
+{% for vendor_name, vendor in edifact_vendors.items() %}
   {{ vendor_name }}:
     host: {{ vendor.host }}
     port: 21
     server_dir: '.'
     user: {{ vendor.user }}
-    pass: {{ vendor.password }}
+    pass: {{ vendor.pass }}
 {% endfor %}
