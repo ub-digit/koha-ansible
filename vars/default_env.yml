@@ -34,9 +34,6 @@ DATABASE_BACKUP_DIR: "{{ data_dirs['database_backup'].path }}"
 EDIFACT_DATA_HOST_DIR: "{{ data_dirs['edifact'].path }}"
 EDIFACT_DATA_DIR: "{{ data_dirs['edifact'].path }}"
 
-EDIFACT_BASE_DIR: "{{ data_dirs['edifact'].path }}"
-EDIFACT_EMAIL: "gunda@ub.gu.se"
-
 # Print notice
 PRINT_NOTICE_DATA_HOST_DIR: "{{ data_dirs['print_notice'].path }}"
 PRINT_NOTICE_DATA_DIR: "{{ data_dirs['print_notice'].path }}"

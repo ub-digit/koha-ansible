@@ -47,6 +47,7 @@ papercut_cron_enabled: false
 print_notice_cron_enabled: false
 primo_export_cron_enabled: false
 
+edifact_email: gunda@ub.gu.se
 edifact_vendors:
   test:
     host: sftp
