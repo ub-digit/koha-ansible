@@ -4,6 +4,7 @@
   become_user: root
   vars_files:
     - ./vars/scripts.yml
+    - ./vars/shared.yml
   tasks:
 
     # Edifact
@@ -20,10 +21,19 @@
         dest: "{{ edifact_repo_path }}"
         version: "{{ edifact_git_revision }}"
 
+    - name: Ensure test vendor directory
+      ansible.builtin.file:
+        dest: "{{ [edifact_repo_path, 'vendors', 'test'] | path_join }}"
+        state: directory
+        recurse: true
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
+
+
     - name: Ensure default upload_edi.conf.yml
-      ansible.builtin.copy:
-        src: "{{ playbook_dir }}/files/upload_edi.conf.yml"
-        dest: "{{ [edifact_repo_path, 'upload_edi.conf.yml'] | path_join "
+      ansible.builtin.template:
+        src: "upload_edi.conf.yml.j2"
+        dest: "{{ [edifact_repo_path, 'upload_edi.conf.yml'] | path_join }}"
         owner: "{{ koha_user }}"
         group: "{{ koha_user }}"
 
@@ -36,9 +46,11 @@
         version: "{{ print_notice_git_revision }}"
 
     - name: Ensure print_notice.conf
-      template:
+      ansible.builtin.template:
         src: print-notice.conf.tpl.j2
         dest: "{{ [print_notice_repo_path, 'print-notice.conf.tpl'] | path_join }}"
+        owner: "{{ koha_user }}"
+        group: "{{ koha_user }}"
 
     # Gobi
     - name: Install gobi import perl dependecies

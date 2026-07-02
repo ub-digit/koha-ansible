@@ -1,4 +1,4 @@
-base_dir: /opt/koha-edifact/vendors
+base_dir: {{ [edifact_repo_path, 'vendors'] | path_join }}
 email: gunda@ub.gu.se
 
 vendors:
