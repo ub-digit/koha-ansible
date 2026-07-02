@@ -9,7 +9,7 @@ WORKDIR /root/
 RUN set -eux \
   && git clone "$GIT_REPO_URL" release -b "$GIT_REVISION" --depth 1
 
-FROM docker.ub.gu.se/koha-base:server
+FROM docker.ub.gu.se/koha-base:server-1
 
 ARG KOHA_REPO_PATH=/opt/koha
 
@@ -23,7 +23,6 @@ COPY ./files/koha-create ./files/koha-create
 RUN ansible-galaxy install -r requirements.yml
 RUN ansible-playbook -i koha.yml -e koha_repo_path=${KOHA_REPO_PATH} koha-setup.yml
 
-#RUN cpan-outdated --exclude-core -p | cpanm
 RUN cpanm --skip-installed --installdeps ${KOHA_REPO_PATH}
 
 # TODO: Move to playbook?
