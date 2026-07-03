@@ -10,9 +10,12 @@
     # Edifact
     - name: Install required packages for upload edifact
       apt:
-        name: ftp
+        name: "{{ item }}"
         state: latest
         update_cache: yes
+      loop:
+        - ftp
+        - lftp
 
     - name: Checkout koha edifact repo
       ansible.builtin.git:
@@ -23,12 +26,14 @@
 
     - name: Ensure test vendor directory
       ansible.builtin.file:
-        dest: "{{ [edifact_repo_path, 'vendors', 'test'] | path_join }}"
+        dest: "{{ [edifact_repo_path, 'vendors', 'test', item] | path_join }}"
         state: directory
         recurse: true
         owner: "{{ koha_user }}"
         group: "{{ koha_user }}"
-
+      loop:
+        - archive
+        - messages
 
     - name: Ensure default upload_edi.conf.yml
       ansible.builtin.template:
