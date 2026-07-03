@@ -1,4 +1,5 @@
 version: '3.5'
+name: koha
 services:
   koha:
     env_file:
@@ -54,6 +55,17 @@ services:
       - rabbitmq
     volumes:
       - koha-plack-run:/run/koha-plack
+      - "${DATABASE_BACKUP_HOST_DIR}:${DATABASE_BACKUP_DIR}"
+      - "${EDIFACT_DATA_HOST_DIR}:${EDIFACT_DATA_DIR}"
+      - "${PRINT_NOTICE_DATA_HOST_DIR}:${PRINT_NOTICE_DATA_DIR}"
+      - "${FETCHLIBRIS_DATA_HOST_DIR}:${FETCHLIBRIS_DATA_DIR}"
+      - "${LOADLIBRIS_DATA_HOST_DIR}:${LOADLIBRIS_DATA_DIR}"
+      - "${LIBRIS_OAI_IMPORT_DATA_HOST_DIR}:${LIBRIS_OAI_IMPORT_DATA_DIR}"
+      - "${PAPERCUT_DATA_HOST_DIR}:${PAPERCUT_DATA_DIR}"
+      - "${GOBI_IMPORT_DATA_HOST_DIR}:${GOBI_IMPORT_DATA_DIR}"
+      - "${PRIMO_EXPORT_DATA_HOST_DIR}:${PRIMO_EXPORT_DATA_DIR}"
+      - "${PRIMO_EXPORT_EXPORT_HOST_DIR}:${PRIMO_EXPORT_EXPORT_DIR}"
+      - "${KOHA_LOG_HOST_DIR}:/var/log/koha/${KOHA_INSTANCE_NAME}"
   apache:
     image: docker.ub.gu.se/koha:${GIT_REVISION}
     entrypoint: ["/usr/local/bin/docker-entrypoint-apache.sh"]
