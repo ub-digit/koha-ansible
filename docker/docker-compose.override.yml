@@ -3,6 +3,7 @@ services:
   koha:
     volumes:
       - "${KOHA_REPO}:/opt/koha"
+      - ./koha_known_hosts:/root/.ssh/known_hosts:ro
   elasticsearch:
     ports:
     - "127.0.0.1:7192:9200"
