@@ -9,7 +9,7 @@ services:
   sftp:
     image: atmoz/sftp:alpine
     environment:
-      - SFTP_USERS="edifact:edifact:::edifact-uploads"
+      SFTP_USERS: "edifact:edifact:::edifact-uploads"
     volumes:
       - ./edifact-uploads:/home/edifact/edifact-uploads
       - ./sftp/id_rsa.pub:/home/edifact/.ssh/keys/id_rsa.pub:ro
