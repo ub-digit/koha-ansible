@@ -167,6 +167,11 @@
         dest: "{{ primo_export_repo_path }}"
         version: "{{ primo_export_git_revision }}"
 
+    - name: Ensure primo config
+      ansible.builtin.template:
+        src: primo-export.config.tpl.j2
+        dest: "{{ [primo_export_repo_path, 'config.tpl'] | path_join }}"
+
     # Add wrapper for running scripts
     - name: Ensure run-scripts.sh
       ansible.builtin.template:

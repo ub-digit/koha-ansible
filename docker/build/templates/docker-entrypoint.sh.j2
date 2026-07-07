@@ -13,6 +13,7 @@ envsubst < {{ [loadlibris_repo_path, 'loadlibris.sh.conf.tpl'] | path_join }}  >
 envsubst < {{ [fetchlibris_repo_path, 'fetchlibris.sh.conf.tpl'] | path_join }}  >  {{ [fetchlibris_repo_path, 'fetchlibris.sh.conf'] | path_join }}
 envsubst < {{ [libris_oai_import_repo_path, 'export_nix.sh.conf.tpl'] | path_join }}  >  {{ [libris_oai_import_repo_path, 'export_nix.sh.conf'] | path_join }} 
 envsubst < {{ [papercut_repo_path, 'config.tpl'] | path_join }}  >  {{ [papercut_repo_path, 'config'] | path_join }} 
+envsubst < {{ [primo_repo_path, 'config.tpl'] | path_join }}  >  {{ [primo_repo_path, 'config'] | path_join }} 
 
 # If first arg starts with "-" OR no args provided → run supervisord
 if [[ $# -eq 0 || "$1" == -* ]]; then
