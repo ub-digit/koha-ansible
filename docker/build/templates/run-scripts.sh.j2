@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+declare -A scripts=(
+    [load-libris]="{{ loadlibris_repo_path }}/loadlibris.sh"
+    [libris-oai-import]="{{ libris_oai_import_repo_path }}/export_nix.sh"
+    [papercut]="{{ papercut_repo_path }}/run_updated_borrowers.sh" #TODO: need way to test locally
+    [gobi-import]="{{ gobi_import_repo_path }}/loadgobi.sh"
+    [upload-edifact]="{{ edifact_repo_path }}/upload_edi.pl"
+    [print-notice]="{{ print_notice_repo_path }}/send_all.sh"
+    [primo-export]="{{ primo_export_repo_path }}/sync_records.sh"
+)
+
+run_script() {
+    local name="$1"
+    shift
+
+    if [[ ! -v scripts["$name"] ]]; then
+        echo "Unknown script: $name"
+        echo
+        echo "Available scripts:"
+        printf '  %s\n' "${!scripts[@]}" | sort
+        exit 1
+    fi
+
+    echo "==> Running $name"
+    "${scripts[$name]}" "$@"
+}
+
+if [[ $# -gt 0 ]]; then
+    run_script "$@"
+else
+    for name in "${!scripts[@]}"; do
+        case "$name" in
+            upload-edifact)
+                touch "{{ edifact_repo_path }}/vendors/test/messages/test.CEP"
+                run_script "$name" test
+                ;;
+            *)
+                run_script "$name"
+                ;;
+        esac
+    done
+fi

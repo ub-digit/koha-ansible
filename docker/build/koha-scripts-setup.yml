@@ -43,6 +43,15 @@
         group: "{{ koha_user }}"
 
     # Print notice
+    
+    - name: Install required packages for print notice
+      apt:
+        name: "{{ item }}"
+        state: latest
+        update_cache: yes
+      loop:
+        - mutt
+
     - name: Checkout print notice repo
       ansible.builtin.git:
         repo: https://github.com/ub-digit/koha-print-notice.git
@@ -76,12 +85,12 @@
         version: "{{ gobi_import_git_revision }}"
 
     - name: Ensure loadgobi.sh.conf
-      template:
+      ansible.builtin.template:
         src: loadgobi.sh.conf.tpl.j2
         dest: "{{ [gobi_import_repo_path, 'loadgobi.sh.conf.tpl'] | path_join }}"
 
     - name: Ensure log4perl.conf
-      template:
+      ansible.builtin.template:
         src: gobi.log4perl.conf.tpl.j2
         dest: "{{ [gobi_import_repo_path, 'log4perl.conf.tpl'] | path_join }}"
 
@@ -94,7 +103,7 @@
         version: "{{ loadlibris_git_revision }}"
 
     - name: Ensure loadlibris.sh.conf
-      template:
+      ansible.builtin.template:
         src: loadlibris.sh.conf.tpl.j2
         dest: "{{ [loadlibris_repo_path, 'loadlibris.sh.conf.tpl'] | path_join }}"
 
@@ -113,7 +122,7 @@
         version: "{{ fetchlibris_git_revision }}"
 
     - name: Ensure fetchlibris.sh.conf
-      template:
+      ansible.builtin.template:
         src: fetchlibris.sh.conf.tpl.j2
         dest: "{{ [fetchlibris_repo_path, 'fetchlibris.sh.conf.tpl'] | path_join }}"
 
@@ -126,7 +135,7 @@
         version: "{{ libris_oai_import_git_revision }}"
 
     - name: Ensure export_nix.sh.conf
-      template:
+      ansible.builtin.template:
         src: export_nix.sh.conf.tpl.j2
         dest: "{{ [libris_oai_import_repo_path, 'export_nix.sh.conf.tpl'] | path_join }}"
 
@@ -157,3 +166,10 @@
         depth: 1
         dest: "{{ primo_export_repo_path }}"
         version: "{{ primo_export_git_revision }}"
+
+    # Add wrapper for running scripts
+    - name: Ensure run-scripts.sh
+      ansible.builtin.template:
+        src: run-scripts.sh.j2
+        dest: "/usr/local/bin/run-scripts.sh"
+        mode: '0755'
