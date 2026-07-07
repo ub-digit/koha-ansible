@@ -12,7 +12,7 @@ services:
     environment:
       SFTP_USERS: "edifact:edifact:::edifact-uploads"
     volumes:
-      - ./edifact-uploads:/home/edifact/edifact-uploads
+      - ./edifact-sftp-home:/home/edifact
       - ./sftp/id_rsa.pub:/home/edifact/.ssh/keys/id_rsa.pub:ro
       - ./sftp/ssh_host_ed25519_key:/etc/ssh/ssh_host_ed25519_key
       - ./sftp/ssh_host_rsa_key:/etc/ssh/ssh_host_rsa_key
