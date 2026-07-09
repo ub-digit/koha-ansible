@@ -73,8 +73,8 @@ services:
     volumes:
       - koha-plack-run:/run/koha-plack
     ports:
-      - "127.0.0.1:${KOHA_INTRANET_HOST_PORT}:8080"
-      - "127.0.0.1:${KOHA_OPAC_HOST_PORT}:80"
+      - "${KOHA_INTRANET_HOST_PORT}:8080"
+      - "${KOHA_OPAC_HOST_PORT}:80"
   postgres:
     image: postgres:18.3
     environment:

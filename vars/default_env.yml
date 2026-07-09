@@ -16,9 +16,9 @@ KOHA_ENVIRONMENT: "{{ koha_environment }}"
 KOHA_USER: "{{ koha_user }}" # TODO + KOHA_UID ??
 
 
-KOHA_OPAC_HOST_PORT: "{{ opac_host_port }}"
-KOHA_INTRANET_HOST_PORT: "{{ intranet_host_port }}"
-MAILPIT_HOST_PORT: "{{ mailpit_host_port }}"
+KOHA_OPAC_HOST_PORT: "127.0.0.1:{{ opac_host_port }}"
+KOHA_INTRANET_HOST_PORT: "127.0.0.1:{{ intranet_host_port }}"
+MAILPIT_HOST_PORT: "127.0.0.1:{{ mailpit_host_port }}"
 
 SIPCONFIG_HOST_FILE: "{{ data_dirs['koha'].path }}/SIPconfig.xml"
 EDIFACT_CONF_HOST_FILE: "{{ data_dirs['edifact'].path }}/upload_edi.conf.yml"
