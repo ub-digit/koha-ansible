@@ -21,7 +21,7 @@ KOHA_INTRANET_HOST_PORT: "127.0.0.1:{{ intranet_host_port }}"
 MAILPIT_HOST_PORT: "127.0.0.1:{{ mailpit_host_port }}"
 
 SIPCONFIG_HOST_FILE: "{{ data_dirs['koha'].path }}/SIPconfig.xml"
-EDIFACT_CONF_HOST_FILE: "{{ data_dirs['edifact'].path }}/upload_edi.conf.yml"
+EDIFACT_CONF_HOST_FILE: "{{ data_dirs['edifact'].path }}/upload_edi.conf.yml.tpl"
 
 MARIADB_DATA_HOST_DIR: "{{ data_dirs['mariadb'].path }}"
 POSTGRES_DATA_HOST_DIR: "{{ data_dirs['postgres'].path }}"

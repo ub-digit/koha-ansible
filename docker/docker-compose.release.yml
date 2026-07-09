@@ -3,4 +3,4 @@ services:
   koha:
     volumes:
       - "${SIPCONFIG_HOST_FILE}:/etc/koha/sites/${KOHA_INSTANCE_NAME}/SIPconfig.xml"
-      - "${EDIFACT_CONF_HOST_FILE}:/opt/koha-edifact/upload_edi.conf.yml" # Hard coded for now
+      - "${EDIFACT_CONF_HOST_FILE}:/opt/koha-edifact/upload_edi.conf.yml.tpl" # Hard coded for now

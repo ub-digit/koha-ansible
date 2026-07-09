@@ -22,14 +22,22 @@
   # Temporary hack to ensure koha derecory, fix (by breaking out directory creation task from ansible deploY?
   - name: Ensure koha-directory
     ansible.builtin.file:
-      path: "{{ data_dirs['koha'].path }}"
+      path: "{{ item }}"
       state: directory
+    loop:
+      - "{{ data_dirs['edifact'].path }}"
+      - "{{ data_dirs['koha'].path }}"
 
   # TODO: Owner koha_uid?
   - name: Ensure SIP-server configuration
     ansible.builtin.template:
       src: SIPconfig.xml.j2
       dest: "{{ data_dirs['koha'].path }}/SIPconfig.xml"
+
+  - name: Ensure upload_edi.conf.yml
+    template:
+      src: upload_edi.conf.yml.tpl.j2
+      dest: "{{ [data_dirs['edifact'].path, 'upload_edi.conf.yml.tpl'] | path_join }}"
 
   - name: Deploy app
     include_role:
@@ -116,11 +124,6 @@
     become: yes
 
   # Edifact
-  - name: Ensure upload_edi.conf.yml
-    template:
-      src: upload_edi.conf.yml.tpl.j2
-      dest: "{{ [data_dirs['edifact'].path, 'upload_edi.conf.yml'] | path_join }}"
-
   - name: Ensure edifact vendor directories
     ansible.builtin.file:
       path: "{{ data_dirs['edifact_vendors'].path }}/{{ item.0 }}/{{ item.1 }}"

@@ -51,6 +51,9 @@ edifact_email: gunda@ub.gu.se
 edifact_vendors:
   test:
     host: sftp
+    protocol: sftp
+    port: 22
+    server_dir: './edifact-uploads'
     user: "test"
     pass: "test"
     cron_minute: 30
